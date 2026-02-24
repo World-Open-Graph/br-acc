@@ -36,7 +36,7 @@ async def test_list_patterns_endpoint(client: AsyncClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert "patterns" in data
-    assert len(data["patterns"]) == 8
+    assert len(data["patterns"]) == 13
 
     ids = {p["id"] for p in data["patterns"]}
     assert "self_dealing_amendment" in ids

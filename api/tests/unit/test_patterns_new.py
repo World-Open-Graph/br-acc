@@ -22,8 +22,34 @@ def test_loan_debtor_registered() -> None:
     assert PATTERN_QUERIES["loan_debtor"] == "pattern_loan_debtor"
 
 
-def test_pattern_count_is_eight() -> None:
-    assert len(PATTERN_QUERIES) == 8
+def test_donation_amendment_loop_registered() -> None:
+    assert "donation_amendment_loop" in PATTERN_QUERIES
+    assert PATTERN_QUERIES["donation_amendment_loop"] == "pattern_donation_amendment_loop"
+
+
+def test_amendment_beneficiary_contracts_registered() -> None:
+    assert "amendment_beneficiary_contracts" in PATTERN_QUERIES
+    expected = "pattern_amendment_beneficiary_contracts"
+    assert PATTERN_QUERIES["amendment_beneficiary_contracts"] == expected
+
+
+def test_debtor_health_operator_registered() -> None:
+    assert "debtor_health_operator" in PATTERN_QUERIES
+    assert PATTERN_QUERIES["debtor_health_operator"] == "pattern_debtor_health_operator"
+
+
+def test_sanctioned_health_operator_registered() -> None:
+    assert "sanctioned_health_operator" in PATTERN_QUERIES
+    assert PATTERN_QUERIES["sanctioned_health_operator"] == "pattern_sanctioned_health_operator"
+
+
+def test_shell_company_contracts_registered() -> None:
+    assert "shell_company_contracts" in PATTERN_QUERIES
+    assert PATTERN_QUERIES["shell_company_contracts"] == "pattern_shell_company_contracts"
+
+
+def test_pattern_count_is_thirteen() -> None:
+    assert len(PATTERN_QUERIES) == 13
 
 
 @pytest.mark.anyio
@@ -127,3 +153,168 @@ async def test_loan_debtor_returns_results() -> None:
     assert len(results) == 1
     assert results[0].pattern_id == "loan_debtor"
     assert results[0].pattern_name == "Tomador de empréstimo com dívida"
+
+
+@pytest.mark.anyio
+async def test_donation_amendment_loop_returns_results() -> None:
+    mock_record = MagicMock()
+    mock_record.__iter__ = lambda self: iter([
+        "politician_name", "politician_cpf", "politician_id",
+        "company_name", "company_cnpj", "company_id",
+        "donation_value", "amendment_value", "amendment_object",
+        "election_year", "pattern_id",
+    ])
+    mock_record.__getitem__ = lambda self, key: {
+        "politician_name": "Pol Test",
+        "politician_cpf": "11122233344",
+        "politician_id": "4:abc:101",
+        "company_name": "Loop Corp",
+        "company_cnpj": "12345678000100",
+        "company_id": "4:abc:102",
+        "donation_value": 50000.0,
+        "amendment_value": 2000000.0,
+        "amendment_object": "Saude",
+        "election_year": 2022,
+        "pattern_id": "donation_amendment_loop",
+    }[key]
+
+    session = AsyncMock()
+
+    with patch("icarus.services.pattern_service.execute_query", new_callable=AsyncMock) as mock_eq:
+        mock_eq.return_value = [mock_record]
+        results = await run_pattern(session, "donation_amendment_loop")
+
+    assert len(results) == 1
+    assert results[0].pattern_id == "donation_amendment_loop"
+    assert results[0].pattern_name == "Ciclo doação-emenda-benefício"
+
+
+@pytest.mark.anyio
+async def test_amendment_beneficiary_contracts_returns_results() -> None:
+    mock_record = MagicMock()
+    mock_record.__iter__ = lambda self: iter([
+        "politician_name", "politician_id",
+        "company_name", "company_cnpj", "company_id",
+        "total_amendment_value", "amendment_count",
+        "total_contract_value", "contract_count", "pattern_id",
+    ])
+    mock_record.__getitem__ = lambda self, key: {
+        "politician_name": "Pol Test",
+        "politician_id": "4:abc:201",
+        "company_name": "Amend Corp",
+        "company_cnpj": "98765432000100",
+        "company_id": "4:abc:202",
+        "total_amendment_value": 5000000.0,
+        "amendment_count": 3,
+        "total_contract_value": 8000000.0,
+        "contract_count": 7,
+        "pattern_id": "amendment_beneficiary_contracts",
+    }[key]
+
+    session = AsyncMock()
+
+    with patch("icarus.services.pattern_service.execute_query", new_callable=AsyncMock) as mock_eq:
+        mock_eq.return_value = [mock_record]
+        results = await run_pattern(session, "amendment_beneficiary_contracts")
+
+    assert len(results) == 1
+    assert results[0].pattern_id == "amendment_beneficiary_contracts"
+    assert results[0].pattern_name == "Beneficiário de emenda com contratos"
+
+
+@pytest.mark.anyio
+async def test_debtor_health_operator_returns_results() -> None:
+    mock_record = MagicMock()
+    mock_record.__iter__ = lambda self: iter([
+        "company_name", "company_cnpj", "company_id",
+        "total_debt", "debt_count", "facility_count", "pattern_id",
+    ])
+    mock_record.__getitem__ = lambda self, key: {
+        "company_name": "Health Debtor Corp",
+        "company_cnpj": "11222333000144",
+        "company_id": "4:abc:301",
+        "total_debt": 1500000.0,
+        "debt_count": 5,
+        "facility_count": 3,
+        "pattern_id": "debtor_health_operator",
+    }[key]
+
+    session = AsyncMock()
+
+    with patch("icarus.services.pattern_service.execute_query", new_callable=AsyncMock) as mock_eq:
+        mock_eq.return_value = [mock_record]
+        results = await run_pattern(session, "debtor_health_operator")
+
+    assert len(results) == 1
+    assert results[0].pattern_id == "debtor_health_operator"
+    assert results[0].pattern_name == "Devedor fiscal operando unidade SUS"
+
+
+@pytest.mark.anyio
+async def test_sanctioned_health_operator_returns_results() -> None:
+    mock_record = MagicMock()
+    mock_record.__iter__ = lambda self: iter([
+        "company_name", "company_cnpj", "company_id",
+        "sanction_type", "sanction_start", "sanction_reason",
+        "facility_name", "facility_cnes", "facility_type",
+        "facility_uf", "facility_id", "pattern_id",
+    ])
+    mock_record.__getitem__ = lambda self, key: {
+        "company_name": "Sanctioned Health Corp",
+        "company_cnpj": "55666777000188",
+        "company_id": "4:abc:401",
+        "sanction_type": "CEIS",
+        "sanction_start": "2023-06-01",
+        "sanction_reason": "Contrato rescindido",
+        "facility_name": "UBS Central",
+        "facility_cnes": "1234567",
+        "facility_type": "UBS",
+        "facility_uf": "SP",
+        "facility_id": "4:abc:402",
+        "pattern_id": "sanctioned_health_operator",
+    }[key]
+
+    session = AsyncMock()
+
+    with patch("icarus.services.pattern_service.execute_query", new_callable=AsyncMock) as mock_eq:
+        mock_eq.return_value = [mock_record]
+        results = await run_pattern(session, "sanctioned_health_operator")
+
+    assert len(results) == 1
+    assert results[0].pattern_id == "sanctioned_health_operator"
+    assert results[0].pattern_name == "Sancionada operando unidade SUS"
+
+
+@pytest.mark.anyio
+async def test_shell_company_contracts_returns_results() -> None:
+    mock_record = MagicMock()
+    mock_record.__iter__ = lambda self: iter([
+        "company_name", "company_cnpj", "company_id",
+        "contract_count", "total_value",
+        "company_cnae", "company_uf",
+        "sector_avg_employees", "sector_total_employees",
+        "sector_establishments", "pattern_id",
+    ])
+    mock_record.__getitem__ = lambda self, key: {
+        "company_name": "Shell Corp",
+        "company_cnpj": "99888777000166",
+        "company_id": "4:abc:501",
+        "contract_count": 12,
+        "total_value": 4500000.0,
+        "company_cnae": "4120400",
+        "company_uf": "MG",
+        "sector_avg_employees": 2.3,
+        "sector_total_employees": 45,
+        "sector_establishments": 20,
+        "pattern_id": "shell_company_contracts",
+    }[key]
+
+    session = AsyncMock()
+
+    with patch("icarus.services.pattern_service.execute_query", new_callable=AsyncMock) as mock_eq:
+        mock_eq.return_value = [mock_record]
+        results = await run_pattern(session, "shell_company_contracts")
+
+    assert len(results) == 1
+    assert results[0].pattern_id == "shell_company_contracts"
+    assert results[0].pattern_name == "Empresa com poucos empregados e muitos contratos"

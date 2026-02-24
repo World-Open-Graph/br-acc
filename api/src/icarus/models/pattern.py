@@ -73,4 +73,46 @@ PATTERN_METADATA: dict[str, dict[str, str]] = {
         "desc_pt": "Empresa que recebeu empréstimo do BNDES enquanto possuía dívida ativa na PGFN",
         "desc_en": "Company that received BNDES loan while having active PGFN tax debt",
     },
+    "donation_amendment_loop": {
+        "name_pt": "Ciclo doação-emenda-benefício",
+        "name_en": "Donation-amendment-benefit loop",
+        "desc_pt": "Empresa doou para político que autorizou emenda beneficiando a mesma empresa",
+        "desc_en": (
+            "Company donated to politician who authored"
+            " amendment benefiting the same company"
+        ),
+    },
+    "amendment_beneficiary_contracts": {
+        "name_pt": "Beneficiário de emenda com contratos",
+        "name_en": "Amendment beneficiary with contracts",
+        "desc_pt": (
+            "Empresa beneficiada por emenda parlamentar"
+            " que também venceu licitações públicas"
+        ),
+        "desc_en": "Company benefited from parliamentary amendment that also won public contracts",
+    },
+    "debtor_health_operator": {
+        "name_pt": "Devedor fiscal operando unidade SUS",
+        "name_en": "Tax debtor operating SUS facility",
+        "desc_pt": "Empresa com dívida ativa na PGFN que opera unidades de saúde do SUS",
+        "desc_en": "Company with active PGFN tax debt operating SUS health facilities",
+    },
+    "sanctioned_health_operator": {
+        "name_pt": "Sancionada operando unidade SUS",
+        "name_en": "Sanctioned operating SUS facility",
+        "desc_pt": "Empresa sancionada (CEIS/CNEP/TCU) que opera unidades de saúde do SUS",
+        "desc_en": "Sanctioned company (CEIS/CNEP/TCU) operating SUS health facilities",
+    },
+    "shell_company_contracts": {
+        "name_pt": "Empresa com poucos empregados e muitos contratos",
+        "name_en": "Low-employee company with many contracts",
+        "desc_pt": (
+            "Empresa que venceu múltiplas licitações em setor"
+            " com poucos empregados registrados na RAIS"
+        ),
+        "desc_en": (
+            "Company winning multiple contracts in sector"
+            " with few RAIS-registered employees"
+        ),
+    },
 }
