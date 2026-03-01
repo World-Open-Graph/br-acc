@@ -7,7 +7,6 @@ Fluxo conservador para review, aprovação e auto-merge de PRs internas no `main
 - Avaliar PRs com Claude Code (`claude-opus-4-6`) usando saída estruturada.
 - Aplicar política determinística (`scripts/claude_merge_gate.py`) antes de qualquer merge.
 - Aprovar formalmente e fazer squash merge só quando todos os gates passarem.
-- Registrar auditoria em Linear para toda decisão.
 
 ## Arquivos principais
 
@@ -15,7 +14,6 @@ Fluxo conservador para review, aprovação e auto-merge de PRs internas no `main
 - Política: `.github/claude-automerge-policy.json`
 - Scanner de injeção: `scripts/prompt_injection_scan.py`
 - Gate determinístico: `scripts/claude_merge_gate.py`
-- Auditoria Linear: `scripts/linear_audit.py`
 
 ## Pré-requisitos
 
@@ -23,15 +21,13 @@ Fluxo conservador para review, aprovação e auto-merge de PRs internas no `main
 
 1. `CLAUDE_CODE_OAUTH_TOKEN`
    - Gere localmente via `claude setup-token` com sua conta Max.
-2. `LINEAR_API_KEY`
 
 ### Variables
 
-1. `LINEAR_TEAM_ID`
-2. `CLAUDE_AUTOMERGE_ENABLED`
+1. `CLAUDE_AUTOMERGE_ENABLED`
    - `false` para shadow mode
    - `true` para ativar merge automático
-3. `CLAUDE_AUTOFIX_ENABLED`
+2. `CLAUDE_AUTOFIX_ENABLED`
    - recomendado: `true`
 
 ### GitHub Actions setting obrigatório
@@ -56,10 +52,6 @@ Sem isso, o passo `gh pr review --approve` pode falhar.
 4. **Approve + merge**
    - só com kill switch ativo (`CLAUDE_AUTOMERGE_ENABLED=true`)
    - aprovação formal + squash merge
-5. **Linear audit**
-   - cria issue em toda decisão
-   - fallback para comentário em PR se Linear falhar
-
 ## Kill switch e rollback
 
 ### Kill switch imediato
@@ -87,11 +79,6 @@ O workflow continua auditando/comentando, mas não faz merge.
 - Confirme `CLAUDE_AUTOMERGE_ENABLED=true`.
 - Revise comentário final no PR e `decision` calculada.
 - Verifique se houve novo commit concorrente.
-
-### Auditoria Linear falhou
-
-- Verifique `LINEAR_API_KEY` e `LINEAR_TEAM_ID`.
-- O merge não é bloqueado por falha de auditoria; há fallback em comentário de PR.
 
 ## Rollout recomendado
 
