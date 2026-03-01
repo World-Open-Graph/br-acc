@@ -131,6 +131,12 @@ class ComprasnetPipeline(Pipeline):
                 ano = rec.get("anoContrato", "")
                 numero_controle = f"{org_cnpj}-{seq}-{ano}"
 
+            bid_reference = str(
+                rec.get("numeroControlePncpCompra")
+                or rec.get("numeroControlePNCPCompra")
+                or ""
+            ).strip()
+
             # Extract contracting org info
             org = rec.get("orgaoEntidade", {})
             org_name = normalize_name(
@@ -152,6 +158,7 @@ class ComprasnetPipeline(Pipeline):
 
             contracts.append({
                 "contract_id": numero_controle,
+                "bid_id": bid_reference,
                 "object": normalize_name(
                     str(rec.get("objetoContrato", ""))
                 ),
@@ -228,3 +235,19 @@ class ComprasnetPipeline(Pipeline):
             target_key="contract_id",
         )
         logger.info("Created %d VENCEU relationships", count)
+
+        # REFERENTE_A: Contract -> Bid (deterministic PNCP linkage)
+        contract_bid_rels = [
+            {"source_key": c["contract_id"], "target_key": c["bid_id"]}
+            for c in self.contracts
+            if c.get("bid_id")
+        ]
+        count = loader.load_relationships(
+            rel_type="REFERENTE_A",
+            rows=contract_bid_rels,
+            source_label="Contract",
+            source_key="contract_id",
+            target_label="Bid",
+            target_key="bid_id",
+        )
+        logger.info("Created %d REFERENTE_A relationships", count)
