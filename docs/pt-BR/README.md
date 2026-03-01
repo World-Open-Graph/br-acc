@@ -71,7 +71,7 @@ O cadastro é via `/api/v1/auth/register`. Se `INVITE_CODE` estiver definido, en
 ```bash
 curl -X POST http://localhost:8000/api/v1/auth/register \
   -H 'Content-Type: application/json' \
-  -d '{"email":"user@example.com","password":"password123","invite_code":""}'
+  -d '{"email":"<development-email>","password":"<development-pass>","invite_code":""}'
 ```
 
 Para login e obtenção do token:
@@ -79,7 +79,7 @@ Para login e obtenção do token:
 ```bash
 curl -X POST http://localhost:8000/api/v1/auth/login \
   -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d 'username=user@example.com&password=password123'
+  -d 'username=<development-email>&password=<development-pass>'
 ```
 
 - API: `http://localhost:8000/health`
