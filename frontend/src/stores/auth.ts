@@ -30,7 +30,8 @@ interface AuthState {
 
 function loadPersistedToken(): string | null {
   try {
-    return localStorage.getItem(STORAGE_KEY);
+    // Persist tokens only in sessionStorage to limit exposure to XSS
+    return sessionStorage.getItem(STORAGE_KEY);
   } catch {
     return null;
   }
@@ -39,12 +40,12 @@ function loadPersistedToken(): string | null {
 function persistToken(token: string | null): void {
   try {
     if (token) {
-      localStorage.setItem(STORAGE_KEY, token);
+      sessionStorage.setItem(STORAGE_KEY, token);
     } else {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
     }
   } catch {
-    // localStorage unavailable
+    // sessionStorage unavailable
   }
 }
 

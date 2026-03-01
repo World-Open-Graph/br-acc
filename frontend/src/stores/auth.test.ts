@@ -14,8 +14,8 @@ vi.mock("@/api/client", async () => {
   return { ...actual, apiFetch: mockApiFetch };
 });
 
-// Mock localStorage
-const localStorageMock = (() => {
+// Mock sessionStorage
+const sessionStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: vi.fn((key: string) => store[key] ?? null),
@@ -31,7 +31,9 @@ const localStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(globalThis, "localStorage", { value: localStorageMock });
+Object.defineProperty(globalThis, "sessionStorage", {
+  value: sessionStorageMock,
+});
 
 import { useAuthStore } from "./auth";
 
@@ -49,7 +51,7 @@ function resetStore() {
 describe("useAuthStore", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorageMock.clear();
+    sessionStorageMock.clear();
     resetStore();
   });
 
@@ -57,7 +59,7 @@ describe("useAuthStore", () => {
     vi.restoreAllMocks();
   });
 
-  it("login success sets token and user, persists to localStorage", async () => {
+  it("login success sets token and user, persists to sessionStorage", async () => {
     const tokenRes = { access_token: "jwt-123", token_type: "bearer" };
     const userRes = {
       id: "u1",
@@ -76,7 +78,7 @@ describe("useAuthStore", () => {
     expect(state.user).toEqual(userRes);
     expect(state.loading).toBe(false);
     expect(state.error).toBeNull();
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+    expect(sessionStorageMock.setItem).toHaveBeenCalledWith(
       STORAGE_KEY,
       "jwt-123",
     );
@@ -163,7 +165,7 @@ describe("useAuthStore", () => {
     expect(state.error).toBe("auth.registerError");
   });
 
-  it("logout clears token, user, and localStorage", () => {
+  it("logout clears token, user, and sessionStorage", () => {
     useAuthStore.setState({
       token: "jwt-123",
       user: {
@@ -179,7 +181,7 @@ describe("useAuthStore", () => {
     expect(state.token).toBeNull();
     expect(state.user).toBeNull();
     expect(state.error).toBeNull();
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith(STORAGE_KEY);
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith(STORAGE_KEY);
   });
 
   it("restore success validates cached token and sets user", async () => {
@@ -211,7 +213,7 @@ describe("useAuthStore", () => {
     const state = useAuthStore.getState();
     expect(state.token).toBeNull();
     expect(state.user).toBeNull();
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith(STORAGE_KEY);
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith(STORAGE_KEY);
   });
 
   it("isAuthenticated returns true when token present, false otherwise", () => {

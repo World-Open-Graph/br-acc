@@ -6,10 +6,18 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   api:
     name: API (Python)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       PRODUCT_TIER: community
     defaults:
@@ -26,21 +34,21 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: uv sync --extra dev
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-api-${{ hashFiles('api/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-api-
 
-      - name: Lint
-        run: uv run ruff check src/ tests/
-
-      - name: Type check
-        run: uv run mypy src/
-
-      - name: Test
-        run: uv run pytest -q
+      - name: Run quality suite
+        run: ../scripts/ci/python_quality.sh
 
   etl:
     name: ETL (Python)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: etl
@@ -55,21 +63,21 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: uv sync --extra dev
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-etl-${{ hashFiles('etl/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-etl-
 
-      - name: Lint
-        run: uv run ruff check src/ tests/
-
-      - name: Type check
-        run: uv run mypy src/
-
-      - name: Test
-        run: uv run pytest -q
+      - name: Run quality suite
+        run: ../scripts/ci/python_quality.sh
 
   frontend:
     name: Frontend (TypeScript)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: frontend
@@ -82,21 +90,13 @@ jobs:
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npx eslint src/
-
-      - name: Type check
-        run: npx tsc --noEmit
-
-      - name: Test
-        run: npm test -- --run
+      - name: Run quality suite
+        run: ../scripts/ci/frontend_quality.sh
 
   neutrality:
     name: Neutrality Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -111,6 +111,7 @@ jobs:
   integration:
     name: Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [api, etl]
     if: github.ref == 'refs/heads/main' && vars.ENABLE_INTEGRATION_TESTS == 'true'
     services:
@@ -136,6 +137,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-integration-${{ hashFiles('api/uv.lock', 'etl/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-integration-
 
       - name: API integration tests
         run: cd api && uv sync --extra dev && uv run pytest -m integration
