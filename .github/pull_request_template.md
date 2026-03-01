@@ -8,6 +8,16 @@ Release note (PT-BR):
 
 Release note (EN):
 
+Release highlights (PT-BR, bullets with `|`):
+
+Release highlights (EN, bullets with `|`):
+
+Included pattern IDs (comma-separated, or `none`):
+
+Technical changes (PT-BR, bullets with `|`):
+
+Technical changes (EN, bullets with `|`):
+
 Change type (choose one release label from taxonomy):
 
 - [ ] `release:major`

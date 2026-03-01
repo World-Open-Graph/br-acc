@@ -23,6 +23,26 @@ on:
         description: "Release title (EN)"
         required: true
         type: string
+      highlights_pt:
+        description: "PT highlights (separate bullets with |)"
+        required: true
+        type: string
+      highlights_en:
+        description: "EN highlights (separate bullets with |)"
+        required: true
+        type: string
+      patterns_included:
+        description: "Comma-separated pattern IDs included in this release (use 'none' if not applicable)"
+        required: true
+        type: string
+      technical_changes_pt:
+        description: "PT technical changes (separate bullets with |)"
+        required: true
+        type: string
+      technical_changes_en:
+        description: "EN technical changes (separate bullets with |)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -104,63 +124,116 @@ jobs:
           COMPARE_URL: ${{ steps.validate.outputs.compare_url }}
           TITLE_PT: ${{ inputs.title_pt }}
           TITLE_EN: ${{ inputs.title_en }}
+          HIGHLIGHTS_PT: ${{ inputs.highlights_pt }}
+          HIGHLIGHTS_EN: ${{ inputs.highlights_en }}
+          PATTERNS_INCLUDED: ${{ inputs.patterns_included }}
+          TECHNICAL_CHANGES_PT: ${{ inputs.technical_changes_pt }}
+          TECHNICAL_CHANGES_EN: ${{ inputs.technical_changes_en }}
         run: |
           set -euo pipefail
           DATE_UTC="$(date -u +"%Y-%m-%d")"
           export DATE_UTC
 
-          cat > release_notes.md <<NOTES
-          ## PT-BR
-
-          ${TITLE_PT}
-
-          ### Escopo
-          - Release publicada por marco.
-          - Mudanças detalhadas por categorias no histórico desta versão.
-
-          ### Integridade pública
-          Os sinais e padrões refletem coocorrências em bases públicas e não constituem prova legal.
-
-          ## EN
-
-          ${TITLE_EN}
-
-          ### Scope
-          - Milestone-based release publication.
-          - Detailed changes grouped by category in this version history.
-
-          ### Public integrity
-          Signals and patterns reflect co-occurrence in public records and are not legal proof.
-
-          ## Compatibility
-
-          - Breaking changes: declare explicitly when applicable.
-          - Migration required: declare explicitly when applicable.
-
-          ## Compare
-
-          ${COMPARE_URL}
-
-          ## Metadata
-
-          - Version: ${VERSION}
-          - Target SHA: ${TARGET_SHA}
-          - Previous tag: ${PREVIOUS_TAG}
-          - Date (UTC): ${DATE_UTC}
-          NOTES
-
           python - <<'PY'
           import json
           import os
+          from textwrap import dedent
+
+          def split_pipe(raw: str) -> list[str]:
+              normalized = raw.replace("\r\n", "\n").replace("\n", "|")
+              return [item.strip(" -\t") for item in normalized.split("|") if item.strip()]
+
+          def split_csv(raw: str) -> list[str]:
+              value = raw.strip()
+              if value.lower() in {"none", "n/a", "na", "-"}:
+                  return []
+              return [item.strip() for item in value.split(",") if item.strip()]
+
+          def bullets(items: list[str], fallback: str) -> str:
+              if not items:
+                  return f"- {fallback}"
+              return "\n".join(f"- {item}" for item in items)
+
+          highlights_pt = split_pipe(os.environ["HIGHLIGHTS_PT"])
+          highlights_en = split_pipe(os.environ["HIGHLIGHTS_EN"])
+          technical_changes_pt = split_pipe(os.environ["TECHNICAL_CHANGES_PT"])
+          technical_changes_en = split_pipe(os.environ["TECHNICAL_CHANGES_EN"])
+          patterns = split_csv(os.environ["PATTERNS_INCLUDED"])
+
+          release_notes = dedent(
+              f"""
+              ## PT-BR
+
+              {os.environ["TITLE_PT"]}
+
+              ### Escopo
+              - Release publicada por marco.
+              - Mudanças listadas de forma específica para facilitar auditoria pública.
+
+              ### Destaques
+              {bullets(highlights_pt, "Sem destaques declarados.")}
+
+              ### Padrões incluídos
+              {bullets(patterns, "Sem novos padrões nesta release.")}
+
+              ### Mudanças técnicas
+              {bullets(technical_changes_pt, "Sem mudanças técnicas declaradas.")}
+
+              ### Integridade pública
+              Os sinais e padrões refletem coocorrências em bases públicas e não constituem prova legal.
+
+              ## EN
+
+              {os.environ["TITLE_EN"]}
+
+              ### Scope
+              - Milestone-based release publication.
+              - Changes are listed explicitly for public traceability.
+
+              ### Highlights
+              {bullets(highlights_en, "No highlights declared.")}
+
+              ### Included patterns
+              {bullets(patterns, "No new patterns in this release.")}
+
+              ### Technical changes
+              {bullets(technical_changes_en, "No technical changes declared.")}
+
+              ### Public integrity
+              Signals and patterns reflect co-occurrence in public records and are not legal proof.
+
+              ## Compatibility
+
+              - Breaking changes: none declared.
+              - Migration required: no.
+
+              ## Compare
+
+              {os.environ.get("COMPARE_URL", "")}
+
+              ## Metadata
+
+              - Version: {os.environ["VERSION"]}
+              - Target SHA: {os.environ["TARGET_SHA"]}
+              - Previous tag: {os.environ["PREVIOUS_TAG"]}
+              - Date (UTC): {os.environ.get("DATE_UTC", "")}
+              """
+          ).strip() + "\n"
+
+          with open("release_notes.md", "w", encoding="utf-8") as fh:
+              fh.write(release_notes)
 
           payload = {
               "version": os.environ["VERSION"],
               "date": os.environ.get("DATE_UTC", ""),
-              "highlights_pt": [os.environ["TITLE_PT"]],
-              "highlights_en": [os.environ["TITLE_EN"]],
+              "highlights_pt": highlights_pt,
+              "highlights_en": highlights_en,
               "api_changes": [],
               "data_changes": [],
               "privacy_compliance_changes": [],
+              "patterns_included": patterns,
+              "technical_changes_pt": technical_changes_pt,
+              "technical_changes_en": technical_changes_en,
               "breaking_changes": False,
               "migration_required": False,
               "compare_url": os.environ.get("COMPARE_URL", ""),
