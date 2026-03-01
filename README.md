@@ -96,13 +96,7 @@ docker-compose up -d
 ```
 ### Docker Development
 
-This application uses an external volume to persist Neo4j data. Before starting the services with Docker, you must create the volume manually:
-
-```bash
-docker volume create d71967adc2d23c9cce3b6c9e742d4b22c7bff9b78b26e6d5f9c2ce4abaf18051
-```
-
-Then, you can start the containers:
+You can start the containers using:
 
 ```bash
 cd infra
