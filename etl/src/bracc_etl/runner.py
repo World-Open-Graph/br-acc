@@ -200,9 +200,22 @@ def download(output_dir: str, files: int, skip_existing: bool) -> None:
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    def _safe_extract_zip(archive: zipfile.ZipFile, output_root: Path) -> None:
+    def _safe_extract_zip(
+        archive: zipfile.ZipFile,
+        output_root: Path,
+        *,
+        max_members: int = 50_000,
+        max_uncompressed_bytes: int = 5_000_000_000,
+    ) -> None:
         base = output_root.resolve()
-        for info in archive.infolist():
+        infos = archive.infolist()
+        if len(infos) > max_members:
+            raise click.ClickException(
+                f"Unsafe ZIP archive: too many entries ({len(infos)} > {max_members})",
+            )
+
+        uncompressed_total = 0
+        for info in infos:
             if not info.filename:
                 continue
             member = info.filename.replace("\\", "/")
@@ -219,6 +232,13 @@ def download(output_dir: str, files: int, skip_existing: bool) -> None:
             if info.is_dir():
                 target.mkdir(parents=True, exist_ok=True)
                 continue
+
+            uncompressed_total += info.file_size
+            if uncompressed_total > max_uncompressed_bytes:
+                raise click.ClickException(
+                    "Unsafe ZIP archive: exceeds max extracted size "
+                    f"({uncompressed_total} > {max_uncompressed_bytes})",
+                )
 
             target.parent.mkdir(parents=True, exist_ok=True)
             with archive.open(info, "r") as source, target.open("wb") as destination:

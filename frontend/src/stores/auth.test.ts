@@ -70,6 +70,19 @@ describe("useAuthStore", () => {
     expect(state.restored).toBe(true);
   });
 
+  it("login non-401 sets auth.loginError and marks restored", async () => {
+    mockApiFetch.mockRejectedValueOnce(new ApiError(500, "Server Error"));
+
+    await useAuthStore.getState().login("test@example.com", "password123");
+
+    const state = useAuthStore.getState();
+    expect(state.token).toBeNull();
+    expect(state.user).toBeNull();
+    expect(state.loading).toBe(false);
+    expect(state.error).toBe("auth.loginError");
+    expect(state.restored).toBe(true);
+  });
+
   it("register success auto-calls login and sets token", async () => {
     const tokenRes = { access_token: "jwt-reg", token_type: "bearer" };
     const userRes = {
@@ -91,6 +104,34 @@ describe("useAuthStore", () => {
     expect(state.token).toBe("jwt-reg");
     expect(state.user).toEqual(userRes);
     expect(state.restored).toBe(true);
+  });
+
+  it("register 403 sets auth.invalidInvite error", async () => {
+    mockApiFetch.mockRejectedValueOnce(new ApiError(403, "Forbidden"));
+
+    await useAuthStore
+      .getState()
+      .register("new@example.com", "password123", "invite-abc");
+
+    const state = useAuthStore.getState();
+    expect(state.loading).toBe(false);
+    expect(state.error).toBe("auth.invalidInvite");
+    expect(state.token).toBeNull();
+    expect(state.user).toBeNull();
+  });
+
+  it("register non-403 sets auth.registerError", async () => {
+    mockApiFetch.mockRejectedValueOnce(new ApiError(500, "Server Error"));
+
+    await useAuthStore
+      .getState()
+      .register("new@example.com", "password123", "invite-abc");
+
+    const state = useAuthStore.getState();
+    expect(state.loading).toBe(false);
+    expect(state.error).toBe("auth.registerError");
+    expect(state.token).toBeNull();
+    expect(state.user).toBeNull();
   });
 
   it("logout clears token and user and calls API logout", () => {

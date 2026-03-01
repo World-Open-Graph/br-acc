@@ -16,14 +16,15 @@ export function GraphExplorer() {
   const { t } = useTranslation();
   const { entityId } = useParams<{ entityId: string }>();
 
+  const reset = useGraphExplorerStore((s) => s.reset);
   const store = useGraphExplorerStore();
   const { depth, enabledTypes, enabledRelTypes, selectedNodeIds, sidebarCollapsed, detailPanelOpen } = store;
 
   const { data, loading, error } = useGraphData(entityId, depth);
 
   useEffect(() => {
-    store.reset();
-  }, [entityId, store]);
+    reset();
+  }, [entityId, reset]);
 
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
