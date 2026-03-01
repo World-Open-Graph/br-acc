@@ -118,6 +118,16 @@ docker exec -it infra-api-1 create-dev-user --email <email> -- <password>
 | GET | `/api/v1/public/graph/company/{cnpj_or_id}` | Public company subgraph |
 | GET | `/api/v1/public/patterns/company/{cnpj_or_id}` | Returns `503` while pattern engine is disabled |
 
+## Brazil Dataset Matrix (Legal Basis)
+
+BR/ACC maintains a legal-basis registry for Brazilian public datasets used in transparency workflows.
+
+| Scope | Coverage | Includes legal basis | File |
+|---|---|---|---|
+| Brazil public data matrix | 93 sources | Yes | [docs/pt-BR/datasets/matriz-bases-publicas-brasil.md](docs/pt-BR/datasets/matriz-bases-publicas-brasil.md) |
+
+This matrix includes dataset, disclosure scope, source URL, format, indicative legal foundation, and approximate record volume where available. The current full matrix is maintained in Portuguese (pt-BR).
+
 ## Contributing
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) for workflow, quality gates, and review expectations.

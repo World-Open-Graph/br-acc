@@ -75,6 +75,7 @@ scripts/audit-prompts/
 # Local report artifacts in repository root
 /*.pdf
 /*.html
+gitleaks-report*.json
 
 # Playwright MCP cache
 .playwright-mcp/
