@@ -103,6 +103,12 @@ cd infra
 docker-compose up -d
 ```
 
+Para criar um usuário de desenvolvimento dentro do container em execução:
+
+```bash
+docker exec -it infra-api-1 create-dev-user --email admin@bracc.dev --password password123
+```
+
 > **Nota sobre Permissões:** Se encontrar erros `EACCES` no diretório `infra/neo4j/import`, execute: `sudo chmod -R 777 infra/neo4j/import`.
 
 ## Superfície da API
