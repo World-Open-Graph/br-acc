@@ -6,12 +6,12 @@
 
 **Open-source graph infrastructure that cross-references Brazil's public databases to generate actionable intelligence for civic improvement.**
 
-[![CI](https://github.com/brunoclz/world-transparency-graph/actions/workflows/ci.yml/badge.svg)](https://github.com/brunoclz/world-transparency-graph/actions/workflows/ci.yml)
+[![CI](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml/badge.svg)](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Last Commit](https://img.shields.io/github/last-commit/brunoclz/world-transparency-graph)](https://github.com/brunoclz/world-transparency-graph/commits)
-[![Issues](https://img.shields.io/github/issues/brunoclz/world-transparency-graph)](https://github.com/brunoclz/world-transparency-graph/issues)
-[![Stars](https://img.shields.io/github/stars/brunoclz/world-transparency-graph?style=social)](https://github.com/brunoclz/world-transparency-graph/stargazers)
-[![Forks](https://img.shields.io/github/forks/brunoclz/world-transparency-graph?style=social)](https://github.com/brunoclz/world-transparency-graph/network/members)
+[![Last Commit](https://img.shields.io/github/last-commit/World-Open-Graph/br-acc)](https://github.com/World-Open-Graph/br-acc/commits)
+[![Issues](https://img.shields.io/github/issues/World-Open-Graph/br-acc)](https://github.com/World-Open-Graph/br-acc/issues)
+[![Stars](https://img.shields.io/github/stars/World-Open-Graph/br-acc?style=social)](https://github.com/World-Open-Graph/br-acc/stargazers)
+[![Forks](https://img.shields.io/github/forks/World-Open-Graph/br-acc?style=social)](https://github.com/World-Open-Graph/br-acc/network/members)
 [![Twitter Follow](https://img.shields.io/twitter/follow/brunoclz?style=social)](https://x.com/brunoclz)
 [![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/YyvGGgNGVD)
 
