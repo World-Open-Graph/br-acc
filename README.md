@@ -82,7 +82,26 @@ cd ../frontend && npm install
 # quality
 make check
 make neutrality
+
+# Create development user
+cd api && uv run create-dev-user --email admin@bracc.dev --password password123
 ```
+### Docker Development
+
+This application uses an external volume to persist Neo4j data. Before starting the services with Docker, you must create the volume manually:
+
+```bash
+docker volume create d71967adc2d23c9cce3b6c9e742d4b22c7bff9b78b26e6d5f9c2ce4abaf18051
+```
+
+Then, you can start the containers:
+
+```bash
+cd infra
+docker-compose up -d
+```
+
+> **Note on Permissions:** If you encounter `EACCES` errors with the `infra/neo4j/import` directory, run: `sudo chmod -R 777 infra/neo4j/import && sudo chmod -R 777 infra/neo4j/import`. This ensures the directory is accessible across both host and container environments.
 
 ## API Surface
 

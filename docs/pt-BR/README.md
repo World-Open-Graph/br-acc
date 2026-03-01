@@ -88,6 +88,23 @@ make check
 make neutrality
 ```
 
+### Rodando com Docker
+
+Esta aplicação utiliza um volume externo para persistir os dados do Neo4j. Antes de subir os serviços, você deve criar o volume manualmente:
+
+```bash
+docker volume create d71967adc2d23c9cce3b6c9e742d4b22c7bff9b78b26e6d5f9c2ce4abaf18051
+```
+
+Em seguida, você pode iniciar os containers:
+
+```bash
+cd infra
+docker-compose up -d
+```
+
+> **Nota sobre Permissões:** Se encontrar erros `EACCES` no diretório `infra/neo4j/import`, execute: `sudo chmod -R 777 infra/neo4j/import`.
+
 ## Superfície da API
 
 | Método | Rota | Descrição |
