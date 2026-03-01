@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "thresholds": {
+    "max_changed_files": 12,
+    "max_total_churn": 400,
+    "required_checks_timeout_minutes": 45
+  },
+  "allowlist": [
+    "docs/**",
+    "README.md",
+    "CONTRIBUTING.md",
+    "frontend/src/**",
+    "api/src/icarus/queries/**",
+    "api/src/icarus/models/**",
+    "api/tests/**",
+    "etl/tests/**",
+    "frontend/src/**/*.test.*"
+  ],
+  "denylist": [
+    ".github/workflows/**",
+    "infra/**",
+    "scripts/**",
+    "api/src/**/auth*",
+    "api/src/**/middleware/**",
+    "api/src/**/config.py",
+    "api/src/**/dependencies.py"
+  ],
+  "evaluation": {
+    "min_confidence": 0.9,
+    "allowed_risk_levels": [
+      "low"
+    ]
+  },
+  "autofix": {
+    "eligible_checks": [
+      "API (Python)",
+      "ETL (Python)",
+      "Frontend (TypeScript)",
+      "Neutrality Audit"
+    ],
+    "attempt_label": "claude-autofix-attempted",
+    "max_attempts_per_sha": 1
+  }
+}

@@ -1,0 +1,715 @@
+name: Claude PR Governor
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: claude-pr-governor-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+
+jobs:
+  preflight-policy:
+    name: Preflight Policy
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.preflight.outputs.pr_number }}
+      pr_url: ${{ steps.preflight.outputs.pr_url }}
+      author_login: ${{ steps.preflight.outputs.author_login }}
+      head_sha: ${{ steps.preflight.outputs.head_sha }}
+      head_ref: ${{ steps.preflight.outputs.head_ref }}
+      base_ref: ${{ steps.preflight.outputs.base_ref }}
+      preflight_eligible: ${{ steps.preflight.outputs.preflight_eligible }}
+      preflight_decision: ${{ steps.preflight.outputs.preflight_decision }}
+      preflight_reasons_json: ${{ steps.preflight.outputs.preflight_reasons_json }}
+      prompt_scan_suspicious: ${{ steps.preflight.outputs.prompt_scan_suspicious }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run preflight policy
+        id: preflight
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          INTERNAL_PR: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          HEAD_REPO_FULL_NAME: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+
+          workdir=".tmp/claude-governor/preflight"
+          mkdir -p "$workdir"
+
+          gh pr view "$PR_NUMBER" --repo "$REPO" \
+            --json number,url,title,body,author,headRefOid,headRefName,baseRefName,isDraft,files > "$workdir/pr_metadata_raw.json"
+
+          jq \
+            --arg internal "$INTERNAL_PR" \
+            --arg head_repo "$HEAD_REPO_FULL_NAME" \
+            '. + {internal_pr: ($internal == "true"), head_repo_full_name: $head_repo}' \
+            "$workdir/pr_metadata_raw.json" > "$workdir/pr_metadata.json"
+
+          jq -r '.title // ""' "$workdir/pr_metadata.json" > "$workdir/title.txt"
+          jq -r '.body // ""' "$workdir/pr_metadata.json" > "$workdir/body.txt"
+
+          gh api "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" --paginate --jq '.[].body // ""' > "$workdir/issue_comments.txt" || true
+          gh api "repos/$REPO/pulls/$PR_NUMBER/comments?per_page=100" --paginate --jq '.[].body // ""' > "$workdir/review_comments.txt" || true
+          cat "$workdir/issue_comments.txt" "$workdir/review_comments.txt" > "$workdir/comments.txt"
+
+          gh pr diff "$PR_NUMBER" --repo "$REPO" > "$workdir/pr.diff"
+
+          python scripts/prompt_injection_scan.py \
+            --title-file "$workdir/title.txt" \
+            --body-file "$workdir/body.txt" \
+            --comments-file "$workdir/comments.txt" \
+            --diff-file "$workdir/pr.diff" \
+            --output "$workdir/prompt_scan.json"
+
+          python scripts/claude_merge_gate.py \
+            --mode preflight \
+            --policy .github/claude-automerge-policy.json \
+            --pr-metadata-json "$workdir/pr_metadata.json" \
+            --prompt-scan-json "$workdir/prompt_scan.json" \
+            --output "$workdir/gate_preflight.json"
+
+          {
+            echo "pr_number=$(jq -r '.number' "$workdir/pr_metadata.json")"
+            echo "pr_url=$(jq -r '.url' "$workdir/pr_metadata.json")"
+            echo "author_login=$(jq -r '.author.login // "unknown"' "$workdir/pr_metadata.json")"
+            echo "head_sha=$(jq -r '.headRefOid // ""' "$workdir/pr_metadata.json")"
+            echo "head_ref=$(jq -r '.headRefName // ""' "$workdir/pr_metadata.json")"
+            echo "base_ref=$(jq -r '.baseRefName // ""' "$workdir/pr_metadata.json")"
+            echo "preflight_eligible=$(jq -r '.eligible' "$workdir/gate_preflight.json")"
+            echo "preflight_decision=$(jq -r '.decision' "$workdir/gate_preflight.json")"
+            echo "prompt_scan_suspicious=$(jq -r '.suspicious' "$workdir/prompt_scan.json")"
+            echo "preflight_reasons_json<<EOF"
+            jq -c '.reasons' "$workdir/gate_preflight.json"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment blocked preflight
+        if: steps.preflight.outputs.preflight_eligible != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DECISION: ${{ steps.preflight.outputs.preflight_decision }}
+          REASONS: ${{ steps.preflight.outputs.preflight_reasons_json }}
+        run: |
+          set -euo pipefail
+          body="AI PR Governor bloqueou esta PR no preflight.\n\n- decision: \`$DECISION\`\n- reasons: \`$REASONS\`\n\nNenhum merge automático será feito neste ciclo."
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body "$body"
+
+  claude-evaluation:
+    name: Claude Evaluation
+    runs-on: ubuntu-latest
+    needs: [preflight-policy]
+    if: needs.preflight-policy.outputs.preflight_eligible == 'true'
+    outputs:
+      useful: ${{ steps.parse.outputs.useful }}
+      necessary: ${{ steps.parse.outputs.necessary }}
+      safe: ${{ steps.parse.outputs.safe }}
+      confidence: ${{ steps.parse.outputs.confidence }}
+      risk_level: ${{ steps.parse.outputs.risk_level }}
+      blocking_findings_json: ${{ steps.parse.outputs.blocking_findings_json }}
+      claude_summary: ${{ steps.parse.outputs.claude_summary }}
+      claude_cost_usd: ${{ steps.parse.outputs.claude_cost_usd }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Claude evaluate PR
+        id: claude_eval
+        uses: anthropics/claude-code-action@ba7fa4bcf054319261202aef93d71a89112a8d00
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+            PR URL: ${{ needs.preflight-policy.outputs.pr_url }}
+
+            Avalie esta PR com rigor conservador para automerge.
+
+            Regras:
+            - Decida se a mudança é útil, necessária e segura para o código do repositório.
+            - Considere riscos técnicos, regressões, segurança e necessidade real.
+            - Se houver incerteza, favoreça bloquear merge automático.
+            - Não execute operações de merge, review approval, push ou comandos destrutivos.
+
+            Responda SOMENTE via saída estruturada exigida pelo schema.
+          claude_args: >-
+            --model claude-opus-4-6
+            --max-turns 8
+            --allowedTools "Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr checks:*)"
+            --disallowedTools "Bash(gh pr merge:*),Bash(gh pr review:*),Bash(git push:*),Bash(git fetch:*),Bash(git pull:*),Bash(git reset:*),Bash(git clean:*),Bash(curl:*),Bash(wget:*)"
+            --json-schema "{\"type\":\"object\",\"properties\":{\"useful\":{\"type\":\"boolean\"},\"necessary\":{\"type\":\"boolean\"},\"safe\":{\"type\":\"boolean\"},\"confidence\":{\"type\":\"number\",\"minimum\":0,\"maximum\":1},\"risk_level\":{\"type\":\"string\",\"enum\":[\"low\",\"medium\",\"high\"]},\"blocking_findings\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"summary\":{\"type\":\"string\",\"maxLength\":800}},\"required\":[\"useful\",\"necessary\",\"safe\",\"confidence\",\"risk_level\",\"blocking_findings\",\"summary\"],\"additionalProperties\":false}"
+
+      - name: Parse evaluation output
+        id: parse
+        env:
+          STRUCTURED_OUTPUT: ${{ steps.claude_eval.outputs.structured_output }}
+          EXECUTION_FILE: ${{ steps.claude_eval.outputs.execution_file }}
+        run: |
+          set -euo pipefail
+          workdir=".tmp/claude-governor/eval"
+          mkdir -p "$workdir"
+
+          parsed=$(jq -cn --arg raw "${STRUCTURED_OUTPUT:-}" '$raw | fromjson?')
+          normalized=$(jq -cn --argjson parsed "$parsed" '
+            def fallback:
+              {
+                useful: false,
+                necessary: false,
+                safe: false,
+                confidence: 0.0,
+                risk_level: "high",
+                blocking_findings: ["structured_output_missing_or_invalid"],
+                summary: "Claude structured output ausente ou invalido; bloqueado por seguranca."
+              };
+            if ($parsed | type) != "object" then
+              fallback
+            elif (["useful","necessary","safe","confidence","risk_level","blocking_findings","summary"] | all(.[]; $parsed[.] != null)) then
+              {
+                useful: ($parsed.useful == true),
+                necessary: ($parsed.necessary == true),
+                safe: ($parsed.safe == true),
+                confidence: ($parsed.confidence | tonumber? // 0.0),
+                risk_level: (($parsed.risk_level | tostring) | ascii_downcase),
+                blocking_findings: (
+                  if ($parsed.blocking_findings | type) == "array"
+                  then $parsed.blocking_findings
+                  else ["blocking_findings_not_array"]
+                  end
+                ),
+                summary: (($parsed.summary | tostring)[:800])
+              }
+            else
+              fallback
+            end
+          ')
+
+          cost=""
+          if [ -n "${EXECUTION_FILE:-}" ] && [ -f "$EXECUTION_FILE" ]; then
+            cost=$(jq -r '.. | .total_cost_usd? // empty' "$EXECUTION_FILE" | head -n 1 || true)
+          fi
+
+          summary=$(jq -r '.summary' <<<"$normalized" | tr '\n' ' ' | cut -c1-780)
+
+          {
+            echo "useful=$(jq -r '.useful' <<<"$normalized")"
+            echo "necessary=$(jq -r '.necessary' <<<"$normalized")"
+            echo "safe=$(jq -r '.safe' <<<"$normalized")"
+            echo "confidence=$(jq -r '.confidence' <<<"$normalized")"
+            echo "risk_level=$(jq -r '.risk_level' <<<"$normalized")"
+            echo "blocking_findings_json<<EOF"
+            jq -c '.blocking_findings' <<<"$normalized"
+            echo "EOF"
+            echo "claude_summary<<EOF"
+            printf '%s\n' "$summary"
+            echo "EOF"
+            echo "claude_cost_usd=$cost"
+          } >> "$GITHUB_OUTPUT"
+
+  required-checks-gate:
+    name: Required Checks Gate
+    runs-on: ubuntu-latest
+    needs: [preflight-policy, claude-evaluation]
+    if: needs.preflight-policy.outputs.preflight_eligible == 'true'
+    outputs:
+      checks_status: ${{ steps.wait.outputs.checks_status }}
+      decision: ${{ steps.finalize.outputs.decision }}
+      can_merge: ${{ steps.finalize.outputs.can_merge }}
+      gate_reasons_json: ${{ steps.finalize.outputs.gate_reasons_json }}
+      autofix_attempted: ${{ steps.finalize.outputs.autofix_attempted }}
+      autofix_pushed: ${{ steps.finalize.outputs.autofix_pushed }}
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.preflight-policy.outputs.head_ref }}
+          fetch-depth: 0
+          token: ${{ github.token }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Wait required checks
+        id: wait
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+        run: |
+          set -euo pipefail
+          workdir=".tmp/claude-governor/checks"
+          mkdir -p "$workdir"
+          echo '[]' > "$workdir/required_checks.json"
+
+          timeout_min=$(jq -r '.thresholds.required_checks_timeout_minutes // 45' .github/claude-automerge-policy.json)
+          timeout_sec=$((timeout_min * 60))
+          poll_sec=30
+          elapsed=0
+          status="pending"
+
+          while true; do
+            set +e
+            gh pr checks "$PR_NUMBER" --repo "$REPO" --required --json name,bucket,state > "$workdir/required_checks.json"
+            rc=$?
+            set -e
+
+            if [ "$rc" -eq 0 ]; then
+              if jq -e 'length > 0 and all(.[]; .bucket == "pass" or .bucket == "skipping")' "$workdir/required_checks.json" >/dev/null; then
+                status="pass"
+                break
+              fi
+              if jq -e 'any(.[]; .bucket == "fail" or .bucket == "cancel")' "$workdir/required_checks.json" >/dev/null; then
+                status="fail"
+                break
+              fi
+            elif [ "$rc" -ne 8 ]; then
+              status="error"
+              break
+            fi
+
+            if [ "$elapsed" -ge "$timeout_sec" ]; then
+              status="timeout"
+              break
+            fi
+
+            sleep "$poll_sec"
+            elapsed=$((elapsed + poll_sec))
+          done
+
+          jq --arg status "$status" '{status: $status, checks: .}' "$workdir/required_checks.json" > "$workdir/checks_status.json"
+          echo "checks_status=$status" >> "$GITHUB_OUTPUT"
+
+      - name: Deterministic final gate when checks pass
+        id: final_gate
+        if: steps.wait.outputs.checks_status == 'pass'
+        env:
+          EVAL_USEFUL: ${{ needs.claude-evaluation.outputs.useful }}
+          EVAL_NECESSARY: ${{ needs.claude-evaluation.outputs.necessary }}
+          EVAL_SAFE: ${{ needs.claude-evaluation.outputs.safe }}
+          EVAL_CONFIDENCE: ${{ needs.claude-evaluation.outputs.confidence }}
+          EVAL_RISK_LEVEL: ${{ needs.claude-evaluation.outputs.risk_level }}
+          EVAL_BLOCKING_FINDINGS_JSON: ${{ needs.claude-evaluation.outputs.blocking_findings_json }}
+        run: |
+          set -euo pipefail
+          workdir=".tmp/claude-governor/checks"
+          mkdir -p "$workdir"
+
+          findings_json=$(jq -cn --arg raw "${EVAL_BLOCKING_FINDINGS_JSON:-[]}" '
+            (try ($raw | fromjson) catch ["blocking_findings_json_parse_error"]) as $v
+            | if ($v | type) == "array" then $v else ["blocking_findings_not_array"] end
+          ')
+
+          jq -n \
+            --arg useful "${EVAL_USEFUL:-false}" \
+            --arg necessary "${EVAL_NECESSARY:-false}" \
+            --arg safe "${EVAL_SAFE:-false}" \
+            --arg confidence "${EVAL_CONFIDENCE:-0}" \
+            --arg risk "${EVAL_RISK_LEVEL:-high}" \
+            --argjson findings "$findings_json" \
+            '{
+              useful: ($useful == "true"),
+              necessary: ($necessary == "true"),
+              safe: ($safe == "true"),
+              confidence: ($confidence | tonumber? // 0),
+              risk_level: ($risk | ascii_downcase),
+              blocking_findings: $findings
+            }' > "$workdir/evaluation.json"
+
+          python scripts/claude_merge_gate.py \
+            --mode final \
+            --policy .github/claude-automerge-policy.json \
+            --evaluation-json "$workdir/evaluation.json" \
+            --checks-json "$workdir/checks_status.json" \
+            --output "$workdir/final_gate.json"
+
+          {
+            echo "final_eligible=$(jq -r '.eligible' "$workdir/final_gate.json")"
+            echo "final_decision=$(jq -r '.decision' "$workdir/final_gate.json")"
+            echo "final_reasons_json<<EOF"
+            jq -c '.reasons' "$workdir/final_gate.json"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Decide auto-fix
+        id: autofix_decide
+        if: steps.wait.outputs.checks_status != 'pass' && vars.CLAUDE_AUTOFIX_ENABLED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+          HEAD_SHA: ${{ needs.preflight-policy.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+
+          workdir=".tmp/claude-governor/checks"
+          mkdir -p "$workdir"
+
+          failed_checks=$(jq -r '.checks[]? | select(.bucket == "fail" or .bucket == "cancel") | .name' "$workdir/checks_status.json" || true)
+          if [ -z "$failed_checks" ]; then
+            echo "try_autofix=false" >> "$GITHUB_OUTPUT"
+            echo "autofix_reason=no_failed_required_checks" >> "$GITHUB_OUTPUT"
+            echo "failed_checks_json=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          mapfile -t failed_array < <(printf '%s\n' "$failed_checks" | sed '/^$/d')
+          eligible_checks_json=$(jq -c '.autofix.eligible_checks' .github/claude-automerge-policy.json)
+
+          non_eligible=""
+          for name in "${failed_array[@]}"; do
+            if ! jq -e --arg n "$name" 'index($n) != null' <<<"$eligible_checks_json" >/dev/null; then
+              non_eligible+="$name;"
+            fi
+          done
+
+          failed_json=$(printf '%s\n' "${failed_array[@]}" | jq -R . | jq -cs .)
+
+          if [ -n "$non_eligible" ]; then
+            echo "try_autofix=false" >> "$GITHUB_OUTPUT"
+            echo "autofix_reason=failed_check_not_autofixable" >> "$GITHUB_OUTPUT"
+            echo "failed_checks_json=$failed_json" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          marker="AUTOFIX_ATTEMPT_SHA: $HEAD_SHA"
+          if gh api "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" --paginate --jq '.[].body // ""' | grep -Fq "$marker"; then
+            echo "try_autofix=false" >> "$GITHUB_OUTPUT"
+            echo "autofix_reason=already_attempted_for_sha" >> "$GITHUB_OUTPUT"
+            echo "failed_checks_json=$failed_json" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "try_autofix=true" >> "$GITHUB_OUTPUT"
+          echo "autofix_reason=eligible" >> "$GITHUB_OUTPUT"
+          echo "failed_checks_json=$failed_json" >> "$GITHUB_OUTPUT"
+
+      - name: Mark auto-fix attempt
+        if: steps.autofix_decide.outputs.try_autofix == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+          HEAD_SHA: ${{ needs.preflight-policy.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+
+          label=$(jq -r '.autofix.attempt_label' .github/claude-automerge-policy.json)
+          gh label create "$label" --repo "$REPO" --color "B60205" --description "Auto-fix attempt by Claude governor" || true
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "$label" || true
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body "AUTOFIX_ATTEMPT_SHA: $HEAD_SHA\n\nAI PR Governor iniciou tentativa única de auto-fix para checks técnicos elegíveis."
+
+      - name: Auto-fix failed technical checks (single attempt)
+        id: autofix_run
+        if: steps.autofix_decide.outputs.try_autofix == 'true'
+        uses: anthropics/claude-code-action@ba7fa4bcf054319261202aef93d71a89112a8d00
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+            HEAD BRANCH: ${{ needs.preflight-policy.outputs.head_ref }}
+            HEAD SHA: ${{ needs.preflight-policy.outputs.head_sha }}
+            FAILED REQUIRED CHECKS: ${{ steps.autofix_decide.outputs.failed_checks_json }}
+
+            Objetivo: corrigir apenas falhas técnicas elegíveis (API/ETL/Frontend/Neutrality) nesta PR.
+
+            Regras:
+            - Faça alterações mínimas e seguras.
+            - Rode validações locais necessárias para confirmar a correção.
+            - Commit e push na mesma branch da PR quando houver correção válida.
+            - Não faça merge, não aprove review, não altere workflows, infra ou políticas de segurança.
+          claude_args: >-
+            --model claude-opus-4-6
+            --max-turns 10
+            --allowedTools "Read,Write,Edit,MultiEdit,Glob,Grep,Bash(git status:*),Bash(git diff:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(uv:*),Bash(pytest:*),Bash(npm:*),Bash(node:*),Bash(make:*)"
+            --disallowedTools "Bash(gh pr merge:*),Bash(gh pr review:*),Bash(git fetch:*),Bash(git pull:*),Bash(git reset:*),Bash(git clean:*),Bash(git rebase:*),Bash(curl:*),Bash(wget:*)"
+
+      - name: Detect auto-fix push outcome
+        id: autofix_outcome
+        if: steps.autofix_decide.outputs.try_autofix == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+          OLD_SHA: ${{ needs.preflight-policy.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          new_sha=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json headRefOid --jq '.headRefOid')
+
+          if [ "$new_sha" != "$OLD_SHA" ]; then
+            echo "autofix_pushed=true" >> "$GITHUB_OUTPUT"
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body "AI PR Governor aplicou auto-fix e atualizou a branch da PR. Novo SHA: \`$new_sha\`.\n\nEste run não fará merge; aguardando novo ciclo (synchronize)."
+          else
+            echo "autofix_pushed=false" >> "$GITHUB_OUTPUT"
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body "AI PR Governor tentou auto-fix, mas não houve commit/push aplicável. PR bloqueada neste ciclo."
+          fi
+
+      - name: Finalize gate result
+        id: finalize
+        env:
+          CHECKS_STATUS: ${{ steps.wait.outputs.checks_status }}
+          FINAL_ELIGIBLE: ${{ steps.final_gate.outputs.final_eligible }}
+          FINAL_DECISION: ${{ steps.final_gate.outputs.final_decision }}
+          FINAL_REASONS_JSON: ${{ steps.final_gate.outputs.final_reasons_json }}
+          TRY_AUTOFIX: ${{ steps.autofix_decide.outputs.try_autofix }}
+          AUTOFIX_PUSHED: ${{ steps.autofix_outcome.outputs.autofix_pushed }}
+        run: |
+          set -euo pipefail
+
+          checks_status="${CHECKS_STATUS:-unknown}"
+          can_merge="false"
+          decision="blocked_unknown"
+          reasons='["blocked_unknown"]'
+          autofix_attempted="false"
+          autofix_pushed="false"
+
+          if [ "$checks_status" = "pass" ]; then
+            if [ "${FINAL_ELIGIBLE:-false}" = "true" ]; then
+              can_merge="true"
+              decision="eligible_merge"
+              reasons='[]'
+            else
+              can_merge="false"
+              decision="${FINAL_DECISION:-blocked_final_gate}"
+              reasons="${FINAL_REASONS_JSON:-[]}"
+            fi
+          else
+            if [ "${TRY_AUTOFIX:-false}" = "true" ]; then
+              autofix_attempted="true"
+              if [ "${AUTOFIX_PUSHED:-false}" = "true" ]; then
+                autofix_pushed="true"
+                decision="autofix_pushed"
+                reasons='["autofix_pushed_waiting_new_synchronize"]'
+              else
+                decision="blocked_autofix_failed"
+                reasons='["autofix_attempt_failed"]'
+              fi
+            else
+              decision="blocked_required_checks_${checks_status}"
+              reasons='["required_checks_not_passed"]'
+            fi
+          fi
+
+          {
+            echo "checks_status=$checks_status"
+            echo "can_merge=$can_merge"
+            echo "decision=$decision"
+            echo "gate_reasons_json<<EOF"
+            printf '%s\n' "$reasons"
+            echo "EOF"
+            echo "autofix_attempted=$autofix_attempted"
+            echo "autofix_pushed=$autofix_pushed"
+          } >> "$GITHUB_OUTPUT"
+
+  approve-and-merge:
+    name: Approve and Merge
+    runs-on: ubuntu-latest
+    needs: [preflight-policy, claude-evaluation, required-checks-gate]
+    if: needs.preflight-policy.outputs.preflight_eligible == 'true' && needs.required-checks-gate.outputs.can_merge == 'true'
+    outputs:
+      merge_decision: ${{ steps.merge.outputs.merge_decision }}
+    steps:
+      - name: Approve and squash merge
+        id: merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+          EVAL_SUMMARY: ${{ needs.claude-evaluation.outputs.claude_summary }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ vars.CLAUDE_AUTOMERGE_ENABLED }}" != "true" ]; then
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body "AI PR Governor: kill switch ativo (CLAUDE_AUTOMERGE_ENABLED != true). Nenhum merge automático foi executado."
+            echo "merge_decision=blocked_kill_switch" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          set +e
+          gh pr review "$PR_NUMBER" --repo "$REPO" --approve --body "AI PR Governor approval: critérios conservadores atendidos (útil/necessário/seguro), checks obrigatórios green e risco baixo.\n\nResumo: $EVAL_SUMMARY"
+          review_rc=$?
+          set -e
+
+          if [ "$review_rc" -ne 0 ]; then
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body "AI PR Governor: falha ao registrar aprovação formal (verifique permissões de Actions para aprovar reviews)."
+            echo "merge_decision=blocked_approval_failed" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          set +e
+          gh pr merge "$PR_NUMBER" --repo "$REPO" --squash --subject "chore(pr-governor): squash merge #$PR_NUMBER" --body "Merged automatically by Claude PR Governor after deterministic policy gates."
+          merge_rc=$?
+          set -e
+
+          if [ "$merge_rc" -eq 0 ]; then
+            echo "merge_decision=merged" >> "$GITHUB_OUTPUT"
+          else
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body "AI PR Governor: falha concorrente ao tentar merge automático (novo commit/check pendente ou condição da branch)."
+            echo "merge_decision=merge_failed" >> "$GITHUB_OUTPUT"
+          fi
+
+  linear-audit:
+    name: Linear Audit
+    runs-on: ubuntu-latest
+    needs: [preflight-policy, claude-evaluation, required-checks-gate, approve-and-merge]
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build audit payload
+        id: payload
+        env:
+          PREFLIGHT_ELIGIBLE: ${{ needs.preflight-policy.outputs.preflight_eligible }}
+          PRE_DECISION: ${{ needs.preflight-policy.outputs.preflight_decision }}
+          CHECKS_DECISION: ${{ needs.required-checks-gate.outputs.decision }}
+          MERGE_DECISION: ${{ needs.approve-and-merge.outputs.merge_decision }}
+          BLOCKING_FINDINGS_JSON: ${{ needs.claude-evaluation.outputs.blocking_findings_json }}
+          GATE_REASONS_JSON: ${{ needs.required-checks-gate.outputs.gate_reasons_json }}
+          CLAUDE_SUMMARY: ${{ needs.claude-evaluation.outputs.claude_summary }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+          PR_URL: ${{ needs.preflight-policy.outputs.pr_url }}
+          AUTHOR_LOGIN: ${{ needs.preflight-policy.outputs.author_login }}
+          HEAD_REF: ${{ needs.preflight-policy.outputs.head_ref }}
+          HEAD_SHA: ${{ needs.preflight-policy.outputs.head_sha }}
+          BASE_REF: ${{ needs.preflight-policy.outputs.base_ref }}
+          CHECKS_STATUS: ${{ needs.required-checks-gate.outputs.checks_status }}
+          CONFIDENCE: ${{ needs.claude-evaluation.outputs.confidence }}
+          RISK_LEVEL: ${{ needs.claude-evaluation.outputs.risk_level }}
+          CLAUDE_COST_USD: ${{ needs.claude-evaluation.outputs.claude_cost_usd }}
+          AUTOFIX_ATTEMPTED: ${{ needs.required-checks-gate.outputs.autofix_attempted }}
+          AUTOFIX_PUSHED: ${{ needs.required-checks-gate.outputs.autofix_pushed }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          workdir=".tmp/claude-governor/audit"
+          mkdir -p "$workdir"
+
+          jq -n \
+            --arg preflight_eligible "${PREFLIGHT_ELIGIBLE:-false}" \
+            --arg pre_decision "${PRE_DECISION:-}" \
+            --arg checks_decision "${CHECKS_DECISION:-}" \
+            --arg merge_decision "${MERGE_DECISION:-}" \
+            --arg blocking_findings_json "${BLOCKING_FINDINGS_JSON:-[]}" \
+            --arg gate_reasons_json "${GATE_REASONS_JSON:-[]}" \
+            --arg summary "${CLAUDE_SUMMARY:-}" \
+            --arg repository "${REPOSITORY:-}" \
+            --arg pr_number "${PR_NUMBER:-}" \
+            --arg pr_url "${PR_URL:-}" \
+            --arg author_login "${AUTHOR_LOGIN:-}" \
+            --arg head_ref "${HEAD_REF:-}" \
+            --arg head_sha "${HEAD_SHA:-}" \
+            --arg base_ref "${BASE_REF:-}" \
+            --arg checks_status "${CHECKS_STATUS:-}" \
+            --arg confidence "${CONFIDENCE:-}" \
+            --arg risk_level "${RISK_LEVEL:-}" \
+            --arg claude_cost_usd "${CLAUDE_COST_USD:-}" \
+            --arg autofix_attempted "${AUTOFIX_ATTEMPTED:-}" \
+            --arg autofix_pushed "${AUTOFIX_PUSHED:-}" \
+            --arg run_id "${RUN_ID:-}" \
+            '
+            def parse_array($raw):
+              (try ($raw | fromjson) catch []) as $v
+              | if ($v | type) == "array" then $v else [] end;
+            def decision:
+              if $preflight_eligible != "true" then
+                if ($pre_decision | length) > 0 then $pre_decision else "blocked_preflight" end
+              elif ($merge_decision | length) > 0 then
+                $merge_decision
+              elif ($checks_decision | length) > 0 then
+                $checks_decision
+              else
+                "blocked_unknown"
+              end;
+            {
+              decision: decision,
+              repository: $repository,
+              pr_number: $pr_number,
+              pr_url: $pr_url,
+              author: $author_login,
+              head_ref: $head_ref,
+              head_sha: $head_sha,
+              base_ref: $base_ref,
+              checks_status: $checks_status,
+              confidence: $confidence,
+              risk_level: $risk_level,
+              blocking_findings: parse_array($blocking_findings_json),
+              gate_reasons: parse_array($gate_reasons_json),
+              claude_cost_usd: $claude_cost_usd,
+              summary: (if ($summary | length) > 0 then $summary else "No Claude summary available." end),
+              workflow_run_url: (
+                if ($repository | length) > 0 and ($run_id | length) > 0
+                then "https://github.com/\($repository)/actions/runs/\($run_id)"
+                else ""
+                end
+              ),
+              autofix_attempted: $autofix_attempted,
+              autofix_pushed: $autofix_pushed
+            }' > "$workdir/payload.json"
+
+          echo "payload_path=.tmp/claude-governor/audit/payload.json" >> "$GITHUB_OUTPUT"
+
+      - name: Create Linear audit issue
+        id: linear
+        continue-on-error: true
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_TEAM_ID: ${{ vars.LINEAR_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          python scripts/linear_audit.py \
+            --input-json "${{ steps.payload.outputs.payload_path }}" \
+            --output ".tmp/claude-governor/audit/linear_result.json"
+
+      - name: Fallback PR comment when Linear fails
+        if: steps.linear.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+        run: |
+          set -euo pipefail
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body "AI PR Governor: falha ao registrar auditoria no Linear (token/team ausente ou erro de API). Decisão técnica mantida; revisar configuração de LINEAR_API_KEY e LINEAR_TEAM_ID."
+
+      - name: Post final decision comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.preflight-policy.outputs.pr_number }}
+        run: |
+          set -euo pipefail
+
+          payload_file=".tmp/claude-governor/audit/payload.json"
+          decision=$(jq -r '.decision // "blocked_unknown"' "$payload_file")
+          checks=$(jq -r '.checks_status // "unknown"' "$payload_file")
+          confidence=$(jq -r '.confidence // ""' "$payload_file")
+          risk=$(jq -r '.risk_level // ""' "$payload_file")
+          cost=$(jq -r '.claude_cost_usd // ""' "$payload_file")
+
+          body="AI PR Governor decision: \`$decision\`\n\n- required checks: \`$checks\`\n- confidence: \`$confidence\`\n- risk_level: \`$risk\`\n- claude_cost_usd: \`$cost\`"
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body "$body"
