@@ -12,7 +12,7 @@ from bracc.services.neo4j_service import execute_query_single
 logger = logging.getLogger(__name__)
 
 
-async def create_dev_user(email, password):
+async def create_dev_user(email: str, password: str) -> None:
     driver = AsyncGraphDatabase.driver(
         settings.neo4j_uri,
         auth=(settings.neo4j_user, settings.neo4j_password)
@@ -40,16 +40,19 @@ async def create_dev_user(email, password):
                         "user_create",
                         {"id": str(uuid.uuid4()), "email": email, "password_hash": password_hash},
                     )
-                    logger.debug(
-                        f"User created successfully (bypassing invite code): "
-                        f"{record['email']} (ID: {record['id']})"
-                    )
+                    if record:
+                        logger.debug(
+                            f"User created successfully (bypassing invite code): "
+                            f"{record['email']} (ID: {record['id']})"
+                        )
+                    else:
+                        logger.error("Failed to create user (no record returned)")
                 else:
                     raise e
     finally:
         await driver.close()
 
-async def run_cli():
+async def run_cli() -> None:
     parser = argparse.ArgumentParser(description="Create a development user for BRACC")
     parser.add_argument("--email", default="admin@bracc.dev", help="User email")
     parser.add_argument("--password", default="password123", help="User password")
@@ -58,7 +61,7 @@ async def run_cli():
 
     await create_dev_user(args.email, args.password)
 
-def main():
+def main() -> None:
     asyncio.run(run_cli())
 
 if __name__ == "__main__":
