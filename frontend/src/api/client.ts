@@ -1,5 +1,4 @@
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
-const STORAGE_KEY = "bracc_auth";
 
 export class ApiError extends Error {
   constructor(
@@ -11,23 +10,14 @@ export class ApiError extends Error {
   }
 }
 
-function getAuthHeaders(): Record<string, string> {
-  try {
-    const token = localStorage.getItem(STORAGE_KEY);
-    if (token) return { Authorization: `Bearer ${token}` };
-  } catch {
-    // localStorage unavailable
-  }
-  return {};
-}
-
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
+  const includeContentType = !(init?.headers && "Content-Type" in new Headers(init.headers));
   const response = await fetch(url, {
+    credentials: "include",
     ...init,
     headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
+      ...(includeContentType ? { "Content-Type": "application/json" } : {}),
       ...init?.headers,
     },
   });
@@ -211,6 +201,7 @@ export interface Investigation {
   updated_at: string;
   entity_ids: string[];
   share_token: string | null;
+  share_expires_at?: string | null;
 }
 
 export interface InvestigationListResponse {
@@ -351,8 +342,8 @@ export function getSharedInvestigation(token: string): Promise<Investigation> {
 
 export function generateShareLink(
   investigationId: string,
-): Promise<{ share_token: string }> {
-  return apiFetch<{ share_token: string }>(
+): Promise<{ share_token: string; share_expires_at?: string | null }> {
+  return apiFetch<{ share_token: string; share_expires_at?: string | null }>(
     `/api/v1/investigations/${encodeURIComponent(investigationId)}/share`,
     { method: "POST" },
   );
@@ -360,7 +351,7 @@ export function generateShareLink(
 
 export function exportInvestigation(investigationId: string): Promise<Blob> {
   const url = `${API_BASE}/api/v1/investigations/${encodeURIComponent(investigationId)}/export`;
-  return fetch(url, { headers: getAuthHeaders() }).then((res) => {
+  return fetch(url, { credentials: "include" }).then((res) => {
     if (!res.ok) throw new ApiError(res.status, `API error: ${res.statusText}`);
     return res.blob();
   });
@@ -454,7 +445,7 @@ export function exportInvestigationPDF(
 ): Promise<Blob> {
   const params = new URLSearchParams({ lang });
   const url = `${API_BASE}/api/v1/investigations/${encodeURIComponent(investigationId)}/export/pdf?${params}`;
-  return fetch(url, { headers: getAuthHeaders() }).then((res) => {
+  return fetch(url, { credentials: "include" }).then((res) => {
     if (!res.ok) throw new ApiError(res.status, `API error: ${res.statusText}`);
     return res.blob();
   });

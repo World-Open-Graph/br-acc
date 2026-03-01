@@ -1,7 +1,9 @@
 import uuid
+from datetime import UTC, datetime, timedelta
 
 from neo4j import AsyncSession, Record
 
+from bracc.config import settings
 from bracc.models.investigation import Annotation, InvestigationResponse, Tag
 from bracc.services.neo4j_service import execute_query, execute_query_single
 
@@ -13,6 +15,11 @@ def _str(value: object) -> str:
 
 def _record_to_investigation(record: Record) -> InvestigationResponse:
     """Convert a Neo4j Record to InvestigationResponse."""
+    try:
+        raw_share_expires_at = record["share_expires_at"]
+    except KeyError:
+        raw_share_expires_at = None
+    share_expires_at = _str(raw_share_expires_at) if raw_share_expires_at is not None else None
     return InvestigationResponse(
         id=record["id"],
         title=record["title"],
@@ -21,6 +28,7 @@ def _record_to_investigation(record: Record) -> InvestigationResponse:
         updated_at=_str(record["updated_at"]),
         entity_ids=record["entity_ids"],
         share_token=record["share_token"],
+        share_expires_at=share_expires_at,
     )
 
 
@@ -271,16 +279,42 @@ async def generate_share_token(
     session: AsyncSession,
     investigation_id: str,
     user_id: str,
-) -> str | None:
+) -> tuple[str, str | None] | None:
     token = str(uuid.uuid4())
+    expires_at = datetime.now(UTC) + timedelta(hours=settings.share_token_ttl_hours)
     record = await execute_query_single(
         session,
         "investigation_share",
-        {"id": investigation_id, "share_token": token, "user_id": user_id},
+        {
+            "id": investigation_id,
+            "share_token": token,
+            "share_expires_at": expires_at,
+            "user_id": user_id,
+        },
     )
     if record is None:
         return None
-    return str(record["share_token"])
+    try:
+        raw_share_expires_at = record["share_expires_at"]
+    except KeyError:
+        raw_share_expires_at = None
+    share_expires_at = _str(raw_share_expires_at) if raw_share_expires_at is not None else None
+    return str(record["share_token"]), share_expires_at
+
+
+async def revoke_share_token(
+    session: AsyncSession,
+    investigation_id: str,
+    user_id: str,
+) -> bool:
+    record = await execute_query_single(
+        session,
+        "investigation_share_revoke",
+        {"id": investigation_id, "user_id": user_id},
+    )
+    if record is None:
+        return False
+    return int(record["updated"]) > 0
 
 
 async def get_by_share_token(

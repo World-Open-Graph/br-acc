@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings
 
 
@@ -15,6 +17,10 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 1440
+    auth_cookie_name: str = "bracc_session"
+    auth_cookie_secure: bool = False
+    auth_cookie_samesite: Literal["lax", "strict", "none"] = "lax"
+    trust_proxy_headers: bool = False
     rate_limit_anon: str = "60/minute"
     rate_limit_auth: str = "300/minute"
     invite_code: str = ""
@@ -31,6 +37,7 @@ class Settings(BaseSettings):
     pattern_srp_min_orgs: int = 5
     pattern_inexig_min_recurrence: int = 3
     pattern_max_evidence_refs: int = 50
+    share_token_ttl_hours: int = 168
 
     model_config = {"env_prefix": "", "env_file": ".env"}
 

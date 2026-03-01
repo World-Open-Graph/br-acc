@@ -22,6 +22,7 @@ from pathlib import Path
 
 import click
 import httpx
+from _download_utils import safe_extract_zip
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
@@ -90,12 +91,13 @@ def _download_zip(
 
     try:
         with zipfile.ZipFile(BytesIO(resp.content)) as zf:
-            for member in zf.namelist():
-                if member.lower().endswith(".xml"):
-                    zf.extract(member, section_dir)
-                    xml_count += 1
+            extracted = safe_extract_zip(zf, section_dir)
+            xml_count = sum(1 for path in extracted if path.suffix.lower() == ".xml")
     except zipfile.BadZipFile:
         logger.warning("Bad ZIP file: %s", zip_name)
+        return 0
+    except ValueError as exc:
+        logger.warning("Unsafe ZIP file %s: %s", zip_name, exc)
         return 0
 
     if xml_count > 0:

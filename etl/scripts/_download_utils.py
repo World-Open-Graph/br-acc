@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import shutil
+import stat
 import zipfile
 from pathlib import Path
 
@@ -63,13 +65,16 @@ def extract_zip(zip_path: Path, output_dir: Path) -> list[Path]:
     """
     try:
         with zipfile.ZipFile(zip_path, "r") as zf:
-            names = zf.namelist()
-            zf.extractall(output_dir)
-        logger.info("Extracted %d files from %s", len(names), zip_path.name)
-        return [output_dir / n for n in names]
+            extracted = safe_extract_zip(zf, output_dir)
+        logger.info("Extracted %d files from %s", len(extracted), zip_path.name)
+        return extracted
     except zipfile.BadZipFile:
         logger.warning("Bad ZIP file: %s — deleting for re-download", zip_path.name)
         zip_path.unlink()
+        return []
+    except ValueError as exc:
+        logger.warning("Unsafe ZIP file %s: %s — deleting", zip_path.name, exc)
+        zip_path.unlink(missing_ok=True)
         return []
 
 
@@ -106,3 +111,60 @@ def validate_csv(
     except Exception as e:
         logger.warning("Validation failed for %s: %s", path.name, e)
         return False
+
+
+def safe_extract_zip(
+    archive: zipfile.ZipFile,
+    output_dir: Path,
+    *,
+    max_members: int = 50_000,
+    max_uncompressed_bytes: int = 5_000_000_000,
+) -> list[Path]:
+    """Safely extract a ZIP archive.
+
+    Blocks path traversal, symlinks, and oversized archives.
+    """
+    output_root = output_dir.resolve()
+    infos = archive.infolist()
+    if len(infos) > max_members:
+        msg = f"ZIP has too many entries ({len(infos)} > {max_members})"
+        raise ValueError(msg)
+
+    extracted: list[Path] = []
+    uncompressed_total = 0
+    for info in infos:
+        member_name = info.filename.replace("\\", "/")
+        if not member_name:
+            continue
+
+        # Reject symlink entries.
+        mode = info.external_attr >> 16
+        if stat.S_ISLNK(mode):
+            msg = f"ZIP contains symlink entry: {member_name}"
+            raise ValueError(msg)
+
+        target = (output_dir / member_name).resolve()
+        try:
+            target.relative_to(output_root)
+        except ValueError as exc:
+            msg = f"Path traversal detected: {member_name}"
+            raise ValueError(msg) from exc
+
+        if info.is_dir():
+            target.mkdir(parents=True, exist_ok=True)
+            continue
+
+        uncompressed_total += info.file_size
+        if uncompressed_total > max_uncompressed_bytes:
+            msg = (
+                f"ZIP exceeds max extracted size "
+                f"({uncompressed_total} > {max_uncompressed_bytes})"
+            )
+            raise ValueError(msg)
+
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with archive.open(info, "r") as source, target.open("wb") as destination:
+            shutil.copyfileobj(source, destination)
+        extracted.append(target)
+
+    return extracted

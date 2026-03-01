@@ -331,7 +331,8 @@ function GraphCanvasInner({
 
   // Cleanup: pause animation on unmount to stop RAF loop surviving navigation
   useEffect(() => {
-    return () => { fgRef.current?.pauseAnimation(); };
+    const fg = fgRef.current;
+    return () => { fg?.pauseAnimation(); };
   }, []);
 
   // Stable canvas render callback — avoids ForceGraph2D re-initializing render pipeline

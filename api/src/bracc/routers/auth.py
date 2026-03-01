@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from neo4j import AsyncSession
 from neo4j.exceptions import ConstraintError
 from starlette.requests import Request
 
+from bracc.config import settings
 from bracc.dependencies import CurrentUser, get_session
 from bracc.middleware.rate_limit import limiter
 from bracc.models.user import TokenResponse, UserCreate, UserResponse
@@ -39,6 +40,7 @@ async def register(
 @limiter.limit("10/minute")
 async def login(
     request: Request,
+    response: Response,
     form: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> TokenResponse:
@@ -46,9 +48,23 @@ async def login(
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     token = auth_service.create_access_token(user.id)
+    response.set_cookie(
+        key=settings.auth_cookie_name,
+        value=token,
+        max_age=settings.jwt_expire_minutes * 60,
+        httponly=True,
+        secure=settings.auth_cookie_secure,
+        samesite=settings.auth_cookie_samesite,
+        path="/",
+    )
     return TokenResponse(access_token=token)
 
 
 @router.get("/me", response_model=UserResponse)
 async def me(user: CurrentUser) -> UserResponse:
     return user
+
+
+@router.post("/logout", status_code=204)
+async def logout(response: Response) -> None:
+    response.delete_cookie(settings.auth_cookie_name, path="/")

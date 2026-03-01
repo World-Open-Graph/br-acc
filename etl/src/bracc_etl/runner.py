@@ -185,6 +185,8 @@ def run(
 @click.option("--skip-existing/--no-skip-existing", default=True)
 def download(output_dir: str, files: int, skip_existing: bool) -> None:
     """Download CNPJ data from Receita Federal."""
+    import shutil
+    import stat
     import zipfile
     from pathlib import Path
 
@@ -197,6 +199,30 @@ def download(output_dir: str, files: int, skip_existing: bool) -> None:
 
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
+
+    def _safe_extract_zip(archive: zipfile.ZipFile, output_root: Path) -> None:
+        base = output_root.resolve()
+        for info in archive.infolist():
+            if not info.filename:
+                continue
+            member = info.filename.replace("\\", "/")
+            mode = info.external_attr >> 16
+            if stat.S_ISLNK(mode):
+                raise click.ClickException(f"Unsafe ZIP member (symlink): {member}")
+
+            target = (output_root / member).resolve()
+            try:
+                target.relative_to(base)
+            except ValueError as exc:
+                raise click.ClickException(f"Unsafe ZIP member path: {member}") from exc
+
+            if info.is_dir():
+                target.mkdir(parents=True, exist_ok=True)
+                continue
+
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with archive.open(info, "r") as source, target.open("wb") as destination:
+                shutil.copyfileobj(source, destination)
 
     for file_type in file_types:
         for i in range(min(files, 10)):
@@ -218,7 +244,7 @@ def download(output_dir: str, files: int, skip_existing: bool) -> None:
 
                 logger.info("Extracting %s...", dest.name)
                 with zipfile.ZipFile(dest, "r") as zf:
-                    zf.extractall(out)
+                    _safe_extract_zip(zf, out)
             except httpx.HTTPError:
                 logger.warning("Failed to download %s (may not exist)", filename)
 

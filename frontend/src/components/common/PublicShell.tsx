@@ -9,6 +9,7 @@ import styles from "./PublicShell.module.css";
 export function PublicShell() {
   const { t, i18n } = useTranslation();
   const token = useAuthStore((s) => s.token);
+  const restored = useAuthStore((s) => s.restored);
 
   const toggleLang = () => {
     const next = i18n.language === "pt-BR" ? "en" : "pt-BR";
@@ -26,7 +27,7 @@ export function PublicShell() {
             <Link to="/app/search" className={styles.registerLink}>
               Open Explorer
             </Link>
-          ) : !token && (
+          ) : restored && !token && (
             <>
               <Link to="/login" className={styles.authLink}>
                 {t("nav.login")}

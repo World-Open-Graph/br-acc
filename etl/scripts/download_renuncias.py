@@ -12,6 +12,7 @@ import zipfile
 from pathlib import Path
 
 import httpx
+from _download_utils import safe_extract_zip
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +41,8 @@ def download_year(output_dir: Path, year: int) -> None:
         logger.info("Downloaded: %s (%d bytes)", dest_zip.name, len(response.content))
 
         with zipfile.ZipFile(dest_zip, "r") as zf:
-            zf.extractall(output_dir)
-            logger.info("Extracted %d files", len(zf.namelist()))
+            extracted = safe_extract_zip(zf, output_dir)
+            logger.info("Extracted %d files", len(extracted))
     except httpx.HTTPError:
         logger.warning("Failed to download renuncias for %d", year)
 

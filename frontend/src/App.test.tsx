@@ -11,12 +11,13 @@ vi.mock("./stores/auth", () => ({
       const state = {
         token: null,
         user: null,
+        restored: true,
         restore: () => Promise.resolve(),
       };
       return selector ? selector(state) : state;
     },
     {
-      getState: () => ({ token: null }),
+      getState: () => ({ token: null, restored: true }),
     },
   ),
 }));

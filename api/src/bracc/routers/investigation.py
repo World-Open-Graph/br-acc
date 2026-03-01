@@ -225,17 +225,32 @@ async def delete_tag(
 
 @router.post(
     "/{investigation_id}/share",
-    response_model=dict[str, str],
+    response_model=dict[str, str | None],
 )
 async def generate_share_link(
     investigation_id: str,
     session: Annotated[AsyncSession, Depends(get_session)],
     user: CurrentUser,
-) -> dict[str, str]:
-    token = await svc.generate_share_token(session, investigation_id, user.id)
-    if token is None:
+) -> dict[str, str | None]:
+    share_data = await svc.generate_share_token(session, investigation_id, user.id)
+    if share_data is None:
         raise HTTPException(status_code=404, detail="Investigation not found")
-    return {"share_token": token}
+    token, share_expires_at = share_data
+    return {"share_token": token, "share_expires_at": share_expires_at}
+
+
+@router.delete(
+    "/{investigation_id}/share",
+    status_code=204,
+)
+async def revoke_share_link(
+    investigation_id: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser,
+) -> None:
+    updated = await svc.revoke_share_token(session, investigation_id, user.id)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Investigation not found")
 
 
 @shared_router.get("/api/v1/shared/{token}", response_model=InvestigationResponse)

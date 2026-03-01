@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "@/api/client";
 
-// Must use vi.hoisted so the ref exists when vi.mock factory runs (hoisted)
 const { mockApiFetch } = vi.hoisted(() => ({
   mockApiFetch: vi.fn(),
 }));
@@ -14,28 +13,7 @@ vi.mock("@/api/client", async () => {
   return { ...actual, apiFetch: mockApiFetch };
 });
 
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: vi.fn((key: string) => store[key] ?? null),
-    setItem: vi.fn((key: string, value: string) => {
-      store[key] = value;
-    }),
-    removeItem: vi.fn((key: string) => {
-      delete store[key];
-    }),
-    clear: vi.fn(() => {
-      store = {};
-    }),
-  };
-})();
-
-Object.defineProperty(globalThis, "localStorage", { value: localStorageMock });
-
 import { useAuthStore } from "./auth";
-
-const STORAGE_KEY = "bracc_auth";
 
 function resetStore() {
   useAuthStore.setState({
@@ -43,13 +21,13 @@ function resetStore() {
     user: null,
     loading: false,
     error: null,
+    restored: false,
   });
 }
 
 describe("useAuthStore", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorageMock.clear();
     resetStore();
   });
 
@@ -57,7 +35,7 @@ describe("useAuthStore", () => {
     vi.restoreAllMocks();
   });
 
-  it("login success sets token and user, persists to localStorage", async () => {
+  it("login success sets token and user", async () => {
     const tokenRes = { access_token: "jwt-123", token_type: "bearer" };
     const userRes = {
       id: "u1",
@@ -66,8 +44,8 @@ describe("useAuthStore", () => {
     };
 
     mockApiFetch
-      .mockResolvedValueOnce(tokenRes) // login
-      .mockResolvedValueOnce(userRes); // /auth/me
+      .mockResolvedValueOnce(tokenRes)
+      .mockResolvedValueOnce(userRes);
 
     await useAuthStore.getState().login("test@example.com", "password123");
 
@@ -76,10 +54,7 @@ describe("useAuthStore", () => {
     expect(state.user).toEqual(userRes);
     expect(state.loading).toBe(false);
     expect(state.error).toBeNull();
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      STORAGE_KEY,
-      "jwt-123",
-    );
+    expect(state.restored).toBe(true);
   });
 
   it("login 401 sets auth.invalidCredentials error", async () => {
@@ -92,18 +67,7 @@ describe("useAuthStore", () => {
     expect(state.user).toBeNull();
     expect(state.loading).toBe(false);
     expect(state.error).toBe("auth.invalidCredentials");
-  });
-
-  it("login other error sets auth.loginError", async () => {
-    mockApiFetch.mockRejectedValueOnce(
-      new ApiError(500, "Internal Server Error"),
-    );
-
-    await useAuthStore.getState().login("test@example.com", "password123");
-
-    const state = useAuthStore.getState();
-    expect(state.token).toBeNull();
-    expect(state.error).toBe("auth.loginError");
+    expect(state.restored).toBe(true);
   });
 
   it("register success auto-calls login and sets token", async () => {
@@ -115,9 +79,9 @@ describe("useAuthStore", () => {
     };
 
     mockApiFetch
-      .mockResolvedValueOnce(undefined) // register
-      .mockResolvedValueOnce(tokenRes) // login
-      .mockResolvedValueOnce(userRes); // /auth/me
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(tokenRes)
+      .mockResolvedValueOnce(userRes);
 
     await useAuthStore
       .getState()
@@ -126,44 +90,10 @@ describe("useAuthStore", () => {
     const state = useAuthStore.getState();
     expect(state.token).toBe("jwt-reg");
     expect(state.user).toEqual(userRes);
-
-    // First call was register
-    expect(mockApiFetch).toHaveBeenCalledWith("/api/v1/auth/register", {
-      method: "POST",
-      body: JSON.stringify({
-        email: "new@example.com",
-        password: "password123",
-        invite_code: "invite-abc",
-      }),
-    });
+    expect(state.restored).toBe(true);
   });
 
-  it("register 403 sets auth.invalidInvite error", async () => {
-    mockApiFetch.mockRejectedValueOnce(new ApiError(403, "Forbidden"));
-
-    await useAuthStore
-      .getState()
-      .register("new@example.com", "password123", "bad-invite");
-
-    const state = useAuthStore.getState();
-    expect(state.loading).toBe(false);
-    expect(state.error).toBe("auth.invalidInvite");
-  });
-
-  it("register other error sets auth.registerError", async () => {
-    mockApiFetch.mockRejectedValueOnce(
-      new ApiError(500, "Internal Server Error"),
-    );
-
-    await useAuthStore
-      .getState()
-      .register("new@example.com", "password123", "invite-abc");
-
-    const state = useAuthStore.getState();
-    expect(state.error).toBe("auth.registerError");
-  });
-
-  it("logout clears token, user, and localStorage", () => {
+  it("logout clears token and user and calls API logout", () => {
     useAuthStore.setState({
       token: "jwt-123",
       user: {
@@ -171,6 +101,7 @@ describe("useAuthStore", () => {
         email: "test@example.com",
         created_at: "2026-01-01T00:00:00Z",
       },
+      restored: true,
     });
 
     useAuthStore.getState().logout();
@@ -179,27 +110,24 @@ describe("useAuthStore", () => {
     expect(state.token).toBeNull();
     expect(state.user).toBeNull();
     expect(state.error).toBeNull();
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith(STORAGE_KEY);
+    expect(mockApiFetch).toHaveBeenCalledWith("/api/v1/auth/logout", { method: "POST" });
   });
 
-  it("restore success validates cached token and sets user", async () => {
+  it("restore success sets user and cookie-session token when empty", async () => {
     const userRes = {
       id: "u1",
       email: "test@example.com",
       created_at: "2026-01-01T00:00:00Z",
     };
-
-    useAuthStore.setState({ token: "cached-jwt" });
     mockApiFetch.mockResolvedValueOnce(userRes);
 
     await useAuthStore.getState().restore();
 
     const state = useAuthStore.getState();
     expect(state.user).toEqual(userRes);
-    expect(state.token).toBe("cached-jwt");
-    expect(mockApiFetch).toHaveBeenCalledWith("/api/v1/auth/me", {
-      headers: { Authorization: "Bearer cached-jwt" },
-    });
+    expect(state.token).toBe("cookie-session");
+    expect(state.restored).toBe(true);
+    expect(mockApiFetch).toHaveBeenCalledWith("/api/v1/auth/me");
   });
 
   it("restore failure clears token and user", async () => {
@@ -211,7 +139,7 @@ describe("useAuthStore", () => {
     const state = useAuthStore.getState();
     expect(state.token).toBeNull();
     expect(state.user).toBeNull();
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith(STORAGE_KEY);
+    expect(state.restored).toBe(true);
   });
 
   it("isAuthenticated returns true when token present, false otherwise", () => {

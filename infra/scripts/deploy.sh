@@ -49,7 +49,7 @@ log "Waiting for health check..."
 if [ "$DRY_RUN" = false ]; then
     sleep 15
     HEALTH_URL="https://${DOMAIN}/health"
-    if curl -sf -k "$HEALTH_URL" > /dev/null 2>&1; then
+    if curl -sf "$HEALTH_URL" > /dev/null 2>&1; then
         log "Health check passed ($HEALTH_URL)."
     else
         log "Health check failed ($HEALTH_URL)!"

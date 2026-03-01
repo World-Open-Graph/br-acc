@@ -20,12 +20,16 @@ const EntityAnalysis = lazy(() => import("./pages/EntityAnalysis").then((m) => (
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
+  const restored = useAuthStore((s) => s.restored);
+  if (!restored) return <Spinner />;
   if (!token) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
 function RedirectIfAuth({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
+  const restored = useAuthStore((s) => s.restored);
+  if (!restored) return <Spinner />;
   if (token) return <Navigate to="/app" replace />;
   return <>{children}</>;
 }

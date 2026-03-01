@@ -16,13 +16,13 @@ import hashlib
 import json
 import logging
 import re
-import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import click
 import httpx
+from defusedxml import ElementTree as ET
 from download_senado_cpi_archive import fetch_archive_historical
 
 logger = logging.getLogger(__name__)

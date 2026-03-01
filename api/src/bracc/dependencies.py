@@ -50,13 +50,24 @@ def get_intelligence_provider() -> IntelligenceProvider:
     return get_default_provider()
 
 
+def _resolve_token(token: str | None, request: Request) -> str | None:
+    if token:
+        return token
+    cookie_token = request.cookies.get(settings.auth_cookie_name)
+    if isinstance(cookie_token, str) and cookie_token.strip():
+        return cookie_token.strip()
+    return None
+
+
 async def get_current_user(
+    request: Request,
     token: Annotated[str | None, Depends(oauth2_scheme)],
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> UserResponse:
-    if token is None:
+    resolved_token = _resolve_token(token, request)
+    if resolved_token is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    user_id = auth_service.decode_access_token(token)
+    user_id = auth_service.decode_access_token(resolved_token)
     if user_id is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     user = await auth_service.get_user_by_id(session, user_id)
@@ -66,12 +77,14 @@ async def get_current_user(
 
 
 async def get_optional_user(
+    request: Request,
     token: Annotated[str | None, Depends(oauth2_scheme)],
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> UserResponse | None:
-    if token is None:
+    resolved_token = _resolve_token(token, request)
+    if resolved_token is None:
         return None
-    user_id = auth_service.decode_access_token(token)
+    user_id = auth_service.decode_access_token(resolved_token)
     if user_id is None:
         return None
     return await auth_service.get_user_by_id(session, user_id)

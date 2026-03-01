@@ -8,7 +8,7 @@ from bracc.dependencies import get_session
 from bracc.middleware.rate_limit import limiter
 from bracc.models.entity import SourceAttribution
 from bracc.models.search import SearchResponse, SearchResult
-from bracc.services.neo4j_service import execute_query, sanitize_props
+from bracc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
 from bracc.services.public_guard import (
     has_person_labels,
     infer_exposure_tier,
@@ -45,6 +45,7 @@ async def search_entities(
 ) -> SearchResponse:
     skip = (page - 1) * size
     type_filter = entity_type.lower() if entity_type else None
+    hide_person_entities = should_hide_person_entities()
 
     records = await execute_query(
         session,
@@ -52,17 +53,28 @@ async def search_entities(
         {
             "query": q,
             "entity_type": type_filter,
+            "hide_person_entities": hide_person_entities,
             "skip": skip,
             "limit": size,
         },
     )
+    total_record = await execute_query_single(
+        session,
+        "search_count",
+        {
+            "query": q,
+            "entity_type": type_filter,
+            "hide_person_entities": hide_person_entities,
+        },
+    )
+    total = int(total_record["total"]) if total_record and total_record["total"] is not None else 0
 
     results: list[SearchResult] = []
     for record in records:
         node = record["node"]
         props = dict(node)
         labels = record["node_labels"]
-        if should_hide_person_entities() and has_person_labels(labels):
+        if hide_person_entities and has_person_labels(labels):
             continue
         source_val = props.pop("source", None)
         sources: list[SourceAttribution] = []
@@ -88,7 +100,7 @@ async def search_entities(
 
     return SearchResponse(
         results=results,
-        total=len(results),
+        total=total,
         page=page,
         size=size,
     )

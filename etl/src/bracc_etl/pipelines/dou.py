@@ -16,7 +16,8 @@ import logging
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-from xml.etree import ElementTree
+
+from defusedxml import ElementTree  # type: ignore[import-untyped]
 
 from bracc_etl.base import Pipeline
 from bracc_etl.loader import Neo4jBatchLoader

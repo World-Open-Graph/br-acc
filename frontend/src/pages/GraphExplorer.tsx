@@ -23,7 +23,7 @@ export function GraphExplorer() {
 
   useEffect(() => {
     store.reset();
-  }, [entityId]);
+  }, [entityId, store]);
 
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = {};

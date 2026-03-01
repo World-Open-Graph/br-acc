@@ -31,11 +31,18 @@ _logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    if settings.jwt_secret_key == "change-me-in-production" or len(settings.jwt_secret_key) < 32:
-        _logger.critical(
-            "JWT secret is weak or default"
-            " — set JWT_SECRET_KEY env var (>= 32 chars)"
-        )
+    weak_or_default_jwt = (
+        settings.jwt_secret_key == "change-me-in-production"
+        or len(settings.jwt_secret_key) < 32
+    )
+    if weak_or_default_jwt:
+        msg = "JWT secret is weak or default — set JWT_SECRET_KEY env var (>= 32 chars)"
+        app_env = settings.app_env.strip().lower()
+        if app_env in {"dev", "test"}:
+            _logger.warning("%s [allowed in %s]", msg, app_env)
+        else:
+            _logger.critical(msg)
+            raise RuntimeError(msg)
     driver = await init_driver()
     app.state.neo4j_driver = driver
     await ensure_schema(driver)
@@ -57,7 +64,8 @@ app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins.split(","),
+    allow_origins=[origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

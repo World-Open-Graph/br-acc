@@ -19,6 +19,7 @@ class InvestigationResponse(BaseModel):
     updated_at: str
     entity_ids: list[str] = []
     share_token: str | None = None
+    share_expires_at: str | None = None
 
 
 class InvestigationListResponse(BaseModel):

@@ -2,8 +2,6 @@ import { create } from "zustand";
 
 import { apiFetch, ApiError } from "@/api/client";
 
-const STORAGE_KEY = "bracc_auth";
-
 interface AuthUser {
   id: string;
   email: string;
@@ -20,6 +18,7 @@ interface AuthState {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
+  restored: boolean;
 
   isAuthenticated: () => boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -28,31 +27,12 @@ interface AuthState {
   restore: () => Promise<void>;
 }
 
-function loadPersistedToken(): string | null {
-  try {
-    return localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function persistToken(token: string | null): void {
-  try {
-    if (token) {
-      localStorage.setItem(STORAGE_KEY, token);
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  } catch {
-    // localStorage unavailable
-  }
-}
-
 export const useAuthStore = create<AuthState>((set, get) => ({
-  token: loadPersistedToken(),
+  token: null,
   user: null,
   loading: false,
   error: null,
+  restored: false,
 
   isAuthenticated: () => get().token !== null,
 
@@ -69,20 +49,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         body: params.toString(),
       });
 
-      persistToken(res.access_token);
-      set({ token: res.access_token, loading: false });
+      set({ token: res.access_token, loading: false, restored: true });
 
-      const user = await apiFetch<AuthUser>("/api/v1/auth/me", {
-        headers: { Authorization: `Bearer ${res.access_token}` },
-      });
+      const user = await apiFetch<AuthUser>("/api/v1/auth/me");
       set({ user });
     } catch (err) {
-      persistToken(null);
       const message =
         err instanceof ApiError && err.status === 401
           ? "auth.invalidCredentials"
           : "auth.loginError";
-      set({ token: null, user: null, loading: false, error: message });
+      set({ token: null, user: null, loading: false, error: message, restored: true });
     }
   },
 
@@ -110,23 +86,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: () => {
-    persistToken(null);
-    set({ token: null, user: null, error: null });
+    void Promise.resolve(
+      apiFetch<void>("/api/v1/auth/logout", { method: "POST" }),
+    ).catch(() => undefined);
+    set({ token: null, user: null, error: null, restored: true });
   },
 
   restore: async () => {
-    const token = get().token;
-    if (!token) return;
-
     try {
-      const user = await apiFetch<AuthUser>("/api/v1/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      set({ user });
+      const user = await apiFetch<AuthUser>("/api/v1/auth/me");
+      set((state) => ({ user, token: state.token ?? "cookie-session", restored: true }));
     } catch {
-      // Token expired or invalid
-      persistToken(null);
-      set({ token: null, user: null });
+      set({ token: null, user: null, restored: true });
     }
   },
 }));
