@@ -49,6 +49,39 @@ export NEO4J_PASSWORD=sua_senha
 make seed
 ```
 
+## Docker (Local)
+
+Suba tudo com Docker Compose (Neo4j + API + Frontend):
+
+```bash
+cp .env.example .env
+# defina ao menos NEO4J_PASSWORD (e JWT_SECRET_KEY se for criar usuários)
+
+docker compose -f infra/docker-compose.yml --env-file .env up --build
+```
+
+- API: `http://localhost:8000/health`
+- Frontend: `http://localhost:3000`
+- Neo4j Browser: `http://localhost:7474`
+
+## Criar Usuário (API)
+
+O cadastro é via `/api/v1/auth/register`. Se `INVITE_CODE` estiver definido, envie no payload.
+
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"user@example.com","password":"password123","invite_code":""}'
+```
+
+Para login e obtenção do token:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=user@example.com&password=password123'
+```
+
 - API: `http://localhost:8000/health`
 - Frontend: `http://localhost:3000`
 - Neo4j Browser: `http://localhost:7474`
