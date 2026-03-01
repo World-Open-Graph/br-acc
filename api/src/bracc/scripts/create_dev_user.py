@@ -1,13 +1,13 @@
-import asyncio
 import argparse
-import sys
+import asyncio
+import logging
+import uuid
+
 from neo4j import AsyncGraphDatabase
+
 from bracc.config import settings
 from bracc.services import auth_service
 from bracc.services.neo4j_service import execute_query_single
-import uuid
-import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -25,22 +25,25 @@ async def create_dev_user(email, password):
                 return
             try:
                 user = await auth_service.register_user(
-                    session, 
-                    email=email, 
-                    password=password, 
+                    session,
+                    email=email,
+                    password=password,
                     invite_code=settings.invite_code
                 )
                 logger.debug(f"User created successfully: {user.email} (ID: {user.id})")
             except ValueError as e:
                 if str(e) == "Invalid invite code":
-                    
+
                     password_hash = auth_service.hash_password(password)
                     record = await execute_query_single(
                         session,
                         "user_create",
                         {"id": str(uuid.uuid4()), "email": email, "password_hash": password_hash},
                     )
-                    logger.debug(f"User created successfully (bypassing invite code): {record['email']} (ID: {record['id']})")
+                    logger.debug(
+                        f"User created successfully (bypassing invite code): "
+                        f"{record['email']} (ID: {record['id']})"
+                    )
                 else:
                     raise e
     finally:
@@ -50,9 +53,9 @@ async def run_cli():
     parser = argparse.ArgumentParser(description="Create a development user for BRACC")
     parser.add_argument("--email", default="admin@bracc.dev", help="User email")
     parser.add_argument("--password", default="password123", help="User password")
-    
+
     args = parser.parse_args()
-    
+
     await create_dev_user(args.email, args.password)
 
 def main():
