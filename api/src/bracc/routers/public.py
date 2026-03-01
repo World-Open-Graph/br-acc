@@ -10,7 +10,8 @@ from bracc.config import settings
 from bracc.dependencies import get_session
 from bracc.models.entity import SourceAttribution
 from bracc.models.graph import GraphEdge, GraphNode, GraphResponse
-from bracc.models.pattern import PatternResponse, PatternResult
+from bracc.models.pattern import PatternResponse
+from bracc.services.intelligence_provider import CommunityIntelligenceProvider
 from bracc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
 from bracc.services.public_guard import (
     enforce_person_access_policy,
@@ -21,6 +22,7 @@ from bracc.services.public_guard import (
 from bracc.services.source_registry import load_source_registry, source_registry_summary
 
 router = APIRouter(prefix="/api/v1/public", tags=["public"])
+_PUBLIC_PROVIDER = CommunityIntelligenceProvider()
 
 _CPF_KEYS = {"cpf", "doc_partial", "doc_raw"}
 _CNPJ_PATTERN = re.compile(r"^\d{14}$")
@@ -113,42 +115,14 @@ async def public_patterns_for_company(
             status_code=503,
             detail="Pattern engine temporarily unavailable pending validation.",
         )
-    company_id, company_cnpj = await _resolve_company(session, cnpj_or_id)
-    records = await execute_query(
+    company_id, _company_cnpj = await _resolve_company(session, cnpj_or_id)
+    patterns = await _PUBLIC_PROVIDER.run_pattern(
         session,
-        "public_patterns_company",
-        {
-            "company_id": company_id,
-            "company_identifier": _clean_identifier(company_cnpj),
-            "company_identifier_formatted": company_cnpj,
-        },
+        pattern_id="__all__",
+        entity_id=company_id,
+        lang=lang,
+        include_probable=False,
     )
-
-    patterns: list[PatternResult] = []
-    for record in records:
-        data = {
-            "company_cnpj": record["cnpj"],
-            "company_name": record["company_name"],
-            "contract_count": record["contract_count"],
-            "sanction_count": record["sanction_count"],
-            "debt_count": record["debt_count"],
-            "loan_count": record["loan_count"],
-            "amendment_count": record["amendment_count"],
-            "risk_signal": record["risk_signal"],
-        }
-        pattern_name = record["summary_pt"] if lang == "pt" else record["summary_en"]
-        patterns.append(
-            PatternResult(
-                pattern_id=record["pattern_id"],
-                pattern_name=pattern_name,
-                description=pattern_name,
-                data=data,
-                entity_ids=[company_id],
-                sources=[SourceAttribution(database="neo4j_public")],
-                exposure_tier="public_safe",
-                intelligence_tier="community",
-            )
-        )
 
     return PatternResponse(entity_id=company_id, patterns=patterns, total=len(patterns))
 

@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from bracc.config import settings
+from bracc.models.entity import SourceAttribution
+from bracc.models.pattern import PatternResult
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
@@ -145,22 +147,28 @@ async def test_public_patterns_company_endpoint_when_enabled(client: AsyncClient
             },
         ),
         patch(
-            "bracc.routers.public.execute_query",
+            "bracc.routers.public._PUBLIC_PROVIDER.run_pattern",
             new_callable=AsyncMock,
             return_value=[
-                {
-                    "pattern_id": "debtor_contracts",
-                    "cnpj": "11.111.111/0001-11",
-                    "company_name": "Empresa Teste",
-                    "contract_count": 3,
-                    "sanction_count": 0,
-                    "debt_count": 2,
-                    "loan_count": 0,
-                    "amendment_count": 0,
-                    "summary_pt": "Empresa devedora com contratos públicos",
-                    "summary_en": "Debtor company with public contracts",
-                    "risk_signal": 5,
-                }
+                PatternResult(
+                    pattern_id="debtor_contracts",
+                    pattern_name="Devedor com contratos públicos",
+                    description="Coocorrência factual entre dívida ativa e contratos recorrentes",
+                    data={
+                        "cnpj": "11.111.111/0001-11",
+                        "company_name": "Empresa Teste",
+                        "risk_signal": 5.0,
+                        "amount_total": 120000.0,
+                        "window_start": "2024-01-01",
+                        "window_end": "2024-12-31",
+                        "evidence_refs": ["contract:1", "debt:2"],
+                        "evidence_count": 2,
+                    },
+                    entity_ids=["c1"],
+                    sources=[SourceAttribution(database="neo4j_public")],
+                    exposure_tier="public_safe",
+                    intelligence_tier="community",
+                )
             ],
         ),
     ):
@@ -169,6 +177,8 @@ async def test_public_patterns_company_endpoint_when_enabled(client: AsyncClient
     payload = response.json()
     assert payload["total"] == 1
     assert payload["patterns"][0]["exposure_tier"] == "public_safe"
+    assert payload["patterns"][0]["data"]["evidence_refs"]
+    assert payload["patterns"][0]["data"]["risk_signal"] >= 1
     assert "cpf" not in str(payload).lower()
 
 

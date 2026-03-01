@@ -115,6 +115,17 @@ def test_transform_extracts_values() -> None:
     assert 3200000.50 in values
 
 
+def test_transform_extracts_bid_reference() -> None:
+    pipeline = _make_pipeline()
+    _extract_from_fixtures(pipeline)
+    pipeline.transform()
+
+    bid_refs = {c["bid_id"] for c in pipeline.contracts}
+    assert "11222333000181-1-000050/2023" in bid_refs
+    assert "44555666000199-1-000010/2024" in bid_refs
+    assert "77888999000100-1-000020/2024" in bid_refs
+
+
 def test_transform_extracts_dates() -> None:
     pipeline = _make_pipeline()
     _extract_from_fixtures(pipeline)
@@ -205,5 +216,5 @@ def test_load_calls_batch_loader() -> None:
 
     driver = pipeline.driver
     session = driver.session.return_value.__enter__.return_value
-    # Should have called session.run for Contract nodes, Company nodes, and VENCEU rels
-    assert session.run.call_count >= 3
+    # Should have called session.run for Contract nodes, Company nodes, VENCEU and REFERENTE_A rels
+    assert session.run.call_count >= 4

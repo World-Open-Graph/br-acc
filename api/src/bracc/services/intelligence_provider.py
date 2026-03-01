@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 from collections.abc import Awaitable, Callable, Mapping
 from importlib import import_module
@@ -18,12 +19,38 @@ if TYPE_CHECKING:
 
 COMMUNITY_PATTERN_IDS = (
     "sanctioned_still_receiving",
-    "debtor_contracts",
-    "loan_debtor",
     "amendment_beneficiary_contracts",
+    "split_contracts_below_threshold",
+    "contract_concentration",
+    "embargoed_receiving",
+    "debtor_contracts",
+    "srp_multi_org_hitchhiking",
+    "inexigibility_recurrence",
 )
 
+COMMUNITY_PATTERN_QUERIES: dict[str, str] = {
+    "sanctioned_still_receiving": "public_pattern_sanctioned_still_receiving",
+    "amendment_beneficiary_contracts": "public_pattern_amendment_beneficiary_contracts",
+    "split_contracts_below_threshold": "public_pattern_split_contracts_below_threshold",
+    "contract_concentration": "public_pattern_contract_concentration",
+    "embargoed_receiving": "public_pattern_embargoed_receiving",
+    "debtor_contracts": "public_pattern_debtor_contracts",
+    "srp_multi_org_hitchhiking": "public_pattern_srp_multi_org_hitchhiking",
+    "inexigibility_recurrence": "public_pattern_inexigibility_recurrence",
+}
+
 _CNPJ_PATTERN = re.compile(r"^\d{14}$")
+_PUBLIC_PATTERN_BLOCKLIST = (
+    "cpf",
+    "doc_",
+    "person",
+    "partner",
+    "politician",
+    "family",
+    "deputy",
+    "legislator",
+)
+logger = logging.getLogger(__name__)
 
 _PatternRunner = Callable[..., Awaitable[list[PatternResult]]]
 _ComputeExposure = Callable[[Any, str], Awaitable[ExposureResponse]]
@@ -105,6 +132,40 @@ def _build_pattern_meta(pattern_ids: tuple[str, ...]) -> list[dict[str, str]]:
     return rows
 
 
+def _community_pattern_params(
+    company_id: str,
+    company_identifier: str,
+    company_identifier_formatted: str,
+) -> dict[str, str | int | float]:
+    return {
+        "company_id": company_id,
+        "company_identifier": company_identifier,
+        "company_identifier_formatted": company_identifier_formatted,
+        "pattern_split_threshold_value": settings.pattern_split_threshold_value,
+        "pattern_split_min_count": settings.pattern_split_min_count,
+        "pattern_share_threshold": settings.pattern_share_threshold,
+        "pattern_srp_min_orgs": settings.pattern_srp_min_orgs,
+        "pattern_inexig_min_recurrence": settings.pattern_inexig_min_recurrence,
+        "pattern_max_evidence_refs": settings.pattern_max_evidence_refs,
+    }
+
+
+def _sanitize_public_pattern_data(record: Any) -> dict[str, Any]:
+    data: dict[str, Any] = {}
+    for key in record:
+        if key in {"pattern_id", "summary_pt", "summary_en"}:
+            continue
+        lower_key = str(key).lower()
+        if any(token in lower_key for token in _PUBLIC_PATTERN_BLOCKLIST):
+            continue
+        value = record[key]
+        if isinstance(value, list):
+            data[key] = [str(item) for item in value if item is not None and str(item).strip()]
+        else:
+            data[key] = value
+    return data
+
+
 class CommunityIntelligenceProvider:
     tier = "community"
 
@@ -146,44 +207,80 @@ class CommunityIntelligenceProvider:
             return []
 
         company_id, company_identifier, company_identifier_formatted = company
-        records = await execute_query(
-            session,
-            "public_patterns_company",
-            {
-                "company_id": company_id,
-                "company_identifier": company_identifier,
-                "company_identifier_formatted": company_identifier_formatted,
-            },
+        params = _community_pattern_params(
+            company_id,
+            company_identifier,
+            company_identifier_formatted,
         )
 
+        pattern_ids: tuple[str, ...]
+        if pattern_id == "__all__":
+            pattern_ids = COMMUNITY_PATTERN_IDS
+        elif pattern_id in COMMUNITY_PATTERN_QUERIES:
+            pattern_ids = (pattern_id,)
+        else:
+            return []
+
         results: list[PatternResult] = []
-        for record in records:
-            pid = record["pattern_id"]
-            if pid not in COMMUNITY_PATTERN_IDS:
+        for pid in pattern_ids:
+            try:
+                records = await execute_query(
+                    session,
+                    COMMUNITY_PATTERN_QUERIES[pid],
+                    params,
+                    timeout=5,
+                )
+            except TimeoutError:
+                logger.warning("Community pattern '%s' timed out; returning empty set", pid)
                 continue
-            if pattern_id != "__all__" and pid != pattern_id:
+            except Exception:
+                logger.exception("Community pattern '%s' failed; returning empty set", pid)
                 continue
-            summary = record["summary_pt"] if lang == "pt" else record["summary_en"]
-            results.append(PatternResult(
-                pattern_id=pid,
-                pattern_name=summary,
-                description=summary,
-                data={
-                    "company_cnpj": record["cnpj"],
-                    "company_name": record["company_name"],
-                    "contract_count": record["contract_count"],
-                    "sanction_count": record["sanction_count"],
-                    "debt_count": record["debt_count"],
-                    "loan_count": record["loan_count"],
-                    "amendment_count": record["amendment_count"],
-                    "risk_signal": record["risk_signal"],
-                    "identity_path_quality": "community_baseline",
-                },
-                entity_ids=[company_id],
-                sources=[SourceAttribution(database="neo4j_public")],
-                exposure_tier="public_safe",
-                intelligence_tier=self.tier,
-            ))
+            meta = PATTERN_METADATA.get(pid, {})
+            name_key = f"name_{lang}" if f"name_{lang}" in meta else "name_en"
+            desc_key = f"desc_{lang}" if f"desc_{lang}" in meta else "desc_en"
+            for record in records:
+                data = _sanitize_public_pattern_data(record)
+                raw_refs = data.get("evidence_refs", [])
+                evidence_refs: list[str]
+                if isinstance(raw_refs, list):
+                    evidence_refs = [str(item) for item in raw_refs if str(item).strip()]
+                elif raw_refs is None:
+                    evidence_refs = []
+                else:
+                    evidence_refs = [str(raw_refs)]
+                if not evidence_refs:
+                    continue
+                data["evidence_refs"] = evidence_refs[: settings.pattern_max_evidence_refs]
+                raw_risk = data.get("risk_signal")
+                try:
+                    data["risk_signal"] = (
+                        float(raw_risk)
+                        if raw_risk is not None
+                        else float(len(evidence_refs))
+                    )
+                except (TypeError, ValueError):
+                    data["risk_signal"] = float(len(evidence_refs))
+                raw_count = data.get("evidence_count")
+                try:
+                    data["evidence_count"] = (
+                        int(raw_count)
+                        if raw_count is not None
+                        else len(evidence_refs)
+                    )
+                except (TypeError, ValueError):
+                    data["evidence_count"] = len(evidence_refs)
+
+                results.append(PatternResult(
+                    pattern_id=pid,
+                    pattern_name=meta.get(name_key, pid),
+                    description=meta.get(desc_key, ""),
+                    data=data,
+                    entity_ids=[company_id],
+                    sources=[SourceAttribution(database="neo4j_public")],
+                    exposure_tier="public_safe",
+                    intelligence_tier=self.tier,
+                ))
         return results
 
     async def _resolve_company(

@@ -1,0 +1,266 @@
+name: Publish Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "SemVer tag (ex: v0.3.0 or v0.3.1-rc.1)"
+        required: true
+        type: string
+      target_sha:
+        description: "Commit SHA on main"
+        required: true
+        type: string
+      prerelease:
+        description: "Publish as pre-release"
+        required: true
+        type: boolean
+      title_pt:
+        description: "Release title (PT-BR)"
+        required: true
+        type: string
+      title_en:
+        description: "Release title (EN)"
+        required: true
+        type: string
+      highlights_pt:
+        description: "PT highlights (separate bullets with |)"
+        required: true
+        type: string
+      highlights_en:
+        description: "EN highlights (separate bullets with |)"
+        required: true
+        type: string
+      patterns_included:
+        description: "Comma-separated pattern IDs included in this release (use 'none' if not applicable)"
+        required: true
+        type: string
+      technical_changes_pt:
+        description: "PT technical changes (separate bullets with |)"
+        required: true
+        type: string
+      technical_changes_en:
+        description: "EN technical changes (separate bullets with |)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate inputs and target commit
+        id: validate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ inputs.version }}"
+          TARGET_SHA="${{ inputs.target_sha }}"
+          SEMVER_RE='^v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$'
+
+          if ! [[ "$VERSION" =~ $SEMVER_RE ]]; then
+            echo "Invalid version format: $VERSION"
+            echo "Use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-rc.N"
+            exit 1
+          fi
+
+          git fetch origin main --tags
+
+          if git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
+            echo "Tag already exists: $VERSION"
+            exit 1
+          fi
+
+          if ! git cat-file -e "${TARGET_SHA}^{commit}" 2>/dev/null; then
+            echo "Invalid commit SHA: $TARGET_SHA"
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "$TARGET_SHA" "origin/main"; then
+            echo "Target SHA is not reachable from origin/main"
+            exit 1
+          fi
+
+          PREVIOUS_TAG="$(git tag --list 'v*' --sort=-v:refname | grep -v "^${VERSION}$" | head -n1 || true)"
+          if [ -n "$PREVIOUS_TAG" ]; then
+            COMPARE_URL="https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${VERSION}"
+          else
+            COMPARE_URL=""
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "target_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+          echo "previous_tag=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
+          echo "compare_url=$COMPARE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Create annotated tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.validate.outputs.version }}"
+          TARGET_SHA="${{ steps.validate.outputs.target_sha }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "$VERSION" "$TARGET_SHA" -m "Release $VERSION"
+          git push origin "$VERSION"
+
+      - name: Build release notes and manifest
+        id: manifest
+        shell: bash
+        env:
+          VERSION: ${{ steps.validate.outputs.version }}
+          TARGET_SHA: ${{ steps.validate.outputs.target_sha }}
+          PREVIOUS_TAG: ${{ steps.validate.outputs.previous_tag }}
+          COMPARE_URL: ${{ steps.validate.outputs.compare_url }}
+          TITLE_PT: ${{ inputs.title_pt }}
+          TITLE_EN: ${{ inputs.title_en }}
+          HIGHLIGHTS_PT: ${{ inputs.highlights_pt }}
+          HIGHLIGHTS_EN: ${{ inputs.highlights_en }}
+          PATTERNS_INCLUDED: ${{ inputs.patterns_included }}
+          TECHNICAL_CHANGES_PT: ${{ inputs.technical_changes_pt }}
+          TECHNICAL_CHANGES_EN: ${{ inputs.technical_changes_en }}
+        run: |
+          set -euo pipefail
+          DATE_UTC="$(date -u +"%Y-%m-%d")"
+          export DATE_UTC
+
+          python - <<'PY'
+          import json
+          import os
+          from textwrap import dedent
+
+          def split_pipe(raw: str) -> list[str]:
+              normalized = raw.replace("\r\n", "\n").replace("\n", "|")
+              return [item.strip(" -\t") for item in normalized.split("|") if item.strip()]
+
+          def split_csv(raw: str) -> list[str]:
+              value = raw.strip()
+              if value.lower() in {"none", "n/a", "na", "-"}:
+                  return []
+              return [item.strip() for item in value.split(",") if item.strip()]
+
+          def bullets(items: list[str], fallback: str) -> str:
+              if not items:
+                  return f"- {fallback}"
+              return "\n".join(f"- {item}" for item in items)
+
+          highlights_pt = split_pipe(os.environ["HIGHLIGHTS_PT"])
+          highlights_en = split_pipe(os.environ["HIGHLIGHTS_EN"])
+          technical_changes_pt = split_pipe(os.environ["TECHNICAL_CHANGES_PT"])
+          technical_changes_en = split_pipe(os.environ["TECHNICAL_CHANGES_EN"])
+          patterns = split_csv(os.environ["PATTERNS_INCLUDED"])
+
+          release_notes = dedent(
+              f"""
+              ## PT-BR
+
+              {os.environ["TITLE_PT"]}
+
+              ### Escopo
+              - Release publicada por marco.
+              - Mudanças listadas de forma específica para facilitar auditoria pública.
+
+              ### Destaques
+              {bullets(highlights_pt, "Sem destaques declarados.")}
+
+              ### Padrões incluídos
+              {bullets(patterns, "Sem novos padrões nesta release.")}
+
+              ### Mudanças técnicas
+              {bullets(technical_changes_pt, "Sem mudanças técnicas declaradas.")}
+
+              ### Integridade pública
+              Os sinais e padrões refletem coocorrências em bases públicas e não constituem prova legal.
+
+              ## EN
+
+              {os.environ["TITLE_EN"]}
+
+              ### Scope
+              - Milestone-based release publication.
+              - Changes are listed explicitly for public traceability.
+
+              ### Highlights
+              {bullets(highlights_en, "No highlights declared.")}
+
+              ### Included patterns
+              {bullets(patterns, "No new patterns in this release.")}
+
+              ### Technical changes
+              {bullets(technical_changes_en, "No technical changes declared.")}
+
+              ### Public integrity
+              Signals and patterns reflect co-occurrence in public records and are not legal proof.
+
+              ## Compatibility
+
+              - Breaking changes: none declared.
+              - Migration required: no.
+
+              ## Compare
+
+              {os.environ.get("COMPARE_URL", "")}
+
+              ## Metadata
+
+              - Version: {os.environ["VERSION"]}
+              - Target SHA: {os.environ["TARGET_SHA"]}
+              - Previous tag: {os.environ["PREVIOUS_TAG"]}
+              - Date (UTC): {os.environ.get("DATE_UTC", "")}
+              """
+          ).strip() + "\n"
+
+          with open("release_notes.md", "w", encoding="utf-8") as fh:
+              fh.write(release_notes)
+
+          payload = {
+              "version": os.environ["VERSION"],
+              "date": os.environ.get("DATE_UTC", ""),
+              "highlights_pt": highlights_pt,
+              "highlights_en": highlights_en,
+              "api_changes": [],
+              "data_changes": [],
+              "privacy_compliance_changes": [],
+              "patterns_included": patterns,
+              "technical_changes_pt": technical_changes_pt,
+              "technical_changes_en": technical_changes_en,
+              "breaking_changes": False,
+              "migration_required": False,
+              "compare_url": os.environ.get("COMPARE_URL", ""),
+          }
+          with open("release_manifest.json", "w", encoding="utf-8") as fh:
+              json.dump(payload, fh, ensure_ascii=False, indent=2)
+          PY
+
+      - name: Publish GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.validate.outputs.version }}"
+          TARGET_SHA="${{ steps.validate.outputs.target_sha }}"
+
+          PRERELEASE_FLAG=""
+          if [ "${{ inputs.prerelease }}" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          gh release create "$VERSION" \
+            --verify-tag \
+            --target "$TARGET_SHA" \
+            --title "$VERSION — ${{ inputs.title_en }}" \
+            --notes-file release_notes.md \
+            $PRERELEASE_FLAG
+
+          gh release upload "$VERSION" release_manifest.json --clobber

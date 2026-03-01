@@ -117,6 +117,13 @@ To create a development user inside the running container:
 docker exec -it infra-api-1 create-dev-user --email admin@bracc.dev --password password123
 
 
+## Releases
+
+Track update history in GitHub Releases:
+
+- [Releases page](https://github.com/World-Open-Graph/br-acc/releases)
+- [Release policy](docs/release/release_policy.md)
+
 ## API Surface
 
 | Method | Route | Description |
