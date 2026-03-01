@@ -6,10 +6,18 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   gitleaks:
     name: Gitleaks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,6 +37,7 @@ jobs:
   bandit:
     name: Bandit (Python)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -48,6 +57,7 @@ jobs:
   pip-audit:
     name: Pip Audit (Python deps)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -58,6 +68,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-security-${{ hashFiles('api/uv.lock', 'etl/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-security-
 
       - name: Export lock-compatible requirement sets
         run: |
@@ -75,6 +93,7 @@ jobs:
   public-privacy-gate:
     name: Public Privacy Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -88,6 +107,7 @@ jobs:
   compliance-pack-gate:
     name: Compliance Pack Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -100,8 +120,9 @@ jobs:
 
   public-boundary-gate:
     name: Public Boundary Gate
-    if: github.repository == 'World-Open-Graph/br-acc'
+    if: vars.PUBLIC_BOUNDARY_GATE_ENABLED == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -115,6 +136,7 @@ jobs:
   internal-instruction-boundary:
     name: Internal Instruction Boundary
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
