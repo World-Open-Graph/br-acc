@@ -82,10 +82,6 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
   -d 'username=<development-email>&password=<development-pass>'
 ```
 
-- API: `http://localhost:8000/health`
-- Frontend: `http://localhost:3000`
-- Neo4j Browser: `http://localhost:7474`
-
 - API: http://localhost:8000/health
 - Frontend: http://localhost:3000
 - Neo4j Browser: http://localhost:7474
