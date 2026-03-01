@@ -1,0 +1,60 @@
+name: "Copilot Setup Steps"
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    env:
+      # Required for API unit tests (gates community-tier features)
+      PRODUCT_TIER: community
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── Python toolchain ──────────────────────────────────────────────────
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # ── API dependencies ──────────────────────────────────────────────────
+      - name: Install API dependencies
+        working-directory: api
+        run: uv sync --extra dev
+
+      # ── ETL dependencies ──────────────────────────────────────────────────
+      - name: Install ETL dependencies
+        working-directory: etl
+        run: uv sync --extra dev
+
+      # ── Node.js toolchain ─────────────────────────────────────────────────
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      # ── Frontend dependencies ─────────────────────────────────────────────
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
