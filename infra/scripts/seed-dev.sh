@@ -15,17 +15,17 @@ echo "Seeding Neo4j at ${NEO4J_URI}..."
 
 export NEO4J_PASSWORD
 
-if command -v cypher-shell &>/dev/null; then
+if command -v docker &>/dev/null && docker ps --format '{{.Names}}' | grep -q '^bracc-neo4j$'; then
+  docker exec -i -e NEO4J_PASSWORD="${NEO4J_PASSWORD}" bracc-neo4j cypher-shell \
+    -u "${NEO4J_USER}" \
+    -p "${NEO4J_PASSWORD}" \
+    < "${CYPHER_FILE}"
+elif command -v cypher-shell &>/dev/null; then
   cypher-shell \
     -a "${NEO4J_URI}" \
     -u "${NEO4J_USER}" \
-    --env NEO4J_PASSWORD \
+    -p "${NEO4J_PASSWORD}" \
     -f "${CYPHER_FILE}"
-elif command -v docker &>/dev/null; then
-  docker exec -i -e NEO4J_PASSWORD="${NEO4J_PASSWORD}" bracc-neo4j cypher-shell \
-    -u "${NEO4J_USER}" \
-    --env NEO4J_PASSWORD \
-    < "${CYPHER_FILE}"
 else
   echo "Error: cypher-shell not found and docker not available."
   echo "Install cypher-shell or run 'docker compose up -d' first."
