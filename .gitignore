@@ -90,8 +90,3 @@ data/tse/
 
 # Local MCP runtime config (keep example only)
 .mcp.json
-
-# Internal assistant instructions (must never be published)
-CLAUDE.md
-AGENTS.md
-AGENTS*.md

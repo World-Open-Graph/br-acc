@@ -1,0 +1,10 @@
+{
+  "context": [
+    "AGENTS.md",
+    "ETHICS.md",
+    ".github/copilot-instructions.md",
+    ".github/agents/docs.agent.md",
+    ".github/instructions/**/*.md",
+    "agents_docs/*.md"
+  ]
+}
