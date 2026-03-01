@@ -13,9 +13,7 @@ Thanks for helping improve BR/ACC Open Graph.
 ## Development Setup
 
 ```bash
-cd api && uv sync --dev
-cd ../etl && uv sync --dev
-cd ../frontend && npm install
+make install
 ```
 
 ## Quality Checks
@@ -24,7 +22,6 @@ Run these before opening a pull request:
 
 ```bash
 make check
-make neutrality
 ```
 
 ## Pull Request Expectations

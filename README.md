@@ -33,6 +33,12 @@ Data patterns from public records are signals, not legal proof.
 - ETL: Python (pandas, httpx)
 - Infra: Docker Compose
 
+## Prerequisites
+
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+- [Node.js](https://nodejs.org/) >= 22
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose
+
 ## Quick Start
 
 ```bash
@@ -74,14 +80,15 @@ Use these defaults for public deployments:
 ## Development
 
 ```bash
-# dependencies
-cd api && uv sync --dev
-cd ../etl && uv sync --dev
-cd ../frontend && npm install
-
-# quality
-make check
-make neutrality
+make install        # install all dependencies (api + etl + frontend)
+make check          # lint + type-check + test + neutrality
+make lint           # ruff (api, etl) + eslint (frontend)
+make type-check     # mypy (api, etl) + tsc (frontend)
+make test           # pytest (api, etl) + vitest (frontend)
+make neutrality     # verify no judgmental language in source
+make dev            # docker compose up (dev)
+make dev-down       # docker compose down
+make seed           # load dev fixture data into Neo4j
 ```
 
 ## API Surface

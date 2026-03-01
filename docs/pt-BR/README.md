@@ -37,6 +37,12 @@ Padrões em dados públicos são sinais, não prova jurídica.
 - ETL: Python (pandas, httpx)
 - Infra: Docker Compose
 
+## Pré-requisitos
+
+- [uv](https://docs.astral.sh/uv/) (gerenciador de pacotes Python)
+- [Node.js](https://nodejs.org/) >= 22
+- [Docker](https://docs.docker.com/get-docker/) e Docker Compose
+
 ## Quick Start
 
 ```bash
@@ -78,14 +84,15 @@ Use estes defaults para deploy público:
 ## Desenvolvimento
 
 ```bash
-# dependências
-cd api && uv sync --dev
-cd ../etl && uv sync --dev
-cd ../frontend && npm install
-
-# qualidade
-make check
-make neutrality
+make install        # instala dependências (api + etl + frontend)
+make check          # lint + type-check + test + neutrality
+make lint           # ruff (api, etl) + eslint (frontend)
+make type-check     # mypy (api, etl) + tsc (frontend)
+make test           # pytest (api, etl) + vitest (frontend)
+make neutrality     # verifica linguagem neutra no código-fonte
+make dev            # docker compose up (dev)
+make dev-down       # docker compose down
+make seed           # carrega dados de teste no Neo4j
 ```
 
 ## Superfície da API
