@@ -1,71 +1,56 @@
-# Public Repo Release Checklist — World Transparency Graph
+# Public Repo Release Checklist — `World-Open-Graph/br-acc`
 
-## 1) Prepare sanitized snapshot
+## 1) Pre-release gate
+
+1. Confirm target merge commit exists on `main`.
+2. Confirm CI + Security + Public gates are green on that commit.
+3. Confirm PR is merged with exactly one release label.
+
+## 2) Public boundary checks
+
 ```bash
-bash scripts/prepare_public_snapshot.sh /path/to/your/workspace /tmp/br-acc-public
+python scripts/check_public_privacy.py --repo-root .
+python scripts/check_compliance_pack.py --repo-root .
+python scripts/check_open_core_boundary.py --repo-root .
 ```
 
-## 2) Initialize clean-history repo from snapshot
+Expected: all `PASS`.
+
+## 3) Snapshot hygiene (optional verification)
+
 ```bash
-cd /tmp/br-acc-public
-git init
-git add .
-git commit -m "Initial public release (WTG)"
+bash scripts/prepare_public_snapshot.sh . /tmp/br-acc-public
+python /tmp/br-acc-public/scripts/check_public_privacy.py --repo-root /tmp/br-acc-public
+python /tmp/br-acc-public/scripts/check_compliance_pack.py --repo-root /tmp/br-acc-public
+python /tmp/br-acc-public/scripts/check_open_core_boundary.py --repo-root /tmp/br-acc-public
 ```
 
-## 3) Create GitHub repository (manual)
-- Owner: `World-Open-Graph` (or your target org)
-- Name: `br-acc`
-- Visibility: Public
-- Do not auto-add README/License (already present)
+Expected in snapshot:
 
-## 4) Push initial release
-```bash
-git branch -M main
-git remote add origin https://github.com/World-Open-Graph/br-acc.git
-git push -u origin main
-```
+- No `CLAUDE.md`.
+- No `AGENTS.md` or `AGENTS*.md`.
+- No private operational runbooks outside public scope.
 
-## 5) Configure branch protection (GitHub UI)
-Require all checks:
-- `API (Python)`
-- `ETL (Python)`
-- `Frontend (TypeScript)`
-- `Neutrality Audit`
-- `Gitleaks`
-- `Bandit (Python)`
-- `Pip Audit (Python deps)`
-- `Public Privacy Gate`
-- `Compliance Pack Gate`
-- `Public Boundary Gate`
+## 4) Publish release (manual workflow)
 
-## 6) Configure environment defaults
-- Set public deployment environment vars:
-  - `PRODUCT_TIER=community`
-  - `PUBLIC_MODE=true`
-  - `PUBLIC_ALLOW_PERSON=false`
-  - `PUBLIC_ALLOW_ENTITY_LOOKUP=false`
-  - `PUBLIC_ALLOW_INVESTIGATIONS=false`
-  - `PATTERNS_ENABLED=false`
-  - `VITE_PUBLIC_MODE=true`
-  - `VITE_PATTERNS_ENABLED=false`
+In GitHub Actions, run **Publish Release** with:
 
-## 7) Final checks before launch
-- `python scripts/check_public_privacy.py --repo-root .` => `PASS`
-- `python scripts/check_compliance_pack.py --repo-root .` => `PASS`
-- `python scripts/check_open_core_boundary.py --repo-root .` => `PASS`
-- Confirm no internal runbooks in public repo
-- Confirm demo data is synthetic (`data/demo/synthetic_graph.json`)
-- Confirm all legal docs exist in root:
-  - `ETHICS.md`
-  - `LGPD.md`
-  - `PRIVACY.md`
-  - `TERMS.md`
-  - `DISCLAIMER.md`
-  - `SECURITY.md`
-  - `ABUSE_RESPONSE.md`
+- `version`: SemVer tag (e.g. `v0.3.0`, `v0.3.1-rc.1`)
+- `target_sha`: merge commit on `main`
+- `prerelease`: `false` (stable) or `true` (RC)
+- `title_pt`: release title PT-BR
+- `title_en`: release title EN
 
-## 8) Launch communication split
-- Publish product announcement as **WTG**
-- Publish movement announcement as **BRCC**
-- Mention methodology limits and non-accusatory policy
+## 5) Verify outputs
+
+1. Tag exists in repository.
+2. Release page published under `/releases`.
+3. Notes include PT+EN and non-accusatory disclaimer.
+4. `release_manifest.json` asset is attached.
+5. Compare link is valid (`previous_tag...new_tag`).
+
+## 6) Community communication
+
+1. Use `docs/release/community_announcement_template.md`.
+2. Publish short PT+EN summary with release URL.
+3. Keep wording factual: “signals/co-occurrence”, never accusatory language.

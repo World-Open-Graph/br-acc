@@ -1,0 +1,32 @@
+changelog:
+  categories:
+    - title: New patterns/signals
+      labels:
+        - release:patterns
+    - title: API changes
+      labels:
+        - release:api
+    - title: Data/ETL updates
+      labels:
+        - release:data
+    - title: Privacy/Compliance
+      labels:
+        - release:privacy
+    - title: Fixes
+      labels:
+        - release:fix
+    - title: Docs
+      labels:
+        - release:docs
+    - title: Infra
+      labels:
+        - release:infra
+    - title: Security
+      labels:
+        - release:security
+  exclude:
+    labels:
+      - chore
+      - ci
+      - refactor-internal
+      - no-release-note

@@ -5,9 +5,8 @@ from httpx import AsyncClient
 
 from bracc.config import settings
 from bracc.models.pattern import PATTERN_METADATA
-
-pattern_service = pytest.importorskip("bracc.services.pattern_service")
-PATTERN_QUERIES = pattern_service.PATTERN_QUERIES
+from bracc.services.intelligence_provider import COMMUNITY_PATTERN_IDS, COMMUNITY_PATTERN_QUERIES
+from bracc.services.neo4j_service import CypherLoader
 
 
 @pytest.fixture(autouse=True)
@@ -15,19 +14,17 @@ def _enable_patterns(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "patterns_enabled", True)
 
 
-def test_all_patterns_have_metadata() -> None:
-    for pattern_id in PATTERN_QUERIES:
+def test_all_community_patterns_have_metadata() -> None:
+    for pattern_id in COMMUNITY_PATTERN_IDS:
         assert pattern_id in PATTERN_METADATA, f"Missing metadata for {pattern_id}"
 
 
-def test_all_patterns_have_query_files() -> None:
-    from bracc.services.neo4j_service import CypherLoader
-
-    for _pattern_id, query_name in PATTERN_QUERIES.items():
+def test_all_community_patterns_have_query_files() -> None:
+    for query_name in COMMUNITY_PATTERN_QUERIES.values():
         try:
             CypherLoader.load(query_name)
         except FileNotFoundError:
-            pytest.fail(f"Missing .cypher file for pattern {query_name}.cypher")
+            pytest.fail(f"Missing .cypher file for query {query_name}.cypher")
         finally:
             CypherLoader.clear_cache()
 
@@ -46,11 +43,10 @@ async def test_list_patterns_endpoint(client: AsyncClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert "patterns" in data
-    assert len(data["patterns"]) == 4
+    assert len(data["patterns"]) == 8
 
-    ids = {p["id"] for p in data["patterns"]}
-    assert "sanctioned_still_receiving" in ids
-    assert "debtor_contracts" in ids
+    ids = {row["id"] for row in data["patterns"]}
+    assert ids == set(COMMUNITY_PATTERN_IDS)
 
 
 @pytest.mark.anyio
@@ -76,10 +72,11 @@ async def test_patterns_endpoint_forwards_include_probable(client: AsyncClient) 
     with patch("bracc.routers.patterns.run_all_patterns", new_callable=AsyncMock) as mock_run_all:
         mock_run_all.return_value = []
         response = await client.get("/api/v1/patterns/test-id?include_probable=true")
+
     assert response.status_code == 200
     mock_run_all.assert_awaited_once()
-    _driver, _entity_id, _lang = mock_run_all.await_args.args
-    assert _entity_id == "test-id"
+    _driver, entity_id, _lang = mock_run_all.await_args.args
+    assert entity_id == "test-id"
     assert mock_run_all.await_args.kwargs["include_probable"] is True
 
 
@@ -90,44 +87,27 @@ async def test_specific_pattern_endpoint_forwards_include_probable(client: Async
         response = await client.get(
             "/api/v1/patterns/test-id/debtor_contracts?include_probable=true",
         )
+
     assert response.status_code == 200
     mock_run_one.assert_awaited_once()
-    _session, _pattern_name, _entity_id, _lang = mock_run_one.await_args.args
-    assert _pattern_name == "debtor_contracts"
-    assert _entity_id == "test-id"
+    _session, pattern_name, entity_id, _lang = mock_run_one.await_args.args
+    assert pattern_name == "debtor_contracts"
+    assert entity_id == "test-id"
     assert mock_run_one.await_args.kwargs["include_probable"] is True
 
 
-def test_patrimony_query_guards_divide_by_zero() -> None:
-    """pattern_patrimony.cypher must require patrimonio_declarado > 0 to avoid div-by-zero."""
-    from bracc.services.neo4j_service import CypherLoader
-
-    try:
-        cypher = CypherLoader.load("pattern_patrimony")
-    finally:
-        CypherLoader.clear_cache()
-    assert "patrimonio_declarado > 0" in cypher, (
-        "pattern_patrimony.cypher missing 'patrimonio_declarado > 0' guard — "
-        "ratio computation will divide by zero"
-    )
-
-
-def test_pattern_queries_use_parameter_binding() -> None:
-    """All pattern .cypher files must use $entity_id parameter binding, not string interpolation."""
-    from bracc.services.neo4j_service import CypherLoader
-
-    for _pattern_id, query_name in PATTERN_QUERIES.items():
+def test_community_queries_use_bind_params() -> None:
+    for query_name in COMMUNITY_PATTERN_QUERIES.values():
         try:
             cypher = CypherLoader.load(query_name)
         finally:
             CypherLoader.clear_cache()
-        assert "$entity_id" in cypher, (
-            f"{query_name}.cypher missing $entity_id parameter binding"
+        assert "$company_id" in cypher, f"{query_name}.cypher missing $company_id"
+        assert "$company_identifier" in cypher, f"{query_name}.cypher missing $company_identifier"
+        assert "$company_identifier_formatted" in cypher, (
+            f"{query_name}.cypher missing $company_identifier_formatted"
         )
-        # No f-string or .format() injection patterns
-        assert "${" not in cypher, (
-            f"{query_name}.cypher uses string interpolation (unsafe)"
-        )
+        assert "${" not in cypher, f"{query_name}.cypher uses unsafe string interpolation"
 
 
 def test_no_banned_words_in_pattern_metadata() -> None:
