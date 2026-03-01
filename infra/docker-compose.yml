@@ -1,6 +1,7 @@
 services:
   neo4j:
     image: neo4j:5-community
+    container_name: bracc-neo4j
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -45,5 +46,3 @@ services:
 
 volumes:
   neo4j-data:
-    external:
-      name: d71967adc2d23c9cce3b6c9e742d4b22c7bff9b78b26e6d5f9c2ce4abaf18051
