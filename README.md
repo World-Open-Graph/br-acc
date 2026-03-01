@@ -86,13 +86,7 @@ make neutrality
 # Create development user
 cd api && uv run create-dev-user --email admin@bracc.dev --password password123
 
-### Docker Development
 
-To start the containers:
-
-```bash
-cd infra
-docker-compose up -d
 ```
 ### Docker Development
 
