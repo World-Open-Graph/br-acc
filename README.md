@@ -84,7 +84,15 @@ make check
 make neutrality
 
 # Create development user
-cd api && uv run create-dev-user --email <email> --password <password>
+cd api && uv run create-dev-user --email admin@bracc.dev --password password123
+
+### Docker Development
+
+To start the containers:
+
+```bash
+cd infra
+docker-compose up -d
 ```
 ### Docker Development
 
@@ -105,6 +113,14 @@ To create a development user inside the running container:
 
 ```bash
 docker exec -it infra-api-1 create-dev-user --email <email> -- <password>
+```
+
+> **Note on Permissions:** If you encounter `EACCES` errors with the `infra/neo4j/import` directory, run: `sudo chmod -R 777 infra/neo4j/import`. This ensures the directory is accessible across both host and container environments.
+
+To create a development user inside the running container:
+
+```bash
+docker exec -it infra-api-1 create-dev-user --email admin@bracc.dev --password password123
 ```
 
 > **Note on Permissions:** If you encounter `EACCES` errors with the `infra/neo4j/import` directory, run: `sudo chmod -R 777 infra/neo4j/import`. This ensures the directory is accessible across both host and container environments.
