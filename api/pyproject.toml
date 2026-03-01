@@ -32,6 +32,9 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[project.scripts]
+create-dev-user = "bracc.scripts.create_dev_user:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/bracc"]
 
