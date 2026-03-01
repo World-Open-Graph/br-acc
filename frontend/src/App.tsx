@@ -4,7 +4,7 @@ import { Navigate, Route, Routes, useParams } from "react-router";
 import { AppShell } from "./components/common/AppShell";
 import { PublicShell } from "./components/common/PublicShell";
 import { Spinner } from "./components/common/Spinner";
-import { IS_PUBLIC_MODE } from "./config/runtime";
+import { IS_PATTERNS_ENABLED, IS_PUBLIC_MODE } from "./config/runtime";
 import { Baseline } from "./pages/Baseline";
 import { Dashboard } from "./pages/Dashboard";
 import { Investigations } from "./pages/Investigations";
@@ -73,8 +73,8 @@ export function App() {
         <Route path="search" element={<Search />} />
         <Route path="analysis/:entityId" element={<Suspense fallback={<Spinner />}><EntityAnalysis /></Suspense>} />
         <Route path="graph/:entityId" element={<GraphRedirect />} />
-        <Route path="patterns" element={<Patterns />} />
-        <Route path="patterns/:entityId" element={<Patterns />} />
+        {IS_PATTERNS_ENABLED && <Route path="patterns" element={<Patterns />} />}
+        {IS_PATTERNS_ENABLED && <Route path="patterns/:entityId" element={<Patterns />} />}
         <Route path="baseline/:entityId" element={<Baseline />} />
         {!IS_PUBLIC_MODE && <Route path="investigations" element={<Investigations />} />}
         {!IS_PUBLIC_MODE && <Route path="investigations/:investigationId" element={<Investigations />} />}

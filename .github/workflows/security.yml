@@ -109,5 +109,5 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Validate public edition specialized boundary
+      - name: Validate public edition scope
         run: python scripts/check_open_core_boundary.py --repo-root .

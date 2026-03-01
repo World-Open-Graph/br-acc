@@ -3,8 +3,14 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from httpx import AsyncClient
 
+from icarus.config import settings
 from icarus.models.pattern import PATTERN_METADATA
 from icarus.services.pattern_service import PATTERN_QUERIES
+
+
+@pytest.fixture(autouse=True)
+def _enable_patterns(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "patterns_enabled", True)
 
 
 def test_all_patterns_have_metadata() -> None:
@@ -38,11 +44,22 @@ async def test_list_patterns_endpoint(client: AsyncClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert "patterns" in data
-    assert len(data["patterns"]) == 18
+    assert len(data["patterns"]) == 4
 
     ids = {p["id"] for p in data["patterns"]}
-    assert "self_dealing_amendment" in ids
-    assert "donation_contract_loop" in ids
+    assert "sanctioned_still_receiving" in ids
+    assert "debtor_contracts" in ids
+
+
+@pytest.mark.anyio
+async def test_patterns_endpoint_returns_503_when_disabled(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "patterns_enabled", False)
+    response = await client.get("/api/v1/patterns/")
+    assert response.status_code == 503
+    assert "temporarily unavailable" in response.json()["detail"]
 
 
 @pytest.mark.anyio

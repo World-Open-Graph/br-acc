@@ -202,7 +202,7 @@ def test_self_dealing_uses_value_committed_or_value_paid() -> None:
     try:
         cypher = _load_cypher("pattern_self_dealing")
     except FileNotFoundError:
-        pytest.skip("pattern_self_dealing.cypher not shipped in public edition snapshot")
+        pytest.skip("pattern_self_dealing.cypher not available in this scope")
     # Must use coalesce with both TransfereGov fields AND Transparencia fallback
     assert "a.value_committed" in cypher, (
         "pattern_self_dealing.cypher missing a.value_committed (TransfereGov)"

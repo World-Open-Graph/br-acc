@@ -19,7 +19,7 @@ import { Kbd } from "@/components/common/Kbd";
 import { KeyboardShortcutsHelp } from "@/components/common/KeyboardShortcutsHelp";
 import { StatusBar } from "@/components/common/StatusBar";
 import { ToastContainer } from "@/components/common/ToastContainer";
-import { IS_PUBLIC_MODE } from "@/config/runtime";
+import { IS_PATTERNS_ENABLED, IS_PUBLIC_MODE } from "@/config/runtime";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useAuthStore } from "@/stores/auth";
 
@@ -99,11 +99,15 @@ export function AppShell() {
       const base: Action[] = [
         { id: "go-dashboard", label: t("command.goToDashboard"), shortcut: "cmd+1", group: t("command.navigation"), handler: () => navigate("/app") },
         { id: "go-search", label: t("command.goToSearch"), shortcut: "cmd+2", group: t("command.navigation"), handler: () => navigate("/app/search") },
-        { id: "go-patterns", label: t("command.goToPatterns"), shortcut: "cmd+3", group: t("command.navigation"), handler: () => navigate("/app/patterns") },
         { id: "toggle-sidebar", label: t("command.toggleSidebar"), shortcut: "cmd+b", group: t("command.actions"), handler: () => setSidebarCollapsed((p) => !p) },
         { id: "command-palette", label: t("shortcuts.commandPalette"), shortcut: "cmd+k", group: t("command.actions"), handler: () => setCommandOpen(true) },
         { id: "show-shortcuts", label: t("command.showShortcuts"), shortcut: "shift+?", group: t("command.actions"), handler: () => setShortcutsOpen(true) },
       ];
+      if (IS_PATTERNS_ENABLED) {
+        base.push(
+          { id: "go-patterns", label: t("command.goToPatterns"), shortcut: "cmd+3", group: t("command.navigation"), handler: () => navigate("/app/patterns") },
+        );
+      }
       if (!IS_PUBLIC_MODE) {
         base.push(
           { id: "go-investigations", label: t("command.goToInvestigations"), shortcut: "cmd+4", group: t("command.navigation"), handler: () => navigate("/app/investigations") },

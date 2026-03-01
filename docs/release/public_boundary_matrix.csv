@@ -1,33 +1,19 @@
 path,classification,reason,action_for_public_repo
-api/**,PUBLIC,Core API code is required for public edition,include
-etl/**,PUBLIC,Core ingestion framework is required for public edition,include
-frontend/**,PUBLIC,Public demo UI is required,include
-infra/**,PUBLIC with review,Keep only generic local/dev deployment docs,include reviewed subset
-etl/src/icarus_etl/entity_resolution/**,REMOVE_FROM_PUBLIC,Specialized entity resolution and matching logic,exclude
-api/src/icarus/services/score_service.py,REMOVE_FROM_PUBLIC,Specialized exposure scoring logic,exclude
-api/src/icarus/services/pattern_service.py,REMOVE_FROM_PUBLIC,Specialized high-sensitivity pattern intelligence orchestration,exclude
-api/src/icarus/queries/pattern_*.cypher,REMOVE_FROM_PUBLIC,Specialized high-sensitivity pattern query logic,exclude
-api/src/icarus/queries/entity_score*.cypher,REMOVE_FROM_PUBLIC,Specialized score/timeline aggregation queries,exclude
-scripts/link_persons.cypher,REMOVE_FROM_PUBLIC,Specialized entity linking heuristics,exclude
-scripts/link_partners_probable.cypher,REMOVE_FROM_PUBLIC,Specialized probable identity linking heuristics,exclude
-docs/brand/**,PUBLIC,Brand governance for release,include
-docs/demo/**,PUBLIC,Demo dataset contract and constraints,include
-docs/legal/**,PUBLIC,Compliance and responsible-use baseline,include
-ETHICS.md,PUBLIC,Public ethics policy baseline,include
-LGPD.md,PUBLIC,LGPD baseline for public-safe operation,include
-PRIVACY.md,PUBLIC,Public privacy policy baseline,include
-TERMS.md,PUBLIC,Public terms of use baseline,include
-DISCLAIMER.md,PUBLIC,Non-accusatory and limitations statement,include
-SECURITY.md,PUBLIC,Public vulnerability disclosure policy,include
-ABUSE_RESPONSE.md,PUBLIC,Public anti-abuse response policy,include
-docs/source_registry_br_v1.csv,PUBLIC,Program governance and transparency,include
-docs/data-sources.md,PUBLIC,Source catalog visibility,include
-CLAUDE.md,REMOVE_FROM_PUBLIC,Contains operational host and infrastructure paths,exclude
-.mcp.json,REMOVE_FROM_PUBLIC,Contains local runtime MCP wiring,exclude
-scripts/auto_finalize_pncp_backfill.sh,REMOVE_FROM_PUBLIC,Production operational finalizer tied to server paths,exclude
-scripts/storage_capacity_report.sh,INTERNAL,Operational script with server assumptions,exclude by default
-docs/shadow_rollout_runbook.md,REMOVE_FROM_PUBLIC,Operational production rollout details,exclude
-docs/ingestion_priority_runbook.md,REMOVE_FROM_PUBLIC,Contains production data paths and credential procedures,exclude
-docs/ops/storage_operations.md,REMOVE_FROM_PUBLIC,Contains production operational process and server paths,exclude
-audit-results/**,REMOVE_FROM_PUBLIC,Operational evidence and internal logs,exclude
-data/**,INTERNAL by default,Only data/demo synthetic subset allowed,include only data/demo
+api/**,PUBLIC,Core API code for the public edition,include
+etl/**,PUBLIC,Core ingestion framework and loaders,include
+frontend/**,PUBLIC,Public explorer UI,include
+infra/**,PUBLIC with review,Keep generic local/dev infrastructure without secrets,include reviewed subset
+docs/**,PUBLIC with review,Keep public documentation and legal pack,include reviewed subset
+.github/workflows/**,PUBLIC,CI and security transparency,include
+scripts/**,PUBLIC with review,Keep public utilities and gates,include reviewed subset
+data/demo/**,PUBLIC,Synthetic demo dataset only,include
+api/src/icarus/services/pattern_service.py,REMOVE_FROM_PUBLIC,Pattern engine disabled pending validation,exclude
+api/src/icarus/queries/pattern_*.cypher,REMOVE_FROM_PUBLIC,Pattern query engine disabled pending validation,exclude
+scripts/auto_finalize_pncp_backfill.sh,REMOVE_FROM_PUBLIC,Production operational script with server-specific assumptions,exclude
+docs/shadow_rollout_runbook.md,REMOVE_FROM_PUBLIC,Production operational runbook details,exclude
+docs/ingestion_priority_runbook.md,REMOVE_FROM_PUBLIC,Production operational runbook details,exclude
+docs/ops/storage_operations.md,REMOVE_FROM_PUBLIC,Production operational runbook details,exclude
+CLAUDE.md,REMOVE_FROM_PUBLIC,Internal operational context,exclude
+.mcp.json,REMOVE_FROM_PUBLIC,Local operator MCP wiring,exclude
+audit-results/**,REMOVE_FROM_PUBLIC,Operational evidence/log artifacts,exclude
+data/**,INTERNAL by default,Only synthetic demo subset is public,include only data/demo

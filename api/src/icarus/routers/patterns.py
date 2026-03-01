@@ -13,6 +13,15 @@ from icarus.services.public_guard import enforce_entity_lookup_enabled
 
 router = APIRouter(prefix="/api/v1/patterns", tags=["patterns"])
 
+_PATTERN_ENGINE_DISABLED_DETAIL = (
+    "Pattern engine temporarily unavailable pending validation."
+)
+
+
+def _enforce_patterns_enabled() -> None:
+    if not settings.patterns_enabled:
+        raise HTTPException(status_code=503, detail=_PATTERN_ENGINE_DISABLED_DETAIL)
+
 
 async def run_all_patterns(
     driver: AsyncDriver,
@@ -58,6 +67,7 @@ async def get_patterns_for_entity(
     lang: Annotated[str, Query()] = "pt",
     include_probable: Annotated[bool, Query()] = False,
 ) -> PatternResponse:
+    _enforce_patterns_enabled()
     if settings.public_mode:
         enforce_entity_lookup_enabled()
     results = await run_all_patterns(
@@ -85,6 +95,7 @@ async def get_specific_pattern(
     lang: Annotated[str, Query()] = "pt",
     include_probable: Annotated[bool, Query()] = False,
 ) -> PatternResponse:
+    _enforce_patterns_enabled()
     if settings.public_mode:
         enforce_entity_lookup_enabled()
     available = [row["id"] for row in provider.list_patterns()]
@@ -112,4 +123,5 @@ async def get_specific_pattern(
 async def list_patterns(
     provider: Annotated[IntelligenceProvider, Depends(get_intelligence_provider)],
 ) -> dict[str, list[dict[str, str]]]:
+    _enforce_patterns_enabled()
     return {"patterns": provider.list_patterns()}

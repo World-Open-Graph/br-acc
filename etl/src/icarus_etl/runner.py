@@ -117,8 +117,8 @@ def cli() -> None:
 @click.option("--chunk-size", type=int, default=50_000, help="Chunk size for batch processing")
 @click.option(
     "--linking-tier",
-    type=click.Choice(["community", "advanced"]),
-    default=os.getenv("LINKING_TIER", "advanced"),
+    type=click.Choice(["community", "full"]),
+    default=os.getenv("LINKING_TIER", "full"),
     show_default=True,
     help="Post-load linking strategy tier",
 )

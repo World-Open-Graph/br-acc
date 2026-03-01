@@ -10,7 +10,7 @@ bash scripts/prepare_public_snapshot.sh /Users/brunoclz/CORRUPTOS /tmp/world-tra
 cd /tmp/world-transparency-graph-public
 git init
 git add .
-git commit -m "Initial public public edition release (WTG)"
+git commit -m "Initial public release (WTG)"
 ```
 
 ## 3) Create GitHub repository (manual)
@@ -46,7 +46,9 @@ Require all checks:
   - `PUBLIC_ALLOW_PERSON=false`
   - `PUBLIC_ALLOW_ENTITY_LOOKUP=false`
   - `PUBLIC_ALLOW_INVESTIGATIONS=false`
+  - `PATTERNS_ENABLED=false`
   - `VITE_PUBLIC_MODE=true`
+  - `VITE_PATTERNS_ENABLED=false`
 
 ## 7) Final checks before launch
 - `python scripts/check_public_privacy.py --repo-root .` => `PASS`

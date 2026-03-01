@@ -44,8 +44,8 @@ def run_post_load_hooks(
     linking_tier: str,
 ) -> None:
     tier = linking_tier.strip().lower()
-    if tier not in {"community", "advanced"}:
-        tier = "advanced"
+    if tier not in {"community", "full"}:
+        tier = "full"
 
     if tier == "community":
         logger.info("Post-load hooks skipped (LINKING_TIER=community)")

@@ -6,7 +6,6 @@ OUT_DIR="${2:-/tmp/world-transparency-graph-public-$(date +%Y%m%d_%H%M%S)}"
 
 mkdir -p "$OUT_DIR"
 
-# Include only intended public edition directories/files
 rsync -a \
   --exclude='**/.venv/***' \
   --exclude='**/__pycache__/***' \
@@ -15,13 +14,13 @@ rsync -a \
   --exclude='**/.ruff_cache/***' \
   --exclude='frontend/node_modules/***' \
   --exclude='etl/data/***' \
+  --exclude='**/dist/***' \
+  --exclude='**/build/***' \
+  --exclude='**/*.pyc' \
   --exclude='.env' \
   --exclude='api/.env' \
   --exclude='etl/.env' \
   --exclude='frontend/.env' \
-  --exclude='**/dist/***' \
-  --exclude='**/build/***' \
-  --exclude='**/*.pyc' \
   --include='api/' \
   --include='api/***' \
   --include='etl/' \
@@ -32,7 +31,7 @@ rsync -a \
   --include='infra/***' \
   --include='docs/' \
   --include='docs/brand/' \
-  --include='docs/brand/***' \
+  --include='docs/brand/wtg-header.png' \
   --include='docs/demo/' \
   --include='docs/demo/***' \
   --include='docs/legal/' \
@@ -70,32 +69,23 @@ rsync -a \
   --exclude='*' \
   "$SRC_ROOT/" "$OUT_DIR/"
 
-# Explicit removals for internal-only artifacts
+# Explicit removals for sensitive operational artifacts and disabled pattern engine.
 rm -f "$OUT_DIR/CLAUDE.md"
 rm -f "$OUT_DIR/.mcp.json"
 rm -f "$OUT_DIR/docs/shadow_rollout_runbook.md"
 rm -f "$OUT_DIR/docs/ingestion_priority_runbook.md"
 rm -f "$OUT_DIR/docs/ops/storage_operations.md"
 rm -f "$OUT_DIR/scripts/auto_finalize_pncp_backfill.sh"
-rm -f "$OUT_DIR/scripts/link_persons.cypher"
-rm -f "$OUT_DIR/scripts/link_partners_probable.cypher"
-rm -rf "$OUT_DIR/etl/src/icarus_etl/entity_resolution"
-rm -f "$OUT_DIR/api/src/icarus/services/score_service.py"
 rm -f "$OUT_DIR/api/src/icarus/services/pattern_service.py"
 rm -f "$OUT_DIR/api/src/icarus/queries/pattern_"*.cypher
-rm -f "$OUT_DIR/api/src/icarus/queries/entity_score"*.cypher
 rm -f "$OUT_DIR/api/tests/unit/test_patterns.py"
 rm -f "$OUT_DIR/api/tests/unit/test_patterns_new.py"
-rm -f "$OUT_DIR/api/tests/unit/test_score_service.py"
-rm -f "$OUT_DIR/etl/tests/test_entity_resolution.py"
-rm -f "$OUT_DIR/etl/tests/integration/test_link_persons.py"
+
 rm -rf "$OUT_DIR/audit-results"
 
-# Ensure demo data exists
 python3 "$OUT_DIR/scripts/generate_demo_dataset.py" --output "$OUT_DIR/data/demo/synthetic_graph.json" >/dev/null
-
-# Run public privacy gate on generated snapshot
 python3 "$OUT_DIR/scripts/check_public_privacy.py" --repo-root "$OUT_DIR"
+python3 "$OUT_DIR/scripts/check_compliance_pack.py" --repo-root "$OUT_DIR"
 python3 "$OUT_DIR/scripts/check_open_core_boundary.py" --repo-root "$OUT_DIR"
 
 printf 'Public snapshot prepared at: %s\n' "$OUT_DIR"

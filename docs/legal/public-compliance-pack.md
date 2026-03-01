@@ -11,7 +11,7 @@
 ## 2. LGPD-compatible operating principles
 - Purpose limitation: investigative transparency and civic oversight.
 - Data minimization: no person-level lookup in public surface.
-- Security by design: role-separated advanced environment.
+- Security by design: least-privilege runtime and auditable controls.
 - Transparency: source attribution and coverage caveats on every report.
 
 ## 3. Public terms of use requirements

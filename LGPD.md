@@ -12,12 +12,12 @@ This baseline is operational guidance and does not replace formal legal advice.
 
 ## Data categories and exclusions
 
-Data categories processed in the public edition context:
+Data categories processed in this public repository:
 
 - Company records and corporate relationships.
 - Public procurement and public finance records.
 - Publicly disclosed sanctions and regulatory actions.
-- Public legislative and advanced records.
+- Public legislative and administrative records.
 
 Default exclusions in public mode:
 

@@ -1,7 +1,7 @@
-# Legal and Ethics Index — WTG / Icarus
+# Legal and Ethics Index — WTG
 
-Policy-Version: v1.0.0  
-Effective-Date: 2026-02-28  
+Policy-Version: v1.1.0  
+Effective-Date: 2026-03-01  
 Owner: WTG Governance Team
 
 ## Core policies
@@ -17,45 +17,18 @@ Owner: WTG Governance Team
 
 ## Applicability by deployment model
 
-### WTG Open (public-safe deployment)
-
-Applies directly:
-
-- ETHICS
-- LGPD baseline
-- PRIVACY
-- TERMS
-- DISCLAIMER
-- SECURITY
-- ABUSE_RESPONSE
-
-Additional operational constraints:
+This repository uses a public-safe profile:
 
 - `PUBLIC_MODE=true`
-- person-level entities blocked by default
-- public privacy gate mandatory in CI
-
-### Icarus Advanced (internal deployment)
-
-Applies directly:
-
-- ETHICS
-- LGPD baseline
-- PRIVACY
-- TERMS
-- SECURITY
-- ABUSE_RESPONSE
-
-Additional private controls:
-
-- internal runbooks
-- restricted infrastructure details
-- advanced investigation workflows
+- `PUBLIC_ALLOW_PERSON=false`
+- `PUBLIC_ALLOW_ENTITY_LOOKUP=false`
+- `PUBLIC_ALLOW_INVESTIGATIONS=false`
+- `PATTERNS_ENABLED=false`
 
 ## Change log policy
 
 Any policy change must:
 
-1. Update Policy-Version and Effective-Date.
-2. Include changelog note in PR description.
+1. Update `Policy-Version` and `Effective-Date`.
+2. Include a changelog note in the PR description.
 3. Pass `Compliance Pack Gate`.

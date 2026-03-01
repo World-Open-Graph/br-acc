@@ -258,8 +258,8 @@ class CommunityIntelligenceProvider:
         return {}
 
 
-class AdvancedIntelligenceProvider:
-    tier = "advanced"
+class FullIntelligenceProvider:
+    tier = "full"
 
     def list_patterns(self) -> list[dict[str, str]]:
         return _build_pattern_meta(tuple(_load_pattern_queries().keys()))
@@ -324,7 +324,7 @@ class AdvancedIntelligenceProvider:
 _PROVIDER_CACHE: dict[str, IntelligenceProvider] = {}
 
 
-def _advanced_modules_available() -> bool:
+def _full_modules_available() -> bool:
     return (
         find_spec("icarus.services.pattern_service") is not None
         and find_spec("icarus.services.score_service") is not None
@@ -333,9 +333,9 @@ def _advanced_modules_available() -> bool:
 
 def get_default_provider() -> IntelligenceProvider:
     tier = settings.product_tier.strip().lower()
-    if tier not in {"community", "advanced"}:
-        tier = "advanced"
-    if tier == "advanced" and not _advanced_modules_available():
+    if tier not in {"community", "full"}:
+        tier = "full"
+    if tier == "full" and not _full_modules_available():
         tier = "community"
     cached = _PROVIDER_CACHE.get(tier)
     if cached is not None:
@@ -344,6 +344,6 @@ def get_default_provider() -> IntelligenceProvider:
     if tier == "community":
         provider = CommunityIntelligenceProvider()
     else:
-        provider = AdvancedIntelligenceProvider()
+        provider = FullIntelligenceProvider()
     _PROVIDER_CACHE[tier] = provider
     return provider

@@ -6,6 +6,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession  # noqa: TC002
 
+from icarus.config import settings
 from icarus.dependencies import get_session
 from icarus.models.entity import SourceAttribution
 from icarus.models.graph import GraphEdge, GraphNode, GraphResponse
@@ -107,6 +108,11 @@ async def public_patterns_for_company(
     session: Annotated[AsyncSession, Depends(get_session)],
     lang: Annotated[str, Query()] = "pt",
 ) -> PatternResponse:
+    if not settings.patterns_enabled:
+        raise HTTPException(
+            status_code=503,
+            detail="Pattern engine temporarily unavailable pending validation.",
+        )
     company_id, company_cnpj = await _resolve_company(session, cnpj_or_id)
     records = await execute_query(
         session,

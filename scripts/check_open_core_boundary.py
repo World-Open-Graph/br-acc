@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate that public snapshot/repo excludes specialized advanced modules."""
+"""Validate public edition scope and language rules."""
 
 from __future__ import annotations
 
@@ -7,22 +7,17 @@ import argparse
 from pathlib import Path
 
 FORBIDDEN_PATH_GLOBS = (
-    "etl/src/icarus_etl/entity_resolution/**",
-    "scripts/link_persons.cypher",
-    "scripts/link_partners_probable.cypher",
+    "api/src/icarus/services/pattern_service.py",
+    "api/src/icarus/queries/pattern_*.cypher",
     "scripts/auto_finalize_pncp_backfill.sh",
     "docs/shadow_rollout_runbook.md",
     "docs/ingestion_priority_runbook.md",
     "docs/ops/storage_operations.md",
-    "api/src/icarus/services/score_service.py",
-    "api/src/icarus/services/pattern_service.py",
-    "api/src/icarus/queries/pattern_*.cypher",
-    "api/src/icarus/queries/entity_score*.cypher",
+    "CLAUDE.md",
+    ".mcp.json",
 )
 
-# Public API surface must not directly depend on advanced services.
 FORBIDDEN_IMPORT_TOKENS = (
-    "from icarus.services.score_service import",
     "from icarus.services.pattern_service import",
 )
 
@@ -30,7 +25,6 @@ PUBLIC_SURFACE_GLOBS = (
     "api/src/icarus/routers/*.py",
     "api/src/icarus/main.py",
 )
-
 
 def check_forbidden_paths(repo_root: Path) -> list[str]:
     errors: list[str] = []
@@ -57,7 +51,7 @@ def check_forbidden_imports(repo_root: Path) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate public edition public boundary")
+    parser = argparse.ArgumentParser(description="Validate public edition scope")
     parser.add_argument("--repo-root", default=".", help="Path to repository root")
     args = parser.parse_args()
 

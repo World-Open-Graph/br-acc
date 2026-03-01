@@ -9,7 +9,7 @@ import {
   InvestigationIcon,
   PatternIcon,
 } from "@/components/landing/FeatureIcons";
-import { IS_PUBLIC_MODE } from "@/config/runtime";
+import { IS_PATTERNS_ENABLED, IS_PUBLIC_MODE } from "@/config/runtime";
 import { HeroGraph } from "@/components/landing/HeroGraph";
 import { NetworkAnimation } from "@/components/landing/NetworkAnimation";
 import { StatsBar } from "@/components/landing/StatsBar";
@@ -109,6 +109,10 @@ export function Landing() {
       .catch(() => {});
   }, []);
 
+  const visibleFeatures = IS_PATTERNS_ENABLED
+    ? FEATURES
+    : FEATURES.filter((feature) => feature.key !== "patterns");
+
   return (
     <>
       <section className={styles.hero}>
@@ -146,7 +150,7 @@ export function Landing() {
             {t("landing.features.sectionHeading")}
           </h2>
           <div className={styles.featuresGrid}>
-            {FEATURES.map(({ key, icon, iconBg }) => (
+            {visibleFeatures.map(({ key, icon, iconBg }) => (
               <FeatureCard
                 key={key}
                 icon={icon}
