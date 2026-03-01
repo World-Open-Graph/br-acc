@@ -40,6 +40,16 @@ It makes public data that is already open but scattered across dozens of portals
 
 ---
 
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) (with Compose v2)
+- [Python 3.12+](https://www.python.org/)
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+- [Node.js 22+](https://nodejs.org/)
+- [Make](https://www.gnu.org/software/make/)
+
+---
+
 ## Quick Start
 
 ```bash
@@ -48,6 +58,9 @@ make dev                       # start all services
 export NEO4J_PASSWORD=your_password
 make seed                      # load sample data
 ```
+
+> **Low-memory machines:** if you have 16 GB RAM or less, uncomment the lightweight
+> profile in `.env` to reduce Neo4j heap/pagecache before running `make dev`.
 
 You should see all containers running. Verify with:
 
