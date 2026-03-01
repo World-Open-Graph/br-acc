@@ -34,10 +34,16 @@ PATTERN_METADATA: dict[str, dict[str, str]] = {
         "desc_en": "Family company capital inconsistent with declared patrimony",
     },
     "sanctioned_still_receiving": {
-        "name_pt": "Sancionada ainda recebendo",
-        "name_en": "Sanctioned still receiving",
-        "desc_pt": "Empresa sancionada (CEIS/CNEP) que venceu contratos após a sanção",
-        "desc_en": "Sanctioned company (CEIS/CNEP) that won contracts after sanction date",
+        "name_pt": "Coocorrência: sanção e contrato",
+        "name_en": "Co-occurrence: sanction and contract",
+        "desc_pt": (
+            "Contrato com data dentro da janela registrada de sanção"
+            " da empresa (CEIS/CNEP/TCU)"
+        ),
+        "desc_en": (
+            "Contract date within the company's recorded sanction window"
+            " (CEIS/CNEP/TCU)"
+        ),
     },
     "donation_contract_loop": {
         "name_pt": "Ciclo doação-contrato",
@@ -46,27 +52,39 @@ PATTERN_METADATA: dict[str, dict[str, str]] = {
         "desc_en": "Company that donated to campaign then won contracts from the same politician",
     },
     "contract_concentration": {
-        "name_pt": "Concentração de contratos municipais",
-        "name_en": "Municipal contract concentration",
-        "desc_pt": "Participação desproporcional de contratos em um município",
-        "desc_en": "Disproportionate share of contracts in a municipality",
-    },
-    "debtor_contracts": {
-        "name_pt": "Devedor com contratos públicos",
-        "name_en": "Debtor with public contracts",
-        "desc_pt": "Empresa com dívida ativa na PGFN que venceu licitações públicas",
-        "desc_en": "Company with active PGFN tax debt that won public contracts",
-    },
-    "embargoed_receiving": {
-        "name_pt": "Embargada recebendo recursos",
-        "name_en": "Embargoed receiving funds",
+        "name_pt": "Concentração de fornecedor por órgão",
+        "name_en": "Supplier concentration by agency",
         "desc_pt": (
-            "Empresa com embargo ambiental do IBAMA"
-            " que recebeu contratos ou empréstimos públicos"
+            "Participação do fornecedor acima do limiar configurado"
+            " no gasto contratual do órgão"
         ),
         "desc_en": (
-            "Company with IBAMA environmental embargo"
-            " that received public contracts or loans"
+            "Supplier share above configured threshold"
+            " in an agency's contract spend"
+        ),
+    },
+    "debtor_contracts": {
+        "name_pt": "Coocorrência: dívida ativa e contratos",
+        "name_en": "Co-occurrence: active debt and contracts",
+        "desc_pt": (
+            "Empresa com registro de dívida ativa na PGFN"
+            " e recorrência de contratos públicos"
+        ),
+        "desc_en": (
+            "Company with recorded PGFN active debt"
+            " and recurring public contracts"
+        ),
+    },
+    "embargoed_receiving": {
+        "name_pt": "Coocorrência: embargo e recursos públicos",
+        "name_en": "Co-occurrence: embargo and public funds",
+        "desc_pt": (
+            "Embargo ambiental registrado no IBAMA"
+            " com fluxo temporal de contrato ou empréstimo público"
+        ),
+        "desc_en": (
+            "Recorded IBAMA environmental embargo"
+            " with temporal overlap of public contract or loan"
         ),
     },
     "loan_debtor": {
@@ -85,13 +103,16 @@ PATTERN_METADATA: dict[str, dict[str, str]] = {
         ),
     },
     "amendment_beneficiary_contracts": {
-        "name_pt": "Beneficiário de emenda com contratos",
-        "name_en": "Amendment beneficiary with contracts",
+        "name_pt": "Coocorrência: emenda e contratos",
+        "name_en": "Co-occurrence: amendment and contracts",
         "desc_pt": (
-            "Empresa beneficiada por emenda parlamentar"
-            " que também venceu licitações públicas"
+            "Empresa beneficiada por emenda/convênio"
+            " que também possui contratos públicos registrados"
         ),
-        "desc_en": "Company benefited from parliamentary amendment that also won public contracts",
+        "desc_en": (
+            "Company benefited by amendment/grant"
+            " that also holds recorded public contracts"
+        ),
     },
     "debtor_health_operator": {
         "name_pt": "Devedor fiscal operando unidade SUS",
@@ -175,6 +196,42 @@ PATTERN_METADATA: dict[str, dict[str, str]] = {
         "desc_en": (
             "Legislator who is partner in company"
             " that supplied goods/services to the same legislator"
+        ),
+    },
+    "split_contracts_below_threshold": {
+        "name_pt": "Recorrência de contratos abaixo do teto",
+        "name_en": "Recurring contracts below threshold",
+        "desc_pt": (
+            "Múltiplos contratos com mesmo órgão e objeto,"
+            " no mesmo mês, abaixo do teto configurado"
+        ),
+        "desc_en": (
+            "Multiple contracts with same agency and object,"
+            " in the same month, below configured threshold"
+        ),
+    },
+    "srp_multi_org_hitchhiking": {
+        "name_pt": "Ata SRP com adesão multiórgão",
+        "name_en": "SRP record with multi-agency adoption",
+        "desc_pt": (
+            "Mesma ata SRP vinculada a contratos"
+            " de múltiplos órgãos públicos"
+        ),
+        "desc_en": (
+            "Same SRP bid record linked to contracts"
+            " from multiple public agencies"
+        ),
+    },
+    "inexigibility_recurrence": {
+        "name_pt": "Recorrência de inexigibilidade",
+        "name_en": "Recurring inexigibility",
+        "desc_pt": (
+            "Fornecedor recorrente em inexigibilidade"
+            " no mesmo órgão e objeto"
+        ),
+        "desc_en": (
+            "Recurring supplier in inexigibility"
+            " for the same agency and object"
         ),
     },
 }

@@ -84,6 +84,13 @@ make check
 make neutrality
 ```
 
+## Releases
+
+Track update history in GitHub Releases:
+
+- [Releases page](https://github.com/World-Open-Graph/br-acc/releases)
+- [Release policy](docs/release/release_policy.md)
+
 ## API Surface
 
 | Method | Route | Description |

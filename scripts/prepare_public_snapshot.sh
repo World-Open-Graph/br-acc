@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SRC_ROOT="${1:-$(pwd)}"
-OUT_DIR="${2:-/tmp/world-transparency-graph-public-$(date +%Y%m%d_%H%M%S)}"
+OUT_DIR="${2:-/tmp/br-acc-public-$(date +%Y%m%d_%H%M%S)}"
 
 mkdir -p "$OUT_DIR"
 
@@ -36,6 +36,8 @@ rsync -a \
   --include='docs/demo/***' \
   --include='docs/legal/' \
   --include='docs/legal/***' \
+  --include='docs/pt-BR/' \
+  --include='docs/pt-BR/***' \
   --include='docs/release/' \
   --include='docs/release/public_boundary_matrix.csv' \
   --include='docs/release/public_endpoint_matrix.md' \
@@ -67,6 +69,8 @@ rsync -a \
 
 # Explicit removals for sensitive operational artifacts and disabled pattern engine.
 rm -f "$OUT_DIR/CLAUDE.md"
+rm -f "$OUT_DIR/AGENTS.md"
+rm -f "$OUT_DIR/AGENTS"*".md"
 rm -f "$OUT_DIR/.mcp.json"
 rm -f "$OUT_DIR/docs/shadow_rollout_runbook.md"
 rm -f "$OUT_DIR/docs/ingestion_priority_runbook.md"

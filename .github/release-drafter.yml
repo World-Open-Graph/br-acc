@@ -1,0 +1,80 @@
+name-template: v$RESOLVED_VERSION
+tag-template: v$RESOLVED_VERSION
+filter-by-commitish: true
+change-template: '- $TITLE ([#$NUMBER]($URL)) @$AUTHOR'
+no-changes-template: '- No user-facing changes in this period.'
+
+categories:
+  - title: 'New patterns/signals'
+    labels:
+      - release:patterns
+  - title: 'API changes'
+    labels:
+      - release:api
+  - title: 'Data/ETL updates'
+    labels:
+      - release:data
+  - title: 'Privacy/Compliance'
+    labels:
+      - release:privacy
+  - title: 'Fixes'
+    labels:
+      - release:fix
+  - title: 'Docs'
+    labels:
+      - release:docs
+  - title: 'Infra'
+    labels:
+      - release:infra
+  - title: 'Security'
+    labels:
+      - release:security
+
+exclude-labels:
+  - chore
+  - ci
+  - refactor-internal
+  - no-release-note
+
+version-resolver:
+  major:
+    labels:
+      - release:major
+      - breaking-change
+  minor:
+    labels:
+      - release:feature
+      - release:patterns
+      - release:api
+      - release:data
+      - release:privacy
+  patch:
+    labels:
+      - release:fix
+      - release:docs
+      - release:infra
+      - release:security
+  default: patch
+
+template: |
+  ## PT-BR
+
+  Resumo da release em português (edite antes de publicar).
+
+  ## EN
+
+  Release summary in English (edit before publishing).
+
+  Signals and patterns reflect co-occurrence in public records and are not legal proof.
+
+  ## Changes
+
+  $CHANGES
+
+  ## Contributors
+
+  $CONTRIBUTORS
+
+  ## Compare
+
+  $PREVIOUS_TAG -> v$RESOLVED_VERSION
