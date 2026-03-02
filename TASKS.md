@@ -665,6 +665,15 @@
 | **Cost/Query** | ~$0.0006/query (~R$ 0,003) | 02/03/2026 |
 | **Custo Mensal Real** | ~$105/mês (~R$ 630) | 02/03/2026 |
 
+### TASK-086: UI Fix — Scrolling + Analytics Improvement ✅ (03/03/2026)
+- [x] Root cause: AppShell.module.css `.main` had `overflow: hidden` — killed scrolling on ALL app pages
+- [x] Fix: changed to `overflow: auto` — Reports, Activity, Analytics all scroll now
+- [x] Analytics: aggregate entity analysis URLs into single group (was polluting 200+ entries)
+- [x] Analytics: added note about in-memory data persistence (resets on API restart)
+- [x] Analytics data verified REAL: 4607 views, 20 unique visitors, 80 activity events
+- [x] Contract tests: 9/9 endpoints passing (health, search, chat, cache, analytics, activity, 422, 404)
+> **Arquivos:** `AppShell.module.css`, `Analytics.tsx`
+
 ### TASK-078: Crash Prevention — Defensive Frontend ✅ (03/03/2026)
 - [x] Root cause: SourceRegistry crashed on placeholder sources.json (no sources array)
 - [x] 14 files fixed: ?? [] guards on entity_ids, sources, entities, categories
