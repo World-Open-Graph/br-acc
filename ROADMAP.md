@@ -488,21 +488,37 @@ O projeto [Intelink](https://intelink.ia.br) (EGOS) já implementou capacidades 
 
 ---
 
-## Sobre Modelos de IA para Investigação
+## Modelos de IA para Investigacao (Atualizado Marco 2026)
 
-> **Conclusão dos testes com Patense (2026-03-02):** Relatórios de investigação exigem modelos com raciocínio em cadeia (Chain of Thought). Modelos baratos funcionam para consultas individuais, mas a síntese (BNDES → pulverização → SPEs → perguntas investigativas) requer capacidade avançada.
+> Fonte: [LM Arena](https://lmarena.ai), [Awesome Agents](https://awesomeagents.ai), [WhatLLM](https://whatllm.org)
 
-| Modelo | Adequação | Custo/1M tokens | Melhor para |
-|--------|-----------|-----------------|-------------|
-| Claude 3.5 Sonnet | ⭐⭐⭐⭐⭐ | ~$3.00 | Relatórios de investigação |
-| GPT-4o | ⭐⭐⭐⭐ | ~$2.50 | Análise de documentos |
-| Gemini 2.0 Flash | ⭐⭐⭐ | ~$0.10 | Bots, tool calling, busca |
-| Gemini 1.5 Pro | ⭐⭐⭐⭐ | ~$1.25 | Documentos longos (1M ctx) |
-| Llama 3.1 70B | ⭐⭐⭐ | ~$0.20 | Consultas simples |
+### Ranking Global Marco 2026
 
-**Custo de um relatório completo (como o Patense):** ~$0.16 (Exa + APIs públicas + Claude)
+| # | Modelo | Provider | Input/Output per 1M | Melhor para |
+|---|--------|----------|---------------------|-------------|
+| 1 | **GPT-5.2 Pro** | OpenAI | $10 / $30 | Raciocinio complexo, #1 overall |
+| 2 | **Claude Opus 4.6** | Anthropic | $15 / $75 | Coding (#1 SWE-Bench 72.5%), investigacoes longas |
+| 3 | **Gemini 3.1 Pro** | Google | $1.25 / $5 | Melhor custo-beneficio, multimodal, tool calling |
+| 4 | **Grok 4 Heavy** | xAI | $3 / $15 | Raciocinio, noticias em tempo real |
+| 5 | **DeepSeek V3.2** | DeepSeek | $0.14 / $0.28 | Budget king, open source |
+| 6 | **GLM-4.7 Thinking** | Zhipu | Open source | Melhor open-source para raciocinio |
+| 7 | **Kimi K2.5** | Moonshot | Open source | Open source, contexto longo |
 
-**Plano de financiamento:** Créditos da comunidade para gerar relatórios avançados com modelos premium. Ver [CREDIT_SYSTEM_PLAN.md](../docs/plans/CREDIT_SYSTEM_PLAN.md).
+### Como Usamos
+
+| Funcao | Modelo Atual | Modelo Ideal | Por que |
+|--------|-------------|-------------|---------|
+| **Bot Discord/Telegram** | Gemini 2.0 Flash | **Gemini 3.1 Pro** | 10x melhor raciocinio, mesmo preco |
+| **Relatorios de investigacao** | Claude Sonnet (via Cascade) | **Claude Opus 4.6** | Chain-of-thought superior |
+| **Tool calling (bot)** | Gemini 2.0 Flash | **Gemini 3.1 Pro** | Melhor function calling |
+| **Analise de documentos longos** | N/A | **Gemini 3.1 Pro** (1M ctx) | Contexto massivo |
+| **Budget / self-hosted** | N/A | **DeepSeek V3.2** | R$0.70/1M tokens |
+
+### Acao Imediata
+
+- [ ] Migrar bot de `google/gemini-2.0-flash-001` para `google/gemini-3.1-pro` via OpenRouter
+- [ ] Testar `deepseek/deepseek-v3.2` como fallback barato
+- [ ] Para relatorios premium: usar `anthropic/claude-opus-4.6` ou `openai/gpt-5.2`
 
 ---
 
