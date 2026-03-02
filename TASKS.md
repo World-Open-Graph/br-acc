@@ -1,6 +1,6 @@
 # TASKS.md — EGOS Inteligência (SSOT)
 
-> **Updated:** 2026-03-03 (session 4) | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
+> **Updated:** 2026-03-03 (session 6) | **Stars:** ~70 ⭐ | **Patterns:** 10 | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
 
 ---
 
@@ -664,6 +664,26 @@
 | **Evidence Chain** | Proveniência de dados em cada query ✅ | 02/03/2026 |
 | **Cost/Query** | ~$0.0006/query (~R$ 0,003) | 02/03/2026 |
 | **Custo Mensal Real** | ~$105/mês (~R$ 630) | 02/03/2026 |
+
+### TASK-087: Branding — EGOS Logo as Favicon + OG Image ✅ (03/03/2026)
+- [x] Generate favicon.ico (16/32/48px), favicon-16x16.png, favicon-32x32.png
+- [x] Generate apple-touch-icon.png (180x180), android-chrome (192/512)
+- [x] Generate og-image.png (1200x630) for social sharing previews
+- [x] Create site.webmanifest (theme: #00e5a0, standalone)
+- [x] Update index.html with all icon refs + OG image + Twitter image
+- [x] Deploy to Contabo — all assets returning HTTP 200
+> **Source:** `/home/enio/Downloads/egos_discord_icon_1771941656007.png`
+> **Arquivos:** `index.html`, `favicon.ico`, `site.webmanifest`, `og-image.png`
+
+### TASK-088: First Community PR — Benford's Law + HHI Patterns ✅ (03/03/2026)
+- [x] PR #30 by @mrncstt: 2 new intelligence patterns (+134/-2 lines)
+- [x] Benford's Law: flags contract values deviating from expected leading-digit distribution (MAD threshold)
+- [x] HHI Concentration: flags companies with high Herfindahl-Hirschman Index across contracting agencies
+- [x] Code review: approved with minor observations (precision, performance, scaling docs)
+- [x] Merged to main, API rebuild deployed
+- [x] Test count: 8→10 patterns, 48 unit tests passing
+> **Milestone:** First external contributor! ~70 GitHub stars 🎉
+> **Arquivos:** `config.py`, `pattern.py`, `intelligence_provider.py`, 2 new `.cypher` files
 
 ### TASK-086: UI Fix — Scrolling + Analytics Improvement ✅ (03/03/2026)
 - [x] Root cause: AppShell.module.css `.main` had `overflow: hidden` — killed scrolling on ALL app pages
