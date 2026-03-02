@@ -1,0 +1,23 @@
+# IDs that are allowed to report specific URL classes in scheduled audits.
+# Keep this list minimal and time-bound.
+
+allow_broken_404_410:
+  - bolsa_familia_bpc
+
+allow_auth_or_rate_limited:
+  - datajud
+  - interpol_red_notices
+
+allow_transient_error:
+  - caged
+  - cnpj
+  - sicar_rural_registry
+  - stj_dados_abertos
+  - tce_ap
+  - tce_mg
+  - tce_pr
+  - tce_rj
+  - transferegov
+  - un_sanctions
+  - state_portal_ce
+  - state_portal_rj
