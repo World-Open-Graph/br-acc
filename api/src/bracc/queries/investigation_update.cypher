@@ -11,5 +11,4 @@ RETURN i.id AS id,
        i.created_at AS created_at,
        i.updated_at AS updated_at,
        i.share_token AS share_token,
-       i.share_expires_at AS share_expires_at,
        [x IN eids WHERE x IS NOT NULL] AS entity_ids

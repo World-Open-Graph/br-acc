@@ -31,31 +31,28 @@ vi.mock("@/hooks/useGraphData", () => ({
 }));
 
 // Mock graphExplorer store
-const mockGraphExplorerState = {
-  depth: 1,
-  enabledTypes: new Set<string>(),
-  enabledRelTypes: new Set<string>(),
-  selectedNodeIds: new Set<string>(),
-  sidebarCollapsed: false,
-  detailPanelOpen: false,
-  hoveredNodeId: null,
-  hiddenNodeIds: new Set<string>(),
-  layoutMode: "force" as const,
-  reset: vi.fn(),
-  toggleSidebar: vi.fn(),
-  setDepth: vi.fn(),
-  toggleType: vi.fn(),
-  toggleRelType: vi.fn(),
-  selectNode: vi.fn(),
-  setHoveredNode: vi.fn(),
-  setContextMenu: vi.fn(),
-  setLayoutMode: vi.fn(),
-  toggleFullscreen: vi.fn(),
-};
-
 vi.mock("@/stores/graphExplorer", () => ({
-  useGraphExplorerStore: (selector?: (state: typeof mockGraphExplorerState) => unknown) =>
-    selector ? selector(mockGraphExplorerState) : mockGraphExplorerState,
+  useGraphExplorerStore: () => ({
+    depth: 1,
+    enabledTypes: new Set<string>(),
+    enabledRelTypes: new Set<string>(),
+    selectedNodeIds: new Set<string>(),
+    sidebarCollapsed: false,
+    detailPanelOpen: false,
+    hoveredNodeId: null,
+    hiddenNodeIds: new Set<string>(),
+    layoutMode: "force" as const,
+    reset: vi.fn(),
+    toggleSidebar: vi.fn(),
+    setDepth: vi.fn(),
+    toggleType: vi.fn(),
+    toggleRelType: vi.fn(),
+    selectNode: vi.fn(),
+    setHoveredNode: vi.fn(),
+    setContextMenu: vi.fn(),
+    setLayoutMode: vi.fn(),
+    toggleFullscreen: vi.fn(),
+  }),
 }));
 
 import { GraphExplorer } from "./GraphExplorer";

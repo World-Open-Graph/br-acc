@@ -53,7 +53,7 @@ def _is_pep_record(record: dict[str, Any]) -> bool:
 
     for field in ("role", "cargo"):
         value = record.get(field)
-        if isinstance(value, str) and value.strip().lower() in PEP_ROLES:
+        if isinstance(value, str) and any(kw in value.strip().lower() for kw in PEP_ROLES):
             return True
 
     return False

@@ -77,7 +77,7 @@ async def render_investigation_pdf(
         **labels,
     )
 
-    from weasyprint import HTML  # type: ignore[import-untyped]
+    from weasyprint import HTML
 
     pdf_bytes: bytes = HTML(string=html_content).write_pdf()
     return pdf_bytes

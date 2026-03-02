@@ -71,7 +71,7 @@ def _write_manifest(out_dir: Path, tables: list[dict[str, Any]]) -> Path:
 
 
 @click.command()
-@click.option("--billing-project", default="bracc-corruptos", help="GCP billing project")
+@click.option("--billing-project", default="icarus-corruptos", help="GCP billing project")
 @click.option(
     "--dataset",
     default=WORLD_WB_DATASET,

@@ -22,7 +22,6 @@ from pathlib import Path
 
 import click
 import httpx
-from _download_utils import safe_extract_zip
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
@@ -90,14 +89,23 @@ def _download_zip(
     xml_count = 0
 
     try:
+        resolved_dir = section_dir.resolve()
         with zipfile.ZipFile(BytesIO(resp.content)) as zf:
-            extracted = safe_extract_zip(zf, section_dir)
-            xml_count = sum(1 for path in extracted if path.suffix.lower() == ".xml")
+            for member in zf.namelist():
+                # Path traversal guard
+                target = (section_dir / member).resolve()
+                if not target.is_relative_to(resolved_dir):
+                    logger.warning(
+                        "Path traversal detected in %s: %s — skipping",
+                        zip_name,
+                        member,
+                    )
+                    continue
+                if member.lower().endswith(".xml"):
+                    zf.extract(member, section_dir)
+                    xml_count += 1
     except zipfile.BadZipFile:
         logger.warning("Bad ZIP file: %s", zip_name)
-        return 0
-    except ValueError as exc:
-        logger.warning("Unsafe ZIP file %s: %s", zip_name, exc)
         return 0
 
     if xml_count > 0:

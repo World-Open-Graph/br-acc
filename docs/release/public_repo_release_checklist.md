@@ -1,56 +1,78 @@
-# Public Repo Release Checklist — `World-Open-Graph/br-acc`
+# Public Repo Release Checklist — World Transparency Graph
 
-## 1) Pre-release gate
-
-1. Confirm target merge commit exists on `main`.
-2. Confirm CI + Security + Public gates are green on that commit.
-3. Confirm PR is merged with exactly one release label.
-
-## 2) Public boundary checks
-
+## 1) Prepare sanitized snapshot
 ```bash
-python scripts/check_public_privacy.py --repo-root .
-python scripts/check_compliance_pack.py --repo-root .
-python scripts/check_open_core_boundary.py --repo-root .
+bash scripts/prepare_public_snapshot.sh /Users/brunoclz/CORRUPTOS /tmp/world-transparency-graph-public
 ```
 
-Expected: all `PASS`.
-
-## 3) Snapshot hygiene (optional verification)
-
+## 2) Initialize clean-history repo from snapshot
 ```bash
-bash scripts/prepare_public_snapshot.sh . /tmp/br-acc-public
-python /tmp/br-acc-public/scripts/check_public_privacy.py --repo-root /tmp/br-acc-public
-python /tmp/br-acc-public/scripts/check_compliance_pack.py --repo-root /tmp/br-acc-public
-python /tmp/br-acc-public/scripts/check_open_core_boundary.py --repo-root /tmp/br-acc-public
+cd /tmp/world-transparency-graph-public
+git init
+git add .
+git commit -m "Initial public release (WTG)"
 ```
 
-Expected in snapshot:
+## 3) Create GitHub repository (manual)
+- Owner: `brunoclz`
+- Name: `world-transparency-graph`
+- Visibility: Public
+- Do not auto-add README/License (already present)
 
-- No `CLAUDE.md`.
-- No `AGENTS.md` or `AGENTS*.md`.
-- No private operational runbooks outside public scope.
+## 4) Push initial release
+```bash
+git branch -M main
+git remote add origin https://github.com/brunoclz/world-transparency-graph.git
+git push -u origin main
+```
 
-## 4) Publish release (manual workflow)
+## 5) Configure branch protection (GitHub UI)
+Require all checks:
+- `API (Python)`
+- `ETL (Python)`
+- `Frontend (TypeScript)`
+- `Neutrality Audit`
+- `Gitleaks`
+- `Bandit (Python)`
+- `Pip Audit (Python deps)`
+- `Public Privacy Gate`
+- `Compliance Pack Gate`
+- `Public Boundary Gate`
 
-In GitHub Actions, run **Publish Release** with:
+## 6) Configure environment defaults
+- Set public deployment environment vars:
+  - `PRODUCT_TIER=community`
+  - `PUBLIC_MODE=true`
+  - `PUBLIC_ALLOW_PERSON=false`
+  - `PUBLIC_ALLOW_ENTITY_LOOKUP=false`
+  - `PUBLIC_ALLOW_INVESTIGATIONS=false`
+  - `PATTERNS_ENABLED=false`
+  - `VITE_PUBLIC_MODE=true`
+  - `VITE_PATTERNS_ENABLED=false`
 
-- `version`: SemVer tag (e.g. `v0.3.0`, `v0.3.1-rc.1`)
-- `target_sha`: merge commit on `main`
-- `prerelease`: `false` (stable) or `true` (RC)
-- `title_pt`: release title PT-BR
-- `title_en`: release title EN
+## 7) Final checks before launch
+- `python scripts/check_public_privacy.py --repo-root .` => `PASS`
+- `python scripts/check_compliance_pack.py --repo-root .` => `PASS`
+- `python scripts/check_open_core_boundary.py --repo-root .` => `PASS`
+- Confirm no internal runbooks in public repo
+- Confirm demo data is synthetic (`data/demo/synthetic_graph.json`)
+- Confirm all legal docs exist in root:
+  - `ETHICS.md`
+  - `LGPD.md`
+  - `PRIVACY.md`
+  - `TERMS.md`
+  - `DISCLAIMER.md`
+  - `SECURITY.md`
+  - `ABUSE_RESPONSE.md`
 
-## 5) Verify outputs
+## 8) Launch communication split
+- Publish product announcement as **WTG**
+- Publish movement announcement as **BRCC**
+- Mention methodology limits and non-accusatory policy
 
-1. Tag exists in repository.
-2. Release page published under `/releases`.
-3. Notes include PT+EN and non-accusatory disclaimer.
-4. `release_manifest.json` asset is attached.
-5. Compare link is valid (`previous_tag...new_tag`).
-
-## 6) Community communication
-
-1. Use `docs/release/community_announcement_template.md`.
-2. Publish short PT+EN summary with release URL.
-3. Keep wording factual: “signals/co-occurrence”, never accusatory language.
+## 9) Release system bootstrap
+- Ensure `.github/release.yml` exists for auto-notes categories.
+- Ensure `.github/release-drafter.yml` + workflow are active.
+- Ensure `publish-release.yml` workflow is present and dispatchable.
+- Ensure release label taxonomy is documented and applied to PRs.
+- Publish first policy-compliant tag from this stream (`v0.3.0`).

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -56,21 +56,33 @@ describe("Landing", () => {
     });
   });
 
-  it("renders without crashing", () => {
-    renderLanding();
+  it("renders without crashing", async () => {
+    await act(async () => {
+      renderLanding();
+    });
     // Hero heading should be rendered
     expect(screen.getByText("Siga o dinheiro p\u00FAblico")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("58.5M")).toBeInTheDocument();
+    });
   });
 
-  it("shows key heading text and CTA", () => {
-    renderLanding();
+  it("shows key heading text and CTA", async () => {
+    await act(async () => {
+      renderLanding();
+    });
     expect(screen.getByText("Siga o dinheiro p\u00FAblico")).toBeInTheDocument();
     expect(screen.getByText("Explorar o grafo")).toBeInTheDocument();
-    expect(screen.getByText("BRACC \u00B7 Dados abertos")).toBeInTheDocument();
+    expect(screen.getByText("BR-ACC \u00B7 Dados abertos")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("58.5M")).toBeInTheDocument();
+    });
   });
 
   it("shows all 13 data sources", async () => {
-    renderLanding();
+    await act(async () => {
+      renderLanding();
+    });
 
     await waitFor(() => {
       expect(screen.getByText("CNPJ")).toBeInTheDocument();

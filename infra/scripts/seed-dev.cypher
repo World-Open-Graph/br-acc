@@ -1,4 +1,4 @@
-// BRACC Dev Seed Data
+// BR-ACC Dev Seed Data
 // Small fixture graph that exercises all 5 analysis patterns
 // Run: cypher-shell -f seed-dev.cypher
 

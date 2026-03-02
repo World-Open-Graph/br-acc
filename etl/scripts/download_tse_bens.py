@@ -5,9 +5,9 @@ Streams from BigQuery table `basedosdados.br_tse_eleicoes.bens_candidato` to a l
 Requires `google-cloud-bigquery` and an authenticated GCP project.
 
 Usage:
-    python etl/scripts/download_tse_bens.py --billing-project bracc-corruptos
-    python etl/scripts/download_tse_bens.py --billing-project bracc-corruptos --start-year 2018
-    python etl/scripts/download_tse_bens.py --billing-project bracc-corruptos --skip-existing
+    python etl/scripts/download_tse_bens.py --billing-project icarus-corruptos
+    python etl/scripts/download_tse_bens.py --billing-project icarus-corruptos --start-year 2018
+    python etl/scripts/download_tse_bens.py --billing-project icarus-corruptos --skip-existing
 """
 
 from __future__ import annotations

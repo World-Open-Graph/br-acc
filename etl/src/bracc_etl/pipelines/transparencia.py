@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -20,6 +21,8 @@ from bracc_etl.transforms import (
     parse_date,
     strip_document,
 )
+
+logger = logging.getLogger(__name__)
 
 # Classified contracts (Polícia Federal etc.) use this sentinel CNPJ.
 _SIGILOSO_CNPJ = "-11"
@@ -78,8 +81,9 @@ class TransparenciaPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._raw_contratos: pd.DataFrame = pd.DataFrame()
         self._raw_servidores: pd.DataFrame = pd.DataFrame()
         self._raw_emendas: pd.DataFrame = pd.DataFrame()
@@ -89,24 +93,30 @@ class TransparenciaPipeline(Pipeline):
 
     def extract(self) -> None:
         src_dir = Path(self.data_dir) / "transparencia"
-        self._raw_contratos = pd.read_csv(
-            src_dir / "contratos.csv",
-            dtype=str,
-            keep_default_na=False,
-            encoding="utf-8",
-        )
-        self._raw_servidores = pd.read_csv(
-            src_dir / "servidores.csv",
-            dtype=str,
-            keep_default_na=False,
-            encoding="utf-8",
-        )
-        self._raw_emendas = pd.read_csv(
-            src_dir / "emendas.csv",
-            dtype=str,
-            keep_default_na=False,
-            encoding="utf-8",
-        )
+        if not src_dir.exists():
+            logger.warning("[%s] Data directory not found: %s", self.name, src_dir)
+            return
+        contratos_path = src_dir / "contratos.csv"
+        servidores_path = src_dir / "servidores.csv"
+        emendas_path = src_dir / "emendas.csv"
+        if not contratos_path.exists():
+            logger.warning("[%s] contratos.csv not found in %s", self.name, src_dir)
+        else:
+            self._raw_contratos = pd.read_csv(
+                contratos_path, dtype=str, keep_default_na=False, encoding="utf-8",
+            )
+        if not servidores_path.exists():
+            logger.warning("[%s] servidores.csv not found in %s", self.name, src_dir)
+        else:
+            self._raw_servidores = pd.read_csv(
+                servidores_path, dtype=str, keep_default_na=False, encoding="utf-8",
+            )
+        if not emendas_path.exists():
+            logger.warning("[%s] emendas.csv not found in %s", self.name, src_dir)
+        else:
+            self._raw_emendas = pd.read_csv(
+                emendas_path, dtype=str, keep_default_na=False, encoding="utf-8",
+            )
 
     def transform(self) -> None:
         contracts: list[dict[str, Any]] = []

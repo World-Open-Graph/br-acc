@@ -33,8 +33,9 @@ class BndesPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._raw: pd.DataFrame = pd.DataFrame()
         self.finances: list[dict[str, Any]] = []
         self.relationships: list[dict[str, Any]] = []
@@ -51,8 +52,15 @@ class BndesPipeline(Pipeline):
 
     def extract(self) -> None:
         bndes_dir = Path(self.data_dir) / "bndes"
+        if not bndes_dir.exists():
+            logger.warning("[%s] Data directory not found: %s", self.name, bndes_dir)
+            return
+        csv_path = bndes_dir / "operacoes-nao-automaticas.csv"
+        if not csv_path.exists():
+            logger.warning("[%s] CSV file not found: %s", self.name, csv_path)
+            return
         self._raw = pd.read_csv(
-            bndes_dir / "operacoes-nao-automaticas.csv",
+            csv_path,
             dtype=str,
             delimiter=";",
             encoding="latin-1",

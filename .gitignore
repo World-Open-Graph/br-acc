@@ -75,7 +75,6 @@ scripts/audit-prompts/
 # Local report artifacts in repository root
 /*.pdf
 /*.html
-gitleaks-report*.json
 
 # Playwright MCP cache
 .playwright-mcp/
@@ -91,7 +90,7 @@ data/tse/
 # Local MCP runtime config (keep example only)
 .mcp.json
 
-# Internal assistant instructions (must never be published)
+# Internal assistant instruction files (must never be published)
 CLAUDE.md
 AGENTS.md
 AGENTS*.md

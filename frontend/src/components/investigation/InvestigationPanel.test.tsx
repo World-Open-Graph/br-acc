@@ -44,6 +44,7 @@ describe("InvestigationPanel", () => {
         updated_at: "2026-01-01T00:00:00Z",
         entity_ids: ["e1", "e2"],
         share_token: null,
+        share_expires_at: null,
       },
     ];
 

@@ -61,7 +61,9 @@ def test_decode_access_token_invalid() -> None:
 
 
 @pytest.mark.anyio
-async def test_register_user_success() -> None:
+async def test_register_user_success(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "invite_code", "")
+
     mock_record = _mock_record({
         "id": "user-uuid",
         "email": "test@example.com",
@@ -80,15 +82,11 @@ async def test_register_user_success() -> None:
 
 
 @pytest.mark.anyio
-async def test_register_user_bad_invite() -> None:
-    original = settings.invite_code
-    try:
-        settings.invite_code = "secret-code"
-        session = AsyncMock()
-        with pytest.raises(ValueError, match="Invalid invite code"):
-            await register_user(session, "test@example.com", "password123", "wrong-code")
-    finally:
-        settings.invite_code = original
+async def test_register_user_bad_invite(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "invite_code", "secret-code")
+    session = AsyncMock()
+    with pytest.raises(ValueError, match="Invalid invite code"):
+        await register_user(session, "test@example.com", "password123", "wrong-code")
 
 
 @pytest.mark.anyio

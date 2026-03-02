@@ -14,7 +14,7 @@ from bracc_etl.transforms.date_formatting import parse_date
         ("31/12/2024 14:30:00", "2024-12-31"),
         ("", ""),
         ("  ", ""),
-        ("invalid", "invalid"),
+        ("invalid", ""),
         ("01/01/2000", "2000-01-01"),
     ],
 )

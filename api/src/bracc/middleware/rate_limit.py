@@ -6,37 +6,20 @@ from bracc.config import settings
 from bracc.services.auth_service import decode_access_token
 
 
-def _extract_token(request: Request) -> str | None:
+def _get_rate_limit_key(request: Request) -> str:
+    """Extract user_id from JWT (Bearer or cookie) for rate limiting, fallback to IP."""
     auth = request.headers.get("authorization", "")
     if auth.startswith("Bearer "):
-        return auth[7:].strip()
-    cookie_token = request.cookies.get(settings.auth_cookie_name)
-    if isinstance(cookie_token, str) and cookie_token.strip():
-        return cookie_token.strip()
-    return None
-
-
-def _resolve_client_ip(request: Request) -> str:
-    if settings.trust_proxy_headers:
-        forwarded = request.headers.get("x-forwarded-for", "")
-        if forwarded:
-            first_hop = forwarded.split(",", 1)[0].strip()
-            if first_hop:
-                return first_hop
-        real_ip = request.headers.get("x-real-ip", "").strip()
-        if real_ip:
-            return real_ip
-    return get_remote_address(request)
-
-
-def _get_rate_limit_key(request: Request) -> str:
-    """Extract user_id from JWT for rate limiting, fallback to IP."""
-    token = _extract_token(request)
-    if token:
+        token = auth[7:]
         user_id = decode_access_token(token)
         if user_id:
             return f"user:{user_id}"
-    return _resolve_client_ip(request)
+    cookie_token = request.cookies.get(settings.auth_cookie_name)
+    if isinstance(cookie_token, str) and cookie_token.strip():
+        user_id = decode_access_token(cookie_token.strip())
+        if user_id:
+            return f"user:{user_id}"
+    return get_remote_address(request)
 
 
 limiter = Limiter(

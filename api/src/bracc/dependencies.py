@@ -35,7 +35,12 @@ async def close_driver() -> None:
 
 
 async def get_driver(request: Request) -> AsyncDriver:
-    driver: AsyncDriver = request.app.state.neo4j_driver
+    driver: AsyncDriver | None = getattr(request.app.state, "neo4j_driver", None)
+    if driver is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection not available",
+        )
     return driver
 
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -19,6 +20,8 @@ from bracc_etl.transforms import (
     strip_document,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class SanctionsPipeline(Pipeline):
     """ETL pipeline for CEIS/CNEP sanctions data."""
@@ -32,8 +35,9 @@ class SanctionsPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._raw_ceis: pd.DataFrame = pd.DataFrame()
         self._raw_cnep: pd.DataFrame = pd.DataFrame()
         self.sanctions: list[dict[str, Any]] = []
@@ -41,17 +45,19 @@ class SanctionsPipeline(Pipeline):
 
     def extract(self) -> None:
         sanctions_dir = Path(self.data_dir) / "sanctions"
+        if not sanctions_dir.exists():
+            logger.warning("[%s] Data directory not found: %s", self.name, sanctions_dir)
+            return
+        ceis_path = sanctions_dir / "ceis.csv"
+        cnep_path = sanctions_dir / "cnep.csv"
+        if not ceis_path.exists() or not cnep_path.exists():
+            logger.warning("[%s] Required CSV files not found in %s", self.name, sanctions_dir)
+            return
         self._raw_ceis = pd.read_csv(
-            sanctions_dir / "ceis.csv",
-            dtype=str,
-            encoding="latin-1",
-            keep_default_na=False,
+            ceis_path, dtype=str, encoding="latin-1", keep_default_na=False,
         )
         self._raw_cnep = pd.read_csv(
-            sanctions_dir / "cnep.csv",
-            dtype=str,
-            encoding="latin-1",
-            keep_default_na=False,
+            cnep_path, dtype=str, encoding="latin-1", keep_default_na=False,
         )
 
     def _process_rows(

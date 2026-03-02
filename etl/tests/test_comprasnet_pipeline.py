@@ -23,7 +23,7 @@ def _extract_from_fixtures(pipeline: ComprasnetPipeline) -> None:
 def test_pipeline_name_and_source_id() -> None:
     pipeline = _make_pipeline()
     assert pipeline.name == "comprasnet"
-    assert pipeline.source_id == "pncp"
+    assert pipeline.source_id == "comprasnet"
 
 
 def test_transform_produces_correct_contracts() -> None:
