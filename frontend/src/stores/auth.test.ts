@@ -55,6 +55,7 @@ describe("useAuthStore", () => {
     expect(state.loading).toBe(false);
     expect(state.error).toBeNull();
     expect(state.restored).toBe(true);
+    expect(mockApiFetch).toHaveBeenNthCalledWith(2, "/api/v1/auth/me");
   });
 
   it("login 401 sets auth.invalidCredentials error", async () => {
@@ -104,6 +105,14 @@ describe("useAuthStore", () => {
     expect(state.token).toBe("jwt-reg");
     expect(state.user).toEqual(userRes);
     expect(state.restored).toBe(true);
+    expect(mockApiFetch).toHaveBeenCalledWith("/api/v1/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "new@example.com",
+        password: "password123",
+        invite_code: "invite-abc",
+      }),
+    });
   });
 
   it("register 403 sets auth.invalidInvite error", async () => {
@@ -151,6 +160,7 @@ describe("useAuthStore", () => {
     expect(state.token).toBeNull();
     expect(state.user).toBeNull();
     expect(state.error).toBeNull();
+    expect(state.restored).toBe(true);
     expect(mockApiFetch).toHaveBeenCalledWith("/api/v1/auth/logout", { method: "POST" });
   });
 
@@ -169,6 +179,23 @@ describe("useAuthStore", () => {
     expect(state.token).toBe("cookie-session");
     expect(state.restored).toBe(true);
     expect(mockApiFetch).toHaveBeenCalledWith("/api/v1/auth/me");
+  });
+
+  it("restore preserves existing token when session is valid", async () => {
+    const userRes = {
+      id: "u1",
+      email: "test@example.com",
+      created_at: "2026-01-01T00:00:00Z",
+    };
+    useAuthStore.setState({ token: "jwt-123" });
+    mockApiFetch.mockResolvedValueOnce(userRes);
+
+    await useAuthStore.getState().restore();
+
+    const state = useAuthStore.getState();
+    expect(state.user).toEqual(userRes);
+    expect(state.token).toBe("jwt-123");
+    expect(state.restored).toBe(true);
   });
 
   it("restore failure clears token and user", async () => {
