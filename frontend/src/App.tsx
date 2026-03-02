@@ -19,6 +19,7 @@ import { useAuthStore } from "./stores/auth";
 const EntityAnalysis = lazy(() => import("./pages/EntityAnalysis").then((m) => ({ default: m.EntityAnalysis })));
 const Analytics = lazy(() => import("./pages/Analytics").then((m) => ({ default: m.Analytics })));
 const ReportsPage = lazy(() => import("./pages/Reports").then((m) => ({ default: m.Reports })));
+const ActivityPage = lazy(() => import("./pages/Activity").then((m) => ({ default: m.Activity })));
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -89,6 +90,7 @@ export function App() {
         {IS_PATTERNS_ENABLED && <Route path="patterns/:entityId" element={<Patterns />} />}
         <Route path="analytics" element={<Suspense fallback={<Spinner />}><Analytics /></Suspense>} />
         <Route path="reports" element={<Suspense fallback={<Spinner />}><ReportsPage /></Suspense>} />
+        <Route path="activity" element={<Suspense fallback={<Spinner />}><ActivityPage /></Suspense>} />
         <Route path="baseline/:entityId" element={<Baseline />} />
         {!IS_PUBLIC_MODE && <Route path="investigations" element={<Investigations />} />}
         {!IS_PUBLIC_MODE && <Route path="investigations/:investigationId" element={<Investigations />} />}

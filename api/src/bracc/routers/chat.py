@@ -25,6 +25,7 @@ from bracc.config import settings
 from bracc.dependencies import get_session
 from bracc.middleware.rate_limit import limiter
 from bracc.services.neo4j_service import execute_query, sanitize_props
+from bracc.routers.activity import log_activity
 from bracc.services.transparency_tools import (
     tool_web_search,
     tool_search_emendas,
@@ -942,6 +943,17 @@ async def chat(
     _trim_conversation(history)
 
     suggestions = _generate_suggestions(reply, entities, body.message)
+
+    # Log activity
+    log_activity(
+        activity_type="chat",
+        title=body.message[:80],
+        description=f"{len(entities)} entities, {len(evidence)} sources",
+        source="chatbot",
+        result_count=len(entities),
+        cost_usd=round(cost, 6),
+        client_ip=client_id,
+    )
 
     return ChatResponse(
         reply=reply,

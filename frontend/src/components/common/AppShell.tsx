@@ -6,6 +6,7 @@ import {
   Activity,
   BarChart3,
   FileText,
+  Clock,
   ChevronLeft,
   ChevronRight,
   FolderOpen,
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { path: "/app/investigations", icon: FolderOpen, labelKey: "nav.investigations" },
   { path: "/app/analytics", icon: Activity, labelKey: "nav.analytics" },
   { path: "/app/reports", icon: FileText, labelKey: "nav.reports" },
+  { path: "/app/activity", icon: Clock, labelKey: "nav.activity" },
 ] as const;
 
 export function AppShell() {
