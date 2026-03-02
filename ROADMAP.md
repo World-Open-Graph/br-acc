@@ -619,6 +619,41 @@ O projeto [Intelink](https://intelink.ia.br) (EGOS) já implementou capacidades 
 
 ---
 
+## Estratégia de Performance: O que as Big Techs fazem
+
+| Empresa | Técnica | Nosso Equivalente | Issue |
+|---|---|---|---|
+| **LinkedIn** | RAM-first + index every queried property | pagecache=22G + 12 indexes | TASK-002 |
+| **Palantir Gotham** | Bounded traversals (max 3 hops) + anomaly scores pré-computados | GDS PageRank + bounded queries | [#22](https://github.com/enioxt/br-acc/issues/22) |
+| **Facebook TAO** | Cache-aside pattern — Redis na frente do banco | Redis 512MB + cache-aside nas API routes | [#19](https://github.com/enioxt/br-acc/issues/19) |
+| **Google Knowledge Graph** | Lucene fulltext + entity linking | Neo4j fulltext indexes + entity resolution (Phase 7.5) | [#17](https://github.com/enioxt/br-acc/issues/17) |
+
+### Infraestrutura Atual
+
+```
+Contabo VPS: 12 vCPU, 48GB RAM, 500GB SSD ($35/mo)
+├── Neo4j 5 Community (heap 16G, pagecache 22G) — APÓS ETL
+├── Redis 7 Alpine (512MB LRU cache) — PRONTO
+├── FastAPI (Python) — API backend
+├── React + Vite — Frontend (bracc.egos.ia.br)
+└── Caddy — Reverse proxy + TLS
+```
+
+### GitHub Issues Abertas (23 total)
+
+| Categoria | Issues |
+|---|---|
+| **Performance** | #19 Redis, #20 GDS, #22 Bounded traversals |
+| **Pipelines ETL** | #5 Extrateto, #12 IBGE, #13 DENATRAN, #14 Reguladoras, #15 Meio Ambiente, #16 SIAFI |
+| **Algoritmos** | #6 Benford, #7 HHI, #17 Entity Resolution |
+| **Frontend** | #21 Website Redesign (help wanted) |
+| **Infra** | #8 Bots, #9 Fork Monitor, #11 PR Coordination |
+| **i18n/Docs** | #1 Frontend PT-BR, #2 API PT-BR, #3 Tradução, #4 FAQ |
+| **Agentes** | #23 Gem Hunter |
+| **Global** | #18 Interoperabilidade (FtM, Aleph, ICIJ) |
+
+---
+
 ## Links
 
 - **Código:** [github.com/enioxt/br-acc](https://github.com/enioxt/br-acc) (fork ativo, futuro "Intelink")

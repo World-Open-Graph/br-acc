@@ -36,6 +36,20 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - bracc
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
   api:
     build: ../api
     restart: unless-stopped
@@ -47,10 +61,13 @@ services:
       INVITE_CODE: ${INVITE_CODE:-}
       CORS_ORIGINS: https://${DOMAIN}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      REDIS_URL: redis://redis:6379/0
     networks:
       - bracc
     depends_on:
       neo4j:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   frontend:
@@ -67,5 +84,6 @@ networks:
 
 volumes:
   neo4j-data:
+  redis-data:
   caddy-data:
   caddy-config:
