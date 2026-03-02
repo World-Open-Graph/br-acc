@@ -348,9 +348,9 @@
 - [x] 23 issues GitHub abertas, 0 fechadas
 - [x] ETL: CPU processing (32GB em disco), nao internet
 - [x] Relatorio Patense em /reports/patense.html (nao linkado na landing)
-- [ ] Falta: pre-commit hooks no repo EGOS-Inteligencia
-- [ ] Falta: pagina dedicada de relatorios na landing
-- [ ] Falta: rebuild da imagem Docker da API (DNS transient error, hotfix via docker cp)
+- [x] Pre-commit hooks instalados (secrets, large files, Python syntax) ✅ (02/03/2026)
+- [x] ReportsShowcase na landing (Patense report linkado) ✅ (02/03/2026)
+- [x] Docker API rebuilt (DNS resolvido) ✅ (02/03/2026)
 
 ### TASK-042: /app — Plataforma de Pesquisa Colaborativa ⏳ (P1)
 - [x] /app/search: Busca no grafo (JA EXISTE, public mode)
