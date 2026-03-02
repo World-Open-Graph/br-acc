@@ -3,144 +3,230 @@
     "date": "2026-01-15",
     "title": "Fork do Bruno — Nasce o Projeto",
     "description": "Fork do repositorio usebruno/bruno como base para construir plataforma de inteligencia publica brasileira. Estrutura inicial com 3 pacotes: API (FastAPI), Frontend (React+Vite), ETL (Python).",
-    "tags": ["foundation"]
+    "tags": [
+      "foundation"
+    ]
   },
   {
     "date": "2026-01-16",
     "title": "Fase 1: API Core + Frontend Base",
     "description": "Todos os endpoints da API, query service com Neo4j, mascaramento de CPF (LGPD), design system, componentes comuns, pagina de busca.",
-    "tags": ["api", "frontend"]
+    "tags": [
+      "api",
+      "frontend"
+    ]
   },
   {
     "date": "2026-01-17",
     "title": "Fase 1: Graph Explorer",
     "description": "Visualizacao force-directed do grafo, controles interativos, detalhes de entidade. Canvas otimizado com memoizacao.",
-    "tags": ["frontend", "feature"]
+    "tags": [
+      "frontend",
+      "feature"
+    ]
   },
   {
     "date": "2026-01-18",
     "title": "Fase 2: Pattern Analysis — 5 Padroes de Corrupcao",
     "description": "5 algoritmos MVP de deteccao: doacao-emenda, emenda-contratos, devedor-saude, sancionado-saude, empresa-fachada. Baseline comparison.",
-    "tags": ["ai", "feature"]
+    "tags": [
+      "ai",
+      "feature"
+    ]
   },
   {
     "date": "2026-01-20",
     "title": "Fase 3: ETL Pipelines — 4 Fontes Iniciais",
     "description": "Pipelines de transformacao, loader, resolucao de entidades, seed data. TSE, CEIS, Portal da Transparencia, Receita Federal.",
-    "tags": ["data", "infrastructure"]
+    "tags": [
+      "data",
+      "infrastructure"
+    ]
   },
   {
     "date": "2026-01-22",
     "title": "Fase 4: Investigation Workspace",
     "description": "CRUD de investigacoes, anotacoes, tags, compartilhamento publico, exportacao PDF. Workspace completo para pesquisadores.",
-    "tags": ["feature"]
+    "tags": [
+      "feature"
+    ]
   },
   {
     "date": "2026-01-24",
     "title": "Fase 5-6: Security, Auth, CI, Deploy",
     "description": "Correcoes de seguranca, code review, CI pipeline, autenticacao JWT, testes de integracao, primeiro deploy em producao.",
-    "tags": ["infrastructure", "security"]
+    "tags": [
+      "infrastructure",
+      "security"
+    ]
   },
   {
     "date": "2026-01-28",
     "title": "BigQuery + CNPJ Dataset Completo",
     "description": "Streaming do dataset completo de CNPJs via BigQuery Storage Read API. 53.6M empresas brasileiras como alvo.",
-    "tags": ["data", "infrastructure"]
+    "tags": [
+      "data",
+      "infrastructure"
+    ]
   },
   {
     "date": "2026-02-01",
     "title": "Hardening: Memoria, Backups, Monitoramento",
     "description": "Tuning de memoria Neo4j, backups automatizados, monitoramento de saude. Producao estavel no Contabo VPS.",
-    "tags": ["infrastructure"]
+    "tags": [
+      "infrastructure"
+    ]
   },
   {
     "date": "2026-02-05",
     "title": "Fase 10: 15 Tipos de Nos + Correcoes IDOR",
     "description": "Expansao para 15 tipos de entidade, correcoes criticas de IDOR (acesso nao autorizado), allowlist de labels em Cypher.",
-    "tags": ["security", "data"]
+    "tags": [
+      "security",
+      "data"
+    ]
   },
   {
     "date": "2026-02-08",
     "title": "Entity Analysis Dossier + Exposure Index",
     "description": "Pagina de dossie completo por entidade: indice de exposicao, insights AI, timeline, conexoes. UI overhaul fase 2.",
-    "tags": ["feature", "ai"]
+    "tags": [
+      "feature",
+      "ai"
+    ]
   },
   {
     "date": "2026-02-10",
     "title": "Fase 14: 10 Novos ETL Pipelines + 64 Testes",
     "description": "DataSUS, DOU, CEAP, municipais, leniencia, BCB penalidades. 64 testes cobrindo IDOR, datasus, dou, pages, hooks.",
-    "tags": ["data", "feature"]
+    "tags": [
+      "data",
+      "feature"
+    ]
   },
   {
     "date": "2026-02-12",
     "title": "5 Padroes Avancados de Corrupcao",
     "description": "Doacao-emenda loop, emenda-beneficiario contratos, devedor-saude operador, sancionado-saude, empresa-fachada contratos.",
-    "tags": ["ai", "feature"]
+    "tags": [
+      "ai",
+      "feature"
+    ]
   },
   {
     "date": "2026-02-15",
     "title": "TSE Historico 2002-2024 + Servidores",
     "description": "Dados eleitorais historicos de 22 anos. Matching de servidores via CPF parcial + nome (bypass LGPD masking).",
-    "tags": ["data"]
+    "tags": [
+      "data"
+    ]
   },
   {
     "date": "2026-02-18",
     "title": "Fork Monitor + Rho Health Score",
     "description": "Script aria2 para downloads, monitoramento automatico de forks upstream, calculo de saude do projeto (Rho score).",
-    "tags": ["infrastructure", "governance"]
+    "tags": [
+      "infrastructure",
+      "governance"
+    ]
   },
   {
     "date": "2026-02-20",
     "title": "DataJud CNJ + 210k Nos no Grafo",
     "description": "Download de dados judiciais do CNJ. Marco de 210.000 nos no grafo. Estrategia MCP documentada.",
-    "tags": ["data"]
+    "tags": [
+      "data"
+    ]
   },
   {
     "date": "2026-02-22",
     "title": "10 Relatorios de Investigacao Reais",
     "description": "Showcase com 10 investigacoes reais usando dados do Neo4j. Grupo Patense: R$217M BNDES, 13 empresas, R$2.15B divida.",
-    "tags": ["feature"]
+    "tags": [
+      "feature"
+    ]
   },
   {
     "date": "2026-02-24",
     "title": "Modo Publico + Live DB Status",
     "description": "Acesso publico sem login para busca. Status da base de dados em tempo real na landing page. Partnership CTA.",
-    "tags": ["feature", "infrastructure"]
+    "tags": [
+      "feature",
+      "infrastructure"
+    ]
   },
   {
     "date": "2026-02-26",
     "title": "Renomeado para EGOS Inteligencia",
     "description": "Rename BRACC -> EGOS Inteligencia. Remocao blocker mobile, bottom nav, LGPD CPF removal, README reescrito, mobile-first.",
-    "tags": ["feature"]
+    "tags": [
+      "feature"
+    ]
   },
   {
     "date": "2026-02-27",
     "title": "AI Chatbot na Landing Page",
     "description": "Chatbot com IA (OpenRouter + Neo4j tools + memoria) integrado na landing page. Substitui HeroGraph. Dark theme fix.",
-    "tags": ["ai", "feature"]
+    "tags": [
+      "ai",
+      "feature"
+    ]
   },
   {
     "date": "2026-02-28",
     "title": "DNS + Gem Hunter + 34 Tasks",
     "description": "DNS inteligencia.egos.ia.br configurado. Gem Hunter encontra 9 projetos open-source relevantes. Linguagem legal. CEAP integration plan.",
-    "tags": ["infrastructure", "governance"]
+    "tags": [
+      "infrastructure",
+      "governance"
+    ]
   },
   {
     "date": "2026-03-01",
     "title": "Governanca AI + Docker Unificado + 14 Tools OSINT",
     "description": "CODEOWNERS, politica de governanca para contribuidores AI, docker-compose unificado, bots Discord e Telegram com 14 ferramentas OSINT.",
-    "tags": ["governance", "ai", "infrastructure"]
+    "tags": [
+      "governance",
+      "ai",
+      "infrastructure"
+    ]
   },
   {
     "date": "2026-03-02",
     "title": "Cache Redis + 108 Fontes + Bots Live",
     "description": "Cache Redis para buscas rapidas, 108 fontes de dados publicos integradas, bots com 14 tools OSINT, FAQ PT-BR, governanca para PRs de IA.",
-    "tags": ["feature", "infrastructure", "data", "ai", "governance"]
+    "tags": [
+      "feature",
+      "infrastructure",
+      "data",
+      "ai",
+      "governance"
+    ]
   },
   {
     "date": "2026-03-02",
     "title": "SourceRegistry + ETL Progress + Healthcheck v2",
     "description": "Componente de transparencia total com 108 fontes e links diretos. Widget de progresso ETL ao vivo. Healthcheck com alertas Telegram. Diagnostico completo do sistema.",
-    "tags": ["feature", "infrastructure"]
+    "tags": [
+      "feature",
+      "infrastructure"
+    ]
+  },
+  {
+    "date": "2026-03-02",
+    "title": "Chatbot Investigativo + Journey System",
+    "description": "Agente AI com 8 ferramentas: busca web, emendas parlamentares, CEAP, transferências federais, PEPs por cidade. Journey system salva histórico de pesquisa localmente.",
+    "tags": [
+      "chatbot",
+      "transparência",
+      "CEAP",
+      "emendas",
+      "journey"
+    ],
+    "metrics": {
+      "tools": 8,
+      "apis": "DuckDuckGo, TransfereGov, Câmara dos Deputados",
+      "tasks": "30/49"
+    }
   }
 ]
