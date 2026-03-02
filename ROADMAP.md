@@ -1,4 +1,4 @@
-# BR/ACC — Roadmap de Integração de Dados
+# EGOS Inteligência — Roadmap de Integração de Dados
 
 > **Visão:** Construir o maior grafo aberto de relações entre entidades públicas e privadas do Brasil,
 > cruzando 79+ bases de dados públicas para detectar padrões de corrupção, conflitos de interesse e
@@ -29,7 +29,7 @@
 | **Bot IA** | Gemini 2.0 Flash (free) → fallback pago, memória persistente |
 | **Servidor** | Contabo Cloud VPS 40 SSD — 12 vCPU, 48GB RAM, 500GB SSD ($35/mo) |
 | **Custo total** | $36/mês (100% autofinanciado, sem grants) |
-| **Frontend** | bracc.egos.ia.br — público, sem login, stats em tempo real |
+| **Frontend** | inteligencia.egos.ia.br — público, sem login, stats em tempo real |
 | **Investigações** | Patense v2 publicado (R$217M BNDES, 4 empresas, 563 ops) |
 | **Performance** | Scripts prontos: Neo4j 16G heap + 22G pagecache + 12 indexes |
 | **Framework** | Construído com EGOS (egos.ia.br) — 24 agentes, MCP tools |
@@ -246,7 +246,7 @@
 | Discord bot com dados reais | ✅ Feito (13 ferramentas, modo agente) | Automático |
 | Telegram bot com dados reais | ✅ Feito (@EGOSin_bot, 13 ferramentas) | Automático |
 | API pública com dados reais | ✅ Feito | Automático |
-| Frontend público (bracc.egos.ia.br) | ✅ Feito (sem login) | Automático |
+| Frontend público (inteligencia.egos.ia.br) | ✅ Feito (sem login) | Automático |
 
 **Resultado:** 210k+ nós nativos + 4.1M OpenSanctions = maior grafo aberto de entidades BR. 10 bases carregadas, 2 bots 24/7, frontend público.
 
@@ -542,7 +542,7 @@ O projeto [Intelink](https://intelink.ia.br) (EGOS) já implementou capacidades 
 
 ---
 
-## Fork Divergence Plan: br-acc → Intelink
+## Fork Divergence Plan: br-acc → EGOS Inteligência
 
 > **Status:** Divergência em andamento. Rename planejado para quando atingir >80% de código próprio.
 
@@ -566,7 +566,7 @@ O projeto [Intelink](https://intelink.ia.br) (EGOS) já implementou capacidades 
 1. **Agora:** Manter `enioxt/br-acc` no GitHub (rastrear upstream)
 2. **Agora:** Branding público como "Intelink" no README e website
 3. **Mês 2:** Quando frontend divergir >80%, criar repo `enioxt/intelink`
-4. **Mês 2:** Redirect `bracc.egos.ia.br` → `intelink.egos.ia.br`
+4. **Mês 2:** Redirect `bracc.egos.ia.br` → `inteligencia.egos.ia.br`
 5. **Contínuo:** Monitorar forks do upstream para cherry-pick de melhorias
 
 ### O que monitorar no upstream
@@ -635,7 +635,7 @@ Contabo VPS: 12 vCPU, 48GB RAM, 500GB SSD ($35/mo)
 ├── Neo4j 5 Community (heap 16G, pagecache 22G) — APÓS ETL
 ├── Redis 7 Alpine (512MB LRU cache) — PRONTO
 ├── FastAPI (Python) — API backend
-├── React + Vite — Frontend (bracc.egos.ia.br)
+├── React + Vite — Frontend (inteligencia.egos.ia.br)
 └── Caddy — Reverse proxy + TLS
 ```
 
@@ -656,10 +656,10 @@ Contabo VPS: 12 vCPU, 48GB RAM, 500GB SSD ($35/mo)
 
 ## Links
 
-- **Código:** [github.com/enioxt/br-acc](https://github.com/enioxt/br-acc) (fork ativo, futuro "Intelink")
+- **Código:** [github.com/enioxt/br-acc](https://github.com/enioxt/br-acc) (fork do World-Open-Graph/br-acc)
 - **Upstream:** World-Open-Graph/br-acc (monitorando)
 - **API ao vivo:** http://217.216.95.126/api/v1/public/
-- **Frontend:** [bracc.egos.ia.br](https://bracc.egos.ia.br) (público, sem login)
+- **Frontend:** [inteligencia.egos.ia.br](https://inteligencia.egos.ia.br) (público, sem login)
 - **Bot Discord:** EGOS Intelligence#2881 (DMs abertas, 13 tools)
 - **Bot Telegram:** [@EGOSin_bot](https://t.me/EGOSin_bot) (13 tools)
 - **Ecossistema EGOS:** [egos.ia.br](https://egos.ia.br)

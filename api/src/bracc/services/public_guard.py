@@ -47,8 +47,7 @@ def infer_exposure_tier(labels: list[str]) -> str:
 def sanitize_public_properties(
     props: dict[str, str | float | int | bool | None],
 ) -> dict[str, str | float | int | bool | None]:
-    if not is_public_mode():
-        return props
+    # LGPD: ALWAYS strip CPF and sensitive personal data from responses
     return {
         key: value
         for key, value in props.items()
@@ -57,19 +56,19 @@ def sanitize_public_properties(
 
 
 def enforce_entity_lookup_policy(raw_identifier: str) -> None:
-    if not is_public_mode():
-        return
-    enforce_entity_lookup_enabled()
+    if is_public_mode():
+        enforce_entity_lookup_enabled()
     clean = _clean_identifier(raw_identifier)
-    if CPF_PATTERN.match(clean) and not settings.public_allow_person:
+    # LGPD: CPF lookup is ALWAYS blocked — CPF is personal data
+    if CPF_PATTERN.match(clean):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Person lookup disabled in public mode",
+            detail="Busca por CPF não é permitida (LGPD). Use CNPJ ou nome.",
         )
-    if not CNPJ_PATTERN.match(clean) and not CPF_PATTERN.match(clean):
+    if not CNPJ_PATTERN.match(clean):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid CPF or CNPJ format",
+            detail="Formato inválido. Use CNPJ (14 dígitos) ou nome.",
         )
 
 

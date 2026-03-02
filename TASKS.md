@@ -1,4 +1,4 @@
-# TASKS.md — BR/ACC (SSOT)
+# TASKS.md — EGOS Inteligência (SSOT)
 
 > **Updated:** 2026-03-02 | **GitHub Issues:** https://github.com/enioxt/br-acc/issues
 
@@ -160,6 +160,55 @@
 - [ ] Traduzir data-sources.md para PT-BR
 - [ ] Criar FAQ para leigos
 
+### TASK-024: Rename BR/ACC → EGOS Inteligência ✅ (02/03/2026)
+- [x] i18n.ts — todas as referências
+- [x] index.html — title
+- [x] AppShell.tsx — logo sidebar
+- [x] README.md — reescrito completo
+- [x] ROADMAP.md — headers e links
+- [x] TASKS.md — header
+> **DNS pendente:** Criar `inteligencia.egos.ia.br` e atualizar Caddy
+
+### TASK-025: LGPD — Remover CPF do sistema inteiro ✅ (02/03/2026)
+- [x] Frontend: remover CPF de search placeholders (i18n.ts)
+- [x] Frontend: remover CPF de EntityDetail.tsx (só mostra CNPJ)
+- [x] Backend: `public_guard.py` — CPF lookup SEMPRE bloqueado (não só public mode)
+- [x] Backend: `sanitize_public_properties` — SEMPRE filtra CPF (não só public mode)
+- [x] Backend: CPF masking middleware mantido como safety net
+> **Arquivos:** `frontend/src/i18n.ts`, `frontend/src/components/entity/EntityDetail.tsx`, `api/src/bracc/services/public_guard.py`
+
+### TASK-026: Mobile-First — Remover bloqueio de tela <1024px ✅ (02/03/2026)
+- [x] Remover `isMobileBlocked` do AppShell.tsx
+- [x] Adicionar bottom navigation para mobile (<768px)
+- [x] Mobile layout funcional com Outlet + nav fixa
+> **Arquivos:** `frontend/src/components/common/AppShell.tsx`
+
+### TASK-027: Chatbot AI na Landing Page ⏳
+- [ ] Backend: `POST /api/v1/chat` — endpoint conversacional
+- [ ] Frontend: `ChatInterface.tsx` — componente mobile-first
+- [ ] Integrar na Landing como interface primária
+- [ ] Phase 1: busca estruturada Neo4j (sem LLM)
+- [ ] Phase 2: LLM via OpenRouter para NLU
+- [ ] Phase 3: rich results (entity cards, mini-grafos)
+
+### TASK-028: Investigações — Upload, Fork, Compartilhamento ⬜
+- [ ] Formatos de exportação: MD, PDF, DOCX, JSON, HTML
+- [ ] Formatos de importação: MD, JSON, HTML (os que fazem sentido)
+- [ ] Fork/clone de investigações públicas
+- [ ] Espiral de escuta — continuar investigação a partir de outra
+- [ ] Interação e comentários em investigações compartilhadas
+
+### TASK-029: Journey Tracker v2 ⬜
+- [ ] Design novo (não port do Intelink)
+- [ ] Rastreamento de passos de investigação
+- [ ] FAB mobile-friendly
+- [ ] Exportação de timeline
+
+### TASK-030: Gem Hunter Agent ⬜ (GitHub #23)
+- [ ] Construir modular no egos-lab framework
+- [ ] Scanner de repos GitHub brasileiros de transparência
+- [ ] Primeiro deploy no website EGOS Inteligência
+
 ---
 
 ## Métricas
@@ -169,7 +218,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 23 | 02/03/2026 |
-| **Tasks concluídas** | 3/23 | 02/03/2026 |
+| **Tasks concluídas** | 7/30 | 02/03/2026 |
 | **ETL Status** | Phase 1 em andamento | 02/03/2026 |
 
 ---

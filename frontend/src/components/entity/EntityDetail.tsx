@@ -56,15 +56,15 @@ export function EntityDetail({ entityId, onClose }: EntityDetailProps) {
             {String(entity.properties.name ?? entity.properties.razao_social ?? entity.properties.nome ?? "N/A")}
           </h3>
 
-          {(entity.properties.cpf || entity.properties.cnpj) && (
+          {entity.properties.cnpj && (
             <p className={styles.document}>
-              {String(entity.properties.cpf || entity.properties.cnpj)}
+              {String(entity.properties.cnpj)}
             </p>
           )}
 
           <div className={styles.properties}>
             {Object.entries(entity.properties).filter(
-              ([key]) => !["name", "razao_social", "nome", "cpf", "cnpj"].includes(key),
+              ([key]) => !["name", "razao_social", "nome", "cpf", "cnpj", "cpf_cnpj"].includes(key),
             ).map(([key, value]) => (
               <div key={key} className={styles.property}>
                 <span className={styles.propKey}>{key}</span>

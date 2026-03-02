@@ -1,37 +1,41 @@
-# BR/ACC Open Graph — Dados Públicos do Brasil em Grafo
+# EGOS Inteligência — Plataforma Aberta de Cruzamento de Dados Públicos
 
 <!-- RHO_BADGE --> **Rho Score:** 🟡 0.30 (WARNING) | Contributors: 4 | Commits (30d): 94 | Updated: 2026-03-02 <!-- /RHO_BADGE -->
 
-[![BRACC Header](docs/brand/bracc-header.jpg)](docs/brand/bracc-header.jpg)
-
 Idioma: **Português (Brasil)** | [English](#english)
 
-[![CI](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml/badge.svg)](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml)
 [![Licença: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![API Status](https://img.shields.io/badge/API-ONLINE-brightgreen)](http://217.216.95.126/health)
-[![Discord Bot](https://img.shields.io/badge/Discord-EGOS%20Intelligence-7289da)](https://discord.gg/egos)
+[![Discord Bot](https://img.shields.io/badge/Discord-EGOS%20Intelig%C3%AAncia-7289da)](https://discord.gg/egos)
+[![Telegram Bot](https://img.shields.io/badge/Telegram-@EGOSin__bot-26A5E4)](https://t.me/EGOSin_bot)
 
-> **Em uma frase:** O BR/ACC conecta dados públicos do Brasil (empresas, políticos, contratos, sanções, doações eleitorais) em um grafo que mostra quem se relaciona com quem.
+> **Em uma frase:** O EGOS Inteligência conecta dados públicos do Brasil (empresas, políticos, contratos, sanções, doações eleitorais) em um grafo interativo que mostra quem se relaciona com quem.
 
-Site: [bracc.egos.ia.br](https://bracc.egos.ia.br) | Ecossistema: [EGOS](https://egos.ia.br) | Upstream: [World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc)
-
-> **Construído com o [EGOS Framework](https://github.com/enioxt/egos-lab)** — plataforma open-source de agentes AI com 24 agentes registrados, MCP tools, e governança SSOT. O BR/ACC é o módulo de inteligência OSINT do ecossistema. O [Intelink](https://intelink.ia.br) é a interface de inteligência policial (em desenvolvimento).
-
-> **Este fork** é mantido pela comunidade [EGOS](https://egos.ia.br) com foco em: tradução PT-BR, acessibilidade para leigos, integração com bots (Discord/Telegram/WhatsApp) e algoritmos de detecção de anomalias. Todas as contribuições são enviadas como PR ao repositório original.
+Site: [inteligencia.egos.ia.br](https://inteligencia.egos.ia.br) | Ecossistema: [EGOS](https://egos.ia.br) | Comunidade: [@ethikin](https://t.me/ethikin)
 
 ---
 
-## Status do Servidor (LIVE)
+## Origem e Diferenças
 
-| Serviço | Status | URL |
+Este projeto é um **fork** do [World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc), uma infraestrutura open-source para dados públicos brasileiros em grafo.
+
+O EGOS Inteligência diverge significativamente do upstream:
+
+| Aspecto | Upstream (br-acc) | EGOS Inteligência |
 |---|---|---|
-| **API Pública** | ✅ Online | http://217.216.95.126/health |
-| **Frontend** | ✅ Online | http://217.216.95.126 |
-| **Neo4j** | ✅ Healthy (48GB RAM) | Interno |
-| **Discord Bot** | ✅ Online (14 tools) | `@EGOS Intelligence#2881` |
-| **Telegram Bot** | ✅ Online (14 tools) | [@EGOSin_bot](https://t.me/EGOSin_bot) |
+| **Idioma** | Inglês | Português-BR nativo |
+| **Interface** | Desktop-only, requer login | Mobile-first, público, chatbot AI |
+| **Dados carregados** | Demo/seed | 278k nós + 53.6M empresas (ETL em andamento) |
+| **Bots AI** | Nenhum | Discord + Telegram (14 ferramentas OSINT) |
+| **Investigações** | Não | Upload, fork, compartilhamento público |
+| **Relatórios** | Não | 11 relatórios publicados (ex: Patense R$217M BNDES) |
+| **Infraestrutura** | Local/demo | Contabo VPS (12 vCPU, 48GB RAM) + Redis |
+| **LGPD** | Parcial | CPF bloqueado em todo o sistema, masking middleware |
+| **Fontes planejadas** | 13 | 79 fontes no roadmap |
+| **Algoritmos** | Básico | PageRank, Benford, HHI, Community Detection (roadmap) |
+| **Ecossistema** | Standalone | Integrado ao [EGOS Framework](https://egos.ia.br) (24 agentes AI) |
 
-**Servidor:** Contabo Cloud VPS 40 SSD — 12 vCPU, 48GB RAM, 500GB SSD ($35/mo)
+Mantemos rastreamento do upstream e contribuímos PRs quando aplicável.
 
 ---
 
@@ -39,103 +43,74 @@ Site: [bracc.egos.ia.br](https://bracc.egos.ia.br) | Ecossistema: [EGOS](https:/
 
 Imagine que você quer saber: **"A empresa que ganhou a licitação do hospital tem alguma ligação com o político que aprovou a verba?"**
 
-Hoje, para responder isso, você precisaria acessar dezenas de portais diferentes (Receita Federal, TSE, Portal da Transparência, Diários Oficiais...) e cruzar os dados manualmente.
+Hoje, você precisaria acessar dezenas de portais diferentes (Receita Federal, TSE, Portal da Transparência...) e cruzar manualmente.
 
-O BR/ACC faz isso automaticamente:
+O EGOS Inteligência faz isso automaticamente:
 
 1. **Coleta** dados de 38+ fontes oficiais do governo brasileiro
-2. **Conecta** esses dados em um grafo de relacionamentos
-3. **Mostra** os vínculos de forma visual e pesquisável
+2. **Conecta** em um grafo de relacionamentos
+3. **Revela** vínculos de forma visual, pesquisável e compartilhável
 
 ### O Que Já Está Dentro
 
 | O Que | Fonte | Volume |
 |---|---|---|
-| Empresas e sócios | CNPJ (Receita Federal) | 53,6 milhões de empresas |
-| Doações eleitorais | TSE | 7,1 milhões de registros (2002-2024) |
-| Contratos federais | Portal da Transparência + ComprasNet | 1,1 milhão de contratos |
-| Empresas punidas | CEIS, TCU, IBAMA, CVM | 150 mil sanções |
-| Dívidas com a União | PGFN | 24 milhões de débitos |
-| Diário Oficial | DOU | 3,98 milhões de atos |
-| Gastos de deputados | Câmara (CEAP) | 4,6 milhões de despesas |
-| Offshores (Panama/Paradise Papers) | ICIJ | 4,8 mil entidades |
-| Pessoas politicamente expostas | CGU + OpenSanctions | 252 mil registros |
-| Processos no STF | STF | 2,38 milhões de casos |
-| Patrimônio de candidatos | TSE Bens | 14,3 milhões de bens declarados |
-| Filiações partidárias | TSE Filiados | 16,5 milhões de filiações |
+| Empresas e sócios | CNPJ (Receita Federal) | 53,6M empresas (ETL em andamento) |
+| Doações eleitorais | TSE | 7,1M registros (2002-2024) |
+| Contratos federais | Portal da Transparência + ComprasNet | 1,1M contratos |
+| Empresas punidas | CEIS, TCU, IBAMA, CVM | 150k sanções |
+| Dívidas com a União | PGFN | 24M débitos |
+| Diário Oficial | DOU | 3,98M atos |
+| Gastos de deputados | Câmara (CEAP) | 4,6M despesas |
+| Offshores | ICIJ (Panama/Paradise/Pandora Papers) | 4,8k entidades |
+| PEPs | CGU + OpenSanctions | 252k registros |
+| Processos no STF | STF | 2,38M casos |
+| Patrimônio de candidatos | TSE Bens | 14,3M bens declarados |
 
-**Meta: 141 milhões de nós e 92 milhões de conexões.**
+**Meta: 141M nós e 92M conexões.** Status atual: 278.501 nós carregados, CNPJ ETL em progresso.
 
-**Status atual (2026-03-02): 278.501 nós e 30.916 conexões carregados.** Faltam CNPJ (53.6M), DataJud (80M+) e fontes financeiras para atingir a meta.
-
-> **Importante:** Padrões encontrados nos dados são **sinais**, não prova jurídica. Toda conclusão de alto risco exige revisão humana.
-
-Para a matriz legal completa de datasets, veja: [Matriz de Bases Públicas Brasil](docs/pt-BR/datasets/matriz-bases-publicas-brasil.md)
+> **Importante:** Padrões encontrados são **sinais**, não prova jurídica. Toda conclusão requer revisão humana.
 
 ---
 
-## Quero Usar! Como Começo?
+## Quero Usar!
 
-### Opção 1: Usar os Bots (Sem Instalar Nada)
+### Opção 1: Chatbot AI (Sem Instalar Nada)
 
-Os dados do BR/ACC estão disponíveis via bots de mensagem que respondem em português:
+O assistente EGOS Inteligência está disponível 24/7 via:
 
-**Discord:** Entre no [Servidor EGOS](https://discord.gg/egos) e mencione `@EGOS Intelligence`
+- **Website:** [inteligencia.egos.ia.br](https://inteligencia.egos.ia.br) — chatbot direto na página inicial
+- **Discord:** [Servidor EGOS](https://discord.gg/egos) → mencione `@EGOS Intelligence`
+- **Telegram:** [@EGOSin_bot](https://t.me/EGOSin_bot)
 
 Exemplos de perguntas:
 ```
-@EGOS Intelligence quais os vínculos da empresa CNPJ 11222333000181?
-@EGOS Intelligence quais são as estatísticas do BR/ACC?
-@EGOS Intelligence busque licitações de saúde em São Paulo
-@EGOS Intelligence quem são os maiores supersalários do TJSP?
+Quais os vínculos da empresa CNPJ 11.222.333/0001-81?
+Quanto a empresa X recebeu do BNDES?
+Busque licitações de saúde em São Paulo
+Quem são os maiores supersalários do TJSP?
 ```
 
-Os bots têm **14 ferramentas OSINT** integradas:
+**14 ferramentas OSINT integradas:**
 
 | Ferramenta | O Que Faz | Fonte |
 |---|---|---|
-| `bracc_meta_stats` | Estatísticas gerais do grafo | BR/ACC |
-| `bracc_company_graph` | Grafo de vínculos de empresa por CNPJ | BR/ACC |
-| `bracc_company_patterns` | Padrões de risco de empresa | BR/ACC |
-| `bndes_search` | Financiamentos do BNDES por empresa (2002-presente) | BNDES Dados Abertos |
+| `egos_meta_stats` | Estatísticas gerais do grafo | EGOS Inteligência |
+| `egos_company_graph` | Grafo de vínculos por CNPJ | EGOS Inteligência |
+| `egos_company_patterns` | Padrões de risco de empresa | EGOS Inteligência |
+| `bndes_search` | Financiamentos do BNDES (2002-presente) | BNDES Dados Abertos |
 | `fetch_top_earners` | Maiores supersalários do Judiciário | Extrateto |
-| `check_specific_member` | Dados de servidor público específico | Extrateto |
-| `get_member_history` | Histórico mensal de pagamentos | Extrateto |
+| `check_specific_member` | Dados de servidor público | Extrateto |
+| `get_member_history` | Histórico de pagamentos | Extrateto |
 | `list_orgaos` | Ranking de órgãos do Judiciário | Extrateto |
 | `list_estados` | Estatísticas por estado | Extrateto |
-| `search_gazettes` | Busca em diários oficiais de 5.570+ municípios | Querido Diário |
-| `search_licitacoes` | Busca de licitações e pregões | Querido Diário |
-| `search_contratos` | Busca de contratos públicos | Querido Diário |
+| `search_gazettes` | Diários oficiais de 5.570+ municípios | Querido Diário |
+| `search_licitacoes` | Licitações e pregões | Querido Diário |
+| `search_contratos` | Contratos públicos | Querido Diário |
 | `web_search` | Busca web em tempo real | Exa AI |
 | `brazil_news_search` | Notícias recentes do Brasil | Exa AI |
 
-**Telegram:** [@EGOSin_bot](https://t.me/EGOSin_bot) — ✅ Online 24/7 (mesmas 14 ferramentas)
-
-**WhatsApp:** Em planejamento (Evolution API)
-
-### Opção 2: Rodar Localmente (Desenvolvedores)
-
-```bash
-git clone https://github.com/enioxt/br-acc.git
-cd br-acc
-cp .env.example .env
-# Edite o .env e defina NEO4J_PASSWORD
-
-cd infra && docker compose up -d
-# Aguarde Neo4j ficar healthy (~30s)
-
-export NEO4J_PASSWORD=sua_senha
-bash infra/scripts/seed-dev.sh
-```
-
-Depois de rodar:
-- **Frontend:** http://localhost:3000
-- **API:** http://localhost:8000/health
-- **Neo4j Browser:** http://localhost:7474
-
-### Opção 3: Usar Nossa API Pública
-
-A API está online e acessível:
+### Opção 2: API Pública
 
 ```bash
 # Estatísticas gerais
@@ -145,33 +120,48 @@ curl http://217.216.95.126/api/v1/public/meta
 curl http://217.216.95.126/api/v1/public/graph/company/11222333000181
 ```
 
+| Método | Rota | O Que Faz |
+|---|---|---|
+| GET | `/health` | Verifica se o servidor está online |
+| GET | `/api/v1/public/meta` | Estatísticas do grafo |
+| GET | `/api/v1/public/graph/company/{cnpj}` | Grafo de vínculos por CNPJ |
+| POST | `/api/v1/chat` | Chat conversacional (em desenvolvimento) |
+
+### Opção 3: Rodar Localmente
+
+```bash
+git clone https://github.com/enioxt/br-acc.git
+cd br-acc
+cp .env.example .env  # Edite NEO4J_PASSWORD
+
+cd infra && docker compose up -d
+# Aguarde Neo4j ficar healthy (~30s)
+
+export NEO4J_PASSWORD=sua_senha
+bash infra/scripts/seed-dev.sh
+```
+
+- **Frontend:** http://localhost:3000
+- **API:** http://localhost:8000/health
+- **Neo4j Browser:** http://localhost:7474
+
 ---
 
-## Como Funciona
+## Arquitetura
 
 ```
-[38+ Fontes Oficiais] → [ETL Python] → [Neo4j Grafo] → [API FastAPI] → [Frontend React + Bots]
+[79 Fontes Planejadas] → [ETL Python] → [Neo4j Grafo] → [FastAPI + Redis] → [React + Bots AI]
 ```
 
 | Componente | Tecnologia |
 |---|---|
 | **Banco de Dados** | Neo4j 5 Community (grafo) |
+| **Cache** | Redis 7 (512MB LRU, cache-aside) |
 | **Backend** | FastAPI (Python 3.12, assíncrono) |
-| **Frontend** | React 19 + Vite + grafo interativo |
+| **Frontend** | React 19 + Vite (mobile-first) |
 | **ETL** | Python com pandas (45 pipelines) |
-| **Bots** | Discord.js + AI Router (OpenRouter) |
-| **Infra** | Docker Compose + Caddy |
-
----
-
-## API Pública
-
-| Método | Rota | O Que Faz |
-|---|---|---|
-| GET | `/health` | Verifica se o servidor está online |
-| GET | `/api/v1/public/meta` | Estatísticas: total de dados carregados |
-| GET | `/api/v1/public/graph/company/{cnpj}` | Grafo de vínculos de uma empresa |
-| GET | `/api/v1/public/patterns/company/{cnpj}` | Padrões de risco (desabilitado no modo público) |
+| **Bots** | Discord.js + Telegraf + AI Router (OpenRouter) |
+| **Infra** | Docker Compose + Caddy + Contabo VPS |
 
 ---
 
@@ -180,63 +170,62 @@ curl http://217.216.95.126/api/v1/public/graph/company/11222333000181
 | Variável | Padrão | O Que Controla |
 |---|---|---|
 | `PUBLIC_MODE` | `true` | Modo público ativado |
-| `PUBLIC_ALLOW_PERSON` | `false` | Bloqueia busca por CPF/pessoa |
+| `PUBLIC_ALLOW_PERSON` | `false` | Bloqueia entidades de pessoa física |
 | `PATTERNS_ENABLED` | `false` | Desabilita detecção de padrões |
 
-Esses defaults cumprem a LGPD e evitam uso indevido.
+### Conformidade LGPD
+
+- **CPF é bloqueado em TODO o sistema** — busca, exibição, exportação
+- Middleware de masking intercepta qualquer CPF que escape para respostas JSON
+- Apenas dados de pessoa jurídica (CNPJ) e dados já públicos por lei são exibidos
+- Pessoa física aparece apenas por nome (sem documento), quando vinculada a cargo público (PEP)
+
+---
+
+## Roadmap
+
+Veja [ROADMAP.md](ROADMAP.md) para o plano completo. Destaques:
+
+| Fase | Status | O Que |
+|---|---|---|
+| **CNPJ ETL** | 🔵 Em andamento | 53.6M empresas da Receita Federal |
+| **Chatbot AI** | 🔵 Em desenvolvimento | Interface conversacional no website |
+| **Redis Cache** | ✅ Pronto | Cache-aside para queries frequentes |
+| **GDS Algoritmos** | 🟡 Planejado | PageRank, Community Detection, Shortest Path |
+| **Investigações** | 🟡 Planejado | Upload, fork, compartilhamento, exportação |
+| **Journey Tracker** | 🟡 Planejado | Rastreamento de passos de investigação |
+| **79 Fontes** | 🟡 Gradual | DataJud, IBGE, DENATRAN, reguladoras... |
 
 ---
 
 ## Quero Contribuir!
 
-Contribuições são muito bem-vindas. Veja [CONTRIBUTING.md](CONTRIBUTING.md) e o [ROADMAP.md](ROADMAP.md).
-
 | Nível | O Que Fazer | Precisa Programar? |
 |---|---|---|
 | **Iniciante** | Tradução, documentação, reportar bugs | Não |
-| **Intermediário** | Pipelines ETL para novas fontes de dados | Sim (Python) |
+| **Intermediário** | Pipelines ETL para novas fontes | Sim (Python) |
 | **Avançado** | Algoritmos de anomalia, queries Cypher | Sim (Python + Neo4j) |
 
-**Issues abertas:** [github.com/enioxt/br-acc/issues](https://github.com/enioxt/br-acc/issues) — várias marcadas como `good first issue`
-
-### O Que Este Fork Adiciona
-
-- ✅ README PT-BR acessível para leigos
-- ✅ Servidor público com API online (48GB RAM, Contabo VPS)
-- ✅ 278.501 nós carregados (PEPs, sanções, empresas, OpenSanctions)
-- ✅ Bot Discord com 14 ferramentas OSINT (24/7)
-- ✅ Bot Telegram @EGOSin_bot com 14 ferramentas OSINT (24/7)
-- ✅ BNDES tool — consulta financiamentos do BNDES por empresa (2002-presente)
-- ✅ Memória persistente — conversas sobrevivem restart (Supabase)
-- ✅ Auto-criação de GitHub Issues a partir de feedback dos usuários
-- ✅ ROADMAP público com coordenação de tasks
-- ✅ 11 relatórios de investigação reais publicados (incluindo Patense R$217M BNDES)
-- ✅ Plataforma de investigações compartilhadas (anônimas, crowd-sourced)
-- 🔵 Tradução completa do frontend (i18next)
--  Algoritmos: Lei de Benford, HHI
-- 🟡 ETL: Extrateto (salários do judiciário)
-- 🟡 Bot WhatsApp (Evolution API)
-- 🟡 MCP Server para IDEs AI
-
-### Infraestrutura & Custos (Transparência Total — todos em USD)
-
-| Serviço | O Quê | Custo Mensal (USD) |
-|---------|-------|-------------------|
-| **Contabo VPS** | Cloud VPS 40 SSD: 12 vCPU, 48GB RAM, 500GB SSD. Roda Neo4j (278k nós), 2 bots AI, frontend, API, Caddy SSL | $35/mo |
-| **Vercel** | egos.ia.br (Mission Control), bracc.egos.ia.br | Free tier |
-| **Supabase** | PostgreSQL (conversas, relatórios, tasks, custos) | Free tier |
-| **OpenRouter** | Gemini 2.0 Flash (free tier) para IA dos bots | $0 (free tier) |
-| **Domínio** | egos.ia.br | ~$7/ano (~$0.60/mo) |
-| **Total** | Plataforma OSINT completa + 2 bots AI + website | **~$36/mo** |
-
-> **Financiamento:** Este projeto é 100% autofinanciado. Não temos patrocínio, grants ou doações. Se você acha útil, considere contribuir: [egos.ia.br/apoie](https://egos.ia.br). Qualquer valor ajuda a manter os servidores online.
-
-**Por que Contabo?** Neo4j na nuvem (AuraDB) custa $65+/mês. Contabo dá 12 vCPU, 48GB RAM, 500GB SSD por $35. Quando carregarmos CNPJ (53.6M empresas) + DataJud (80M processos), vamos precisar dessa capacidade.
-
-**Por que dados locais?** APIs do governo são rate-limited, frequentemente fora do ar (Receita Federal está offline há 3+ dias), e retornam 403/400 em requisições de alto volume. Dados locais = cruzamento em milissegundos, sem dependências externas.
+**Issues abertas:** [github.com/enioxt/br-acc/issues](https://github.com/enioxt/br-acc/issues) — várias marcadas como `good first issue` e `help wanted`
 
 ---
 
+## Infraestrutura & Custos (Transparência Total)
+
+| Serviço | O Quê | Custo (USD/mês) |
+|---|---|---|
+| **Contabo VPS** | 12 vCPU, 48GB RAM, 500GB SSD — Neo4j, Redis, API, bots, frontend | $35 |
+| **Vercel** | egos.ia.br, inteligencia.egos.ia.br | Free |
+| **Supabase** | PostgreSQL (conversas, relatórios, custos) | Free |
+| **OpenRouter** | Gemini 2.0 Flash para IA dos bots | Free |
+| **Domínio** | egos.ia.br | ~$0.60 |
+| **Total** | Plataforma OSINT completa + 2 bots AI + website | **~$36/mo** |
+
+> 100% autofinanciado. Se achar útil, considere apoiar: [egos.ia.br](https://egos.ia.br)
+
+---
+
+## Legal & Ética
 
 - [Política de Ética](ETHICS.md) — usos proibidos, linguagem neutra
 - [LGPD](LGPD.md) — tratamento de dados pessoais
@@ -256,17 +245,17 @@ Contribuições são muito bem-vindas. Veja [CONTRIBUTING.md](CONTRIBUTING.md) e
 
 # English
 
-BR/ACC Open Graph is an open-source graph infrastructure for Brazilian public data intelligence, built by [World Open Graph](https://worldopengraph.com).
+EGOS Inteligência is an open-source platform for cross-referencing Brazilian public data, built on a graph database connecting companies, politicians, contracts, sanctions, and electoral donations.
 
-This fork is maintained by the [EGOS](https://egos.ia.br) community, focused on: PT-BR translation, accessibility for non-technical users, bot integrations (Discord/Telegram/WhatsApp), and anomaly detection algorithms. All contributions are submitted as PRs to the [upstream repository](https://github.com/World-Open-Graph/br-acc).
+**Forked from** [World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc) with significant divergence: mobile-first UI, AI chatbot, LGPD-compliant CPF blocking, 14 OSINT tools via Discord/Telegram bots, 79 planned data sources, and integration with the [EGOS Framework](https://egos.ia.br) (24 AI agents).
 
 ## Live Infrastructure
 
 | Service | Status | URL |
 |---|---|---|
 | **Public API** | ✅ Online | http://217.216.95.126/health |
-| **Frontend** | ✅ Online | http://217.216.95.126 |
-| **Discord Bot** | ✅ Online (14 OSINT tools) | `@EGOS Intelligence#2881` |
+| **Frontend** | ✅ Online | [inteligencia.egos.ia.br](https://inteligencia.egos.ia.br) |
+| **Discord Bot** | ✅ Online (14 OSINT tools) | `@EGOS Intelligence` |
 | **Telegram Bot** | ✅ Online (14 OSINT tools) | [@EGOSin_bot](https://t.me/EGOSin_bot) |
 
 ## Quick Start
@@ -278,29 +267,26 @@ cd infra && docker compose up -d
 export NEO4J_PASSWORD=your_password && bash infra/scripts/seed-dev.sh
 ```
 
-## What This Fork Adds
+## Key Differences from Upstream
 
-- 278,501 nodes loaded (PEPs, sanctions, companies, OpenSanctions)
-- Full PT-BR translation (docs, frontend, API errors)
-- Public server with live API (12 vCPU, 48GB RAM, 500GB SSD — Contabo VPS $35/mo)
-- Discord + Telegram bots with 14 OSINT tools via EGOS AI Router
-- Auto-GitHub-Issue creation from user feedback
-- 11 real investigation reports published (including Patense R$217M BNDES analysis)
-- BNDES financing tool — query public money received by any company
-- Persistent conversation memory (Supabase)
-- Shared investigations platform with crowd-sourced corrections
-- Anomaly detection: Benford's Law, HHI (in progress)
-- ETL pipeline: Extrateto judiciary salaries (in progress)
-- Public ROADMAP with task coordination
-- Full infrastructure cost transparency (~$36/mo total, self-funded, no grants)
+- LGPD-compliant: CPF search/display blocked system-wide
+- Mobile-first responsive design with bottom navigation
+- AI chatbot as primary interface (not just search)
+- 14 OSINT tools via Discord + Telegram bots
+- 278,501 nodes loaded + 53.6M CNPJ ETL in progress
+- Redis cache layer for performance
+- 11 real investigation reports published
+- Investigation upload, fork, and sharing (planned)
+- 79 data sources on roadmap (vs 13 upstream)
+- Integrated with EGOS ecosystem (24 AI agents, MCP tools)
+
+## LGPD Compliance
+
+CPF (Brazilian personal tax ID) is **never** searchable, displayable, or exportable. Only CNPJ (company ID) and publicly mandated data are exposed. All JSON responses pass through a CPF masking middleware as a safety net.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) · [ROADMAP.md](ROADMAP.md) · [Issues](https://github.com/enioxt/br-acc/issues)
-
-## Legal & Ethics
-
-[ETHICS.md](ETHICS.md) · [LGPD.md](LGPD.md) · [PRIVACY.md](PRIVACY.md) · [TERMS.md](TERMS.md) · [DISCLAIMER.md](DISCLAIMER.md) · [SECURITY.md](SECURITY.md) · [ABUSE_RESPONSE.md](ABUSE_RESPONSE.md)
 
 ## License
 
