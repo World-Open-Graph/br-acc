@@ -585,6 +585,27 @@
 - [x] Regras de deploy documentadas em memória (docker rebuild para novos módulos)
 > **Root cause:** .bak file não estava no .gitignore
 
+### TASK-073: Website Overhaul — SEO + Copy + Crawlers ✅ (02/03/2026)
+- [x] SEO meta tags: OG, Twitter Card, Schema.org JSON-LD, AI crawler meta
+- [x] `robots.txt`: permitir AI crawlers (GPTBot, ChatGPT-User, Anthropic, Google-Extended)
+- [x] `sitemap.xml`: landing + 4 relatórios
+- [x] Landing page: custo corrigido $36 → $105/mês
+- [ ] Header/navbar com links para App, Relatórios, FAQ, GitHub
+- [ ] Copy melhorada: proposta de valor mais clara, CTA mais forte
+- [ ] OG image para compartilhamento em redes sociais
+> **Arquivos:** `index.html`, `robots.txt`, `sitemap.xml`, `Landing.tsx`
+
+### TASK-074: Chatbot Intelligence — Reports + Proactive ✅ (02/03/2026)
+- [x] System prompt: awareness de 4 relatórios com URLs
+- [x] 6 sugestões inteligentes no welcome (em vez de 4 genéricas)
+- [x] Regras proativas: "NUNCA peça se pode buscar, INVESTIGUE primeiro"
+- [x] Testado: agora lista relatórios corretamente quando perguntado
+- [x] Usa tools antes de responder (evidence chain ativa)
+- [ ] Chatbot ainda pede cidade para queries nacionais (emendas, supersalários)
+- [ ] Memória entre mensagens (histórico de sessão)
+- [ ] Mais testes de hallucination e edge cases
+> **Arquivo:** `chat.py` (SYSTEM_PROMPT), `ChatInterface.tsx`
+
 ### TASK-043: Gem Hunter v2 — Melhorar Busca de Projetos ⏳ (P2)
 - [x] Adicionar keywords semanticas: "accountability", "civic tech", "open government"
 - [x] Busca automatizada via GitHub Search API (5 categorias, 02/03/2026)
@@ -606,7 +627,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 27 | 02/03/2026 |
-| **Tasks concluídas** | 53/72 | 02/03/2026 |
+| **Tasks concluídas** | 55/74 | 02/03/2026 |
 | **Chatbot Tools** | 18 (3 grafo + 8 livres + 6 Portal + 1 DataJud) | 02/03/2026 |
 | **ETL Status** | Phase 1 file 6/10 (15%) — Contabo CPU | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
