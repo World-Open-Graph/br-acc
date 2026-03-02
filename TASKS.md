@@ -329,6 +329,17 @@
 - [x] Healthcheck alertas Telegram para @ethikin no restart/failure
 > **Arquivos:** `telegram-bot.ts`, `discord-bot.ts`, `/opt/egos-bot/healthcheck.sh`
 
+### TASK-047: Chat Links New Tab + Journey System ✅ (02/03/2026)
+- [x] Chat: entity clicks abrem em nova aba (window.open _blank) em vez de navegar
+- [x] Chat: URLs no markdown recebem target=_blank automaticamente
+- [x] Chat: links markdown [text](url) renderizados corretamente
+- [x] Journey: lib/journey.ts — localStorage com 500 entries max, dedup 60s, export JSON/MD
+- [x] Journey: JourneyPanel.tsx — painel flutuante com stats, lista, export, share, clear
+- [x] Journey: integrado no ChatInterface (tracks queries + entity views)
+- [x] Journey: exportavel como JSON ou Markdown, compartilhavel via Web Share API
+- [ ] Journey: persistencia no backend com login (futuro)
+> **Arquivos:** `frontend/src/lib/journey.ts`, `frontend/src/components/journey/JourneyPanel.tsx`, `frontend/src/components/chat/ChatInterface.tsx`
+
 ### TASK-046: Diagnostico Completo do Sistema ✅ (02/03/2026)
 - [x] 14 OSINT tools registrados nos bots
 - [x] 30+ endpoints API em 10 routers
@@ -380,7 +391,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 23 | 02/03/2026 |
-| **Tasks concluídas** | 26/46 | 02/03/2026 |
+| **Tasks concluídas** | 27/47 | 02/03/2026 |
 | **ETL Status** | Phase 1 em andamento | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
 | **Projetos Gem Hunter** | 9 encontrados | 02/03/2026 |
