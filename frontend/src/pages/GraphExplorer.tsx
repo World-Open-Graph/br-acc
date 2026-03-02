@@ -9,12 +9,17 @@ import { ControlsSidebar } from "@/components/graph/ControlsSidebar";
 import { GraphCanvas } from "@/components/graph/GraphCanvas";
 import { useGraphData } from "@/hooks/useGraphData";
 import { useGraphExplorerStore } from "@/stores/graphExplorer";
+import { addJourneyEntry } from "@/lib/journey";
 
 import styles from "./GraphExplorer.module.css";
 
 export function GraphExplorer() {
   const { t } = useTranslation();
   const { entityId } = useParams<{ entityId: string }>();
+
+  useEffect(() => {
+    if (entityId) addJourneyEntry({ type: "entity", title: "Graph: " + entityId.slice(0, 40), entityId, url: window.location.pathname });
+  }, [entityId]);
 
   const store = useGraphExplorerStore();
   const { depth, enabledTypes, enabledRelTypes, selectedNodeIds, sidebarCollapsed, detailPanelOpen } = store;

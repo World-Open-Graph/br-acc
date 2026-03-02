@@ -7,6 +7,7 @@ import { InvestigationPanel } from "@/components/investigation/InvestigationPane
 import { TagManager } from "@/components/investigation/TagManager";
 import { Timeline } from "@/components/investigation/Timeline";
 import { useInvestigationStore } from "@/stores/investigation";
+import { addJourneyEntry } from "@/lib/journey";
 
 import styles from "./Investigations.module.css";
 
@@ -18,6 +19,7 @@ export function Investigations() {
   useEffect(() => {
     if (investigationId && investigationId !== activeInvestigationId) {
       setActiveInvestigation(investigationId);
+      if (investigationId) addJourneyEntry({ type: "investigation", title: "Investigacao " + investigationId.slice(0, 20), url: window.location.pathname });
     }
   }, [investigationId, activeInvestigationId, setActiveInvestigation]);
 
