@@ -1,3 +1,4 @@
+import re
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
@@ -33,6 +34,29 @@ def _extract_name(node: Any, labels: list[str]) -> str:
     return str(props.get("name", ""))
 
 
+_LUCENE_SPECIAL = re.compile(r'([+\-&|!(){}\[\]^"~*?:\\/])')
+
+
+def _build_search_query(raw: str) -> str:
+    """Build a Lucene query with wildcard support for better partial matching."""
+    raw = raw.strip()
+    # If user already uses Lucene syntax, pass through
+    if any(c in raw for c in ['"', '*', '~', 'AND', 'OR']):
+        return raw
+    # Escape special chars
+    escaped = _LUCENE_SPECIAL.sub(r'\\\1', raw)
+    # Split into terms and add wildcard suffix for partial matching
+    terms = escaped.split()
+    parts: list[str] = []
+    for term in terms:
+        if len(term) >= 2:
+            parts.append(f"{term}*")
+            parts.append(f"{term}~0.8")
+        else:
+            parts.append(term)
+    return " ".join(parts)
+
+
 @router.get("/search", response_model=SearchResponse)
 @limiter.limit("30/minute")
 async def search_entities(
@@ -45,12 +69,13 @@ async def search_entities(
 ) -> SearchResponse:
     skip = (page - 1) * size
     type_filter = entity_type.lower() if entity_type else None
+    search_query = _build_search_query(q)
 
     records = await execute_query(
         session,
         "search",
         {
-            "query": q,
+            "query": search_query,
             "entity_type": type_filter,
             "skip": skip,
             "limit": size,

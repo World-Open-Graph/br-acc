@@ -13,7 +13,7 @@ const resources = {
       landing: {
         hero: "Siga o dinheiro público",
         heroSubtitle:
-          "87 milhões de conexões entre empresas, políticos e contratos. 13 fontes governamentais. Dados abertos.",
+          "Cruzamento de dados entre empresas, políticos e contratos públicos. Múltiplas fontes governamentais. Dados abertos.",
         badge: "BRACC · Dados abertos",
         cta: "Explorar o grafo",
         stats: {
@@ -26,10 +26,10 @@ const resources = {
           sectionHeading: "O que o BRACC revela",
           graph: "Mapeie qualquer conexão",
           graphDesc:
-            "Navegue por 87 milhões de entidades — empresas, pessoas, contratos, doações, sanções — em um grafo interativo.",
+            "Navegue por entidades — empresas, pessoas, contratos, doações, sanções — em um grafo interativo com dados reais.",
           patterns: "Detecte padrões",
           patternsDesc:
-            "8 algoritmos cruzam dados de 13 fontes para encontrar padrões em contratos, doações e sanções.",
+            "Algoritmos cruzam dados de múltiplas fontes para encontrar padrões em contratos, doações e sanções.",
           investigations: "Investigue em profundidade",
           investigationsDesc:
             "Monte dossiês com anotações, etiquetas e exportação. Atribuição de fonte em cada dado.",
@@ -39,10 +39,10 @@ const resources = {
           sectionHeading: "Da fonte ao grafo",
           step1: "Coleta",
           step1Desc:
-            "13 fontes governamentais atualizadas mensalmente — de CNPJ a IBAMA, de TSE a PGFN.",
+            "Fontes governamentais atualizadas periodicamente — CNPJ, CEIS, CNEP, BNDES, TSE, IBAMA e mais.",
           step2: "Cruzamento",
           step2Desc:
-            "Resolução de entidades conecta registros entre fontes. 53 milhões de relações mapeadas.",
+            "Resolução de entidades conecta registros entre fontes. Relações mapeadas automaticamente.",
           step3: "Análise",
           step3Desc:
             "Explore conexões, detecte padrões e exporte relatórios com atribuição de fonte.",
