@@ -968,7 +968,28 @@ async def chat(
     for msg in history[-10:]:
         messages.append(msg)
 
-    messages.append({"role": "user", "content": body.message})
+    # Enrich vague national queries with actionable context
+    enriched_msg = body.message
+    msg_lower = body.message.lower().strip()
+    _QUERY_HINTS = {
+        "emendas parlamentares": "Busque emendas parlamentares para São Paulo (SP) em 2024 usando search_emendas. Mostre as maiores emendas.",
+        "supersalarios": "Busque servidores do Senado Federal usando search_servidores. Mostre os 5 com maiores salários.",
+        "supersalários": "Busque servidores do Senado Federal usando search_servidores. Mostre os 5 com maiores salários.",
+        "licitacoes suspeitas": "Busque dispensas de licitação em SP usando search_licitacoes com modalidade dispensa. Analise valores.",
+        "licitações suspeitas": "Busque dispensas de licitação em SP usando search_licitacoes com modalidade dispensa. Analise valores.",
+        "fornecedores de politicos": "Busque os maiores gastos CEAP de deputados de SP usando search_ceap. Identifique fornecedores recorrentes.",
+        "diario oficial": "Busque diários oficiais de Santos/SP usando search_gazettes com query licitação.",
+        "votacoes recentes": "Busque votações recentes na Câmara usando search_votacoes para o ano 2024.",
+        "investigacoes ministerio publico": "Busque na web por investigações recentes do Ministério Público usando web_search.",
+        "ver estatisticas": "Mostre as estatísticas: 317K+ entidades no grafo Neo4j, 34K+ conexões, 18 ferramentas de busca, 108 fontes catalogadas, 45 implementadas. Custo: ~R$0.003/consulta. 4 relatórios publicados.",
+        "ver estatísticas": "Mostre as estatísticas: 317K+ entidades no grafo Neo4j, 34K+ conexões, 18 ferramentas de busca, 108 fontes catalogadas, 45 implementadas. Custo: ~R$0.003/consulta. 4 relatórios publicados.",
+    }
+    for trigger, hint in _QUERY_HINTS.items():
+        if trigger in msg_lower:
+            enriched_msg = f"{body.message}\n\n[SISTEMA: {hint}]"
+            break
+
+    messages.append({"role": "user", "content": enriched_msg})
 
     try:
         reply, entities, evidence, cost = await _call_openrouter(messages, session)
