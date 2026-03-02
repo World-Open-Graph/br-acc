@@ -13,7 +13,9 @@ Idioma: **Português (Brasil)** | [English](#english)
 
 > **Em uma frase:** O BR/ACC conecta dados públicos do Brasil (empresas, políticos, contratos, sanções, doações eleitorais) em um grafo que mostra quem se relaciona com quem.
 
-Site: [bracc.org](https://bracc.org) | Iniciativa: [World Open Graph](https://worldopengraph.com) | Upstream: [World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc)
+Site: [bracc.egos.ia.br](https://bracc.egos.ia.br) | Ecossistema: [EGOS](https://egos.ia.br) | Upstream: [World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc)
+
+> **Construído com o [EGOS Framework](https://github.com/enioxt/egos-lab)** — plataforma open-source de agentes AI com 24 agentes registrados, MCP tools, e governança SSOT. O BR/ACC é o módulo de inteligência OSINT do ecossistema. O [Intelink](https://intelink.ia.br) é a interface de inteligência policial (em desenvolvimento).
 
 > **Este fork** é mantido pela comunidade [EGOS](https://egos.ia.br) com foco em: tradução PT-BR, acessibilidade para leigos, integração com bots (Discord/Telegram/WhatsApp) e algoritmos de detecção de anomalias. Todas as contribuições são enviadas como PR ao repositório original.
 
@@ -26,10 +28,10 @@ Site: [bracc.org](https://bracc.org) | Iniciativa: [World Open Graph](https://wo
 | **API Pública** | ✅ Online | http://217.216.95.126/health |
 | **Frontend** | ✅ Online | http://217.216.95.126 |
 | **Neo4j** | ✅ Healthy (48GB RAM) | Interno |
-| **Discord Bot** | ✅ Online (13 tools) | `@EGOS Intelligence#2881` |
-| **Telegram Bot** | ✅ Online (13 tools) | [@EGOSin_bot](https://t.me/EGOSin_bot) |
+| **Discord Bot** | ✅ Online (14 tools) | `@EGOS Intelligence#2881` |
+| **Telegram Bot** | ✅ Online (14 tools) | [@EGOSin_bot](https://t.me/EGOSin_bot) |
 
-**Servidor:** Contabo VPS 40 — 12 vCPU, 48GB RAM, 250GB NVMe
+**Servidor:** Contabo Cloud VPS 40 SSD — 12 vCPU, 48GB RAM, 500GB SSD ($35/mo)
 
 ---
 
@@ -88,13 +90,14 @@ Exemplos de perguntas:
 @EGOS Intelligence quem são os maiores supersalários do TJSP?
 ```
 
-Os bots têm **13 ferramentas OSINT** integradas:
+Os bots têm **14 ferramentas OSINT** integradas:
 
 | Ferramenta | O Que Faz | Fonte |
 |---|---|---|
 | `bracc_meta_stats` | Estatísticas gerais do grafo | BR/ACC |
 | `bracc_company_graph` | Grafo de vínculos de empresa por CNPJ | BR/ACC |
 | `bracc_company_patterns` | Padrões de risco de empresa | BR/ACC |
+| `bndes_search` | Financiamentos do BNDES por empresa (2002-presente) | BNDES Dados Abertos |
 | `fetch_top_earners` | Maiores supersalários do Judiciário | Extrateto |
 | `check_specific_member` | Dados de servidor público específico | Extrateto |
 | `get_member_history` | Histórico mensal de pagamentos | Extrateto |
@@ -103,10 +106,10 @@ Os bots têm **13 ferramentas OSINT** integradas:
 | `search_gazettes` | Busca em diários oficiais de 5.570+ municípios | Querido Diário |
 | `search_licitacoes` | Busca de licitações e pregões | Querido Diário |
 | `search_contratos` | Busca de contratos públicos | Querido Diário |
-| `web_search` | Busca web contextualizada | Exa AI |
-| `task_persist` | Auto-criação de issues a partir de feedback | GitHub API |
+| `web_search` | Busca web em tempo real | Exa AI |
+| `brazil_news_search` | Notícias recentes do Brasil | Exa AI |
 
-**Telegram:** [@EGOSin_bot](https://t.me/EGOSin_bot) — ✅ Online 24/7 (mesmas 13 ferramentas)
+**Telegram:** [@EGOSin_bot](https://t.me/EGOSin_bot) — ✅ Online 24/7 (mesmas 14 ferramentas)
 
 **WhatsApp:** Em planejamento (Evolution API)
 
@@ -201,35 +204,39 @@ Contribuições são muito bem-vindas. Veja [CONTRIBUTING.md](CONTRIBUTING.md) e
 - ✅ README PT-BR acessível para leigos
 - ✅ Servidor público com API online (48GB RAM, Contabo VPS)
 - ✅ 278.501 nós carregados (PEPs, sanções, empresas, OpenSanctions)
-- ✅ Bot Discord com 13 ferramentas OSINT (24/7)
-- ✅ Bot Telegram @EGOSin_bot com 13 ferramentas OSINT (24/7)
+- ✅ Bot Discord com 14 ferramentas OSINT (24/7)
+- ✅ Bot Telegram @EGOSin_bot com 14 ferramentas OSINT (24/7)
+- ✅ BNDES tool — consulta financiamentos do BNDES por empresa (2002-presente)
+- ✅ Memória persistente — conversas sobrevivem restart (Supabase)
 - ✅ Auto-criação de GitHub Issues a partir de feedback dos usuários
 - ✅ ROADMAP público com coordenação de tasks
-- ✅ 5 relatórios de investigação reais publicados
+- ✅ 11 relatórios de investigação reais publicados (incluindo Patense R$217M BNDES)
+- ✅ Plataforma de investigações compartilhadas (anônimas, crowd-sourced)
 - 🔵 Tradução completa do frontend (i18next)
 -  Algoritmos: Lei de Benford, HHI
 - 🟡 ETL: Extrateto (salários do judiciário)
 - 🟡 Bot WhatsApp (Evolution API)
 - 🟡 MCP Server para IDEs AI
 
-### Infraestrutura & Custos (Transparência Total)
+### Infraestrutura & Custos (Transparência Total — todos em USD)
 
-| Serviço | O Quê | Custo Mensal |
-|---------|-------|-------------|
-| **Contabo VPS** | Neo4j (278k nós), 2 bots AI, frontend, API, Caddy SSL | ~€10/mês |
-| **Vercel** | egos.ia.br (Mission Control), APIs serverless | Free tier |
-| **Supabase** | PostgreSQL para eventos, tasks, custos | Free tier |
-| **OpenRouter** | Gemini 2.0 Flash para IA dos bots | ~$5/mês |
-| **Domínio** | egos.ia.br | ~R$40/ano |
-| **Total** | Plataforma OSINT completa + 2 bots AI + website | **~$15/mês** |
+| Serviço | O Quê | Custo Mensal (USD) |
+|---------|-------|-------------------|
+| **Contabo VPS** | Cloud VPS 40 SSD: 12 vCPU, 48GB RAM, 500GB SSD. Roda Neo4j (278k nós), 2 bots AI, frontend, API, Caddy SSL | $35/mo |
+| **Vercel** | egos.ia.br (Mission Control), bracc.egos.ia.br | Free tier |
+| **Supabase** | PostgreSQL (conversas, relatórios, tasks, custos) | Free tier |
+| **OpenRouter** | Gemini 2.0 Flash (free tier) para IA dos bots | $0 (free tier) |
+| **Domínio** | egos.ia.br | ~$7/ano (~$0.60/mo) |
+| **Total** | Plataforma OSINT completa + 2 bots AI + website | **~$36/mo** |
 
-**Por que Contabo?** Neo4j na nuvem custa $65+/mês. Contabo dá 8 vCPU, 48GB RAM, 500GB SSD por €10. Quando carregarmos CNPJ (53.6M empresas) + DataJud (80M processos), vamos precisar dessa capacidade.
+> **Financiamento:** Este projeto é 100% autofinanciado. Não temos patrocínio, grants ou doações. Se você acha útil, considere contribuir: [egos.ia.br/apoie](https://egos.ia.br). Qualquer valor ajuda a manter os servidores online.
+
+**Por que Contabo?** Neo4j na nuvem (AuraDB) custa $65+/mês. Contabo dá 12 vCPU, 48GB RAM, 500GB SSD por $35. Quando carregarmos CNPJ (53.6M empresas) + DataJud (80M processos), vamos precisar dessa capacidade.
 
 **Por que dados locais?** APIs do governo são rate-limited, frequentemente fora do ar (Receita Federal está offline há 3+ dias), e retornam 403/400 em requisições de alto volume. Dados locais = cruzamento em milissegundos, sem dependências externas.
 
 ---
 
-## Ética e Legal
 
 - [Política de Ética](ETHICS.md) — usos proibidos, linguagem neutra
 - [LGPD](LGPD.md) — tratamento de dados pessoais
@@ -259,8 +266,8 @@ This fork is maintained by the [EGOS](https://egos.ia.br) community, focused on:
 |---|---|---|
 | **Public API** | ✅ Online | http://217.216.95.126/health |
 | **Frontend** | ✅ Online | http://217.216.95.126 |
-| **Discord Bot** | ✅ Online (13 OSINT tools) | `@EGOS Intelligence#2881` |
-| **Telegram Bot** | ✅ Online (13 OSINT tools) | [@EGOSin_bot](https://t.me/EGOSin_bot) |
+| **Discord Bot** | ✅ Online (14 OSINT tools) | `@EGOS Intelligence#2881` |
+| **Telegram Bot** | ✅ Online (14 OSINT tools) | [@EGOSin_bot](https://t.me/EGOSin_bot) |
 
 ## Quick Start
 
@@ -275,14 +282,17 @@ export NEO4J_PASSWORD=your_password && bash infra/scripts/seed-dev.sh
 
 - 278,501 nodes loaded (PEPs, sanctions, companies, OpenSanctions)
 - Full PT-BR translation (docs, frontend, API errors)
-- Public server with live API (48GB RAM, Contabo VPS)
-- Discord + Telegram bots with 13 OSINT tools via EGOS AI Router
+- Public server with live API (12 vCPU, 48GB RAM, 500GB SSD — Contabo VPS $35/mo)
+- Discord + Telegram bots with 14 OSINT tools via EGOS AI Router
 - Auto-GitHub-Issue creation from user feedback
-- 5 real investigation reports published
+- 11 real investigation reports published (including Patense R$217M BNDES analysis)
+- BNDES financing tool — query public money received by any company
+- Persistent conversation memory (Supabase)
+- Shared investigations platform with crowd-sourced corrections
 - Anomaly detection: Benford's Law, HHI (in progress)
 - ETL pipeline: Extrateto judiciary salaries (in progress)
 - Public ROADMAP with task coordination
-- Full infrastructure cost transparency (~$15/mo total)
+- Full infrastructure cost transparency (~$36/mo total, self-funded, no grants)
 
 ## Contributing
 
