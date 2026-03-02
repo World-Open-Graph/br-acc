@@ -68,6 +68,28 @@ class TestIsPepRecord:
     def test_cargo_field(self) -> None:
         assert _is_pep_record({"name": "X", "cpf": "11111111111", "cargo": "Deputado"})
 
+    @pytest.mark.parametrize(
+        "role",
+        [
+            "Deputado Federal",
+            "deputado federal",
+            "DEPUTADO FEDERAL",
+            "Senador da Republica",
+            "senadora da republica",
+            "Vereador Suplente",
+            "Ministro de Estado",
+            "Governadora do Estado de Sao Paulo",
+            "Presidente da Republica",
+        ],
+    )
+    def test_compound_role_detected_as_pep(self, role: str) -> None:
+        """Compound PEP roles like 'deputado federal' must be detected via substring match."""
+        assert _is_pep_record({"name": "X", "cpf": "11111111111", "role": role})
+
+    def test_compound_cargo_detected_as_pep(self) -> None:
+        """Compound PEP cargo like 'Deputado Federal' must be detected via substring match."""
+        assert _is_pep_record({"name": "X", "cpf": "11111111111", "cargo": "Deputado Federal"})
+
     def test_non_pep_role(self) -> None:
         assert not _is_pep_record({"name": "X", "cpf": "11111111111", "role": "assessor"})
 
@@ -98,6 +120,18 @@ class TestCollectPepCpfs:
     def test_deeply_nested(self) -> None:
         data = {"a": {"b": {"c": [{"cpf": "33333333333", "is_pep": True}]}}}
         assert "33333333333" in _collect_pep_cpfs(data)
+
+    def test_compound_role_collected(self) -> None:
+        """Compound roles like 'Deputado Federal' must be recognized in the walk."""
+        data = {
+            "results": [
+                {"cpf": "11111111111", "role": "Deputado Federal"},
+                {"cpf": "22222222222", "role": "assessor parlamentar"},
+            ]
+        }
+        peps = _collect_pep_cpfs(data)
+        assert "11111111111" in peps
+        assert "22222222222" not in peps
 
 
 # ---------------------------------------------------------------------------
@@ -205,4 +239,4 @@ async def test_health_not_masked(client: AsyncClient) -> None:
     """Non-CPF JSON responses pass through unchanged."""
     resp = await client.get("/health")
     assert resp.status_code == 200
-    assert resp.json()["status"] == "ok" and "version" in resp.json()
+    assert resp.json() == {"status": "ok"}

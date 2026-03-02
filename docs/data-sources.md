@@ -1,24 +1,13 @@
-# BRACC Data Source Catalog
+# ICARUS Data Source Catalog
 
-<!-- SOURCE_SUMMARY_START -->
-**Generated from `docs/source_registry_br_v1.csv` (as-of UTC: 2026-03-01T23:05:00Z)**
-
-- Universe v1 sources: 108
-- Implemented pipelines: 45
-- Loaded sources (load_state=loaded): 36
-- Partial sources (load_state=partial): 8
-- Not loaded sources (load_state=not_loaded): 64
-- Status counts: loaded=36, partial=5, stale=3, blocked_external=1, not_built=63
-<!-- SOURCE_SUMMARY_END -->
-
-Catalog note: counts and status labels are generated from the public registry (`docs/source_registry_br_v1.csv`).
-This document includes reference production inventory context and backlog discovery; it is not a guarantee that every listed source is currently loaded in your local environment.
+**38 loaded | 3 pipelines pending data | 60+ not yet built**
+Last updated: 2026-02-26
 
 ---
 
-## 1. Reference Production Snapshot (Loaded/Implemented Inventory)
+## 1. LOADED (38 sources)
 
-The table below is a timestamped reference snapshot and should be interpreted together with the generated summary block above.
+All sources below have working ETL pipelines in `etl/src/icarus_etl/pipelines/` and are loaded into production Neo4j.
 
 | # | Source | Pipeline | Nodes Created | Rels Created | Notes |
 |---|--------|----------|---------------|--------------|-------|

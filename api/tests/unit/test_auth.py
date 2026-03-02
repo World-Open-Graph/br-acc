@@ -34,7 +34,11 @@ def _setup_mock_session(driver: MagicMock, records: list[MagicMock]) -> AsyncMoc
 
 
 @pytest.mark.anyio
-async def test_register_success(client: AsyncClient) -> None:
+async def test_register_success(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from bracc.config import settings
+
+    monkeypatch.setattr(settings, "invite_code", "")
+
     record = _mock_record({
         "id": "user-uuid",
         "email": "test@example.com",
@@ -56,19 +60,15 @@ async def test_register_success(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
-async def test_register_bad_invite(client: AsyncClient) -> None:
+async def test_register_bad_invite(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
     from bracc.config import settings
 
-    original = settings.invite_code
-    try:
-        settings.invite_code = "secret-code"
-        response = await client.post(
-            "/api/v1/auth/register",
-            json={"email": "test@example.com", "password": "password123", "invite_code": "wrong"},
-        )
-        assert response.status_code == 403
-    finally:
-        settings.invite_code = original
+    monkeypatch.setattr(settings, "invite_code", "secret-code")
+    response = await client.post(
+        "/api/v1/auth/register",
+        json={"email": "test@example.com", "password": "password123", "invite_code": "wrong"},
+    )
+    assert response.status_code == 403
 
 
 @pytest.mark.anyio
@@ -155,16 +155,25 @@ async def test_me_invalid_token(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
-async def test_register_duplicate_email(client: AsyncClient) -> None:
+async def test_register_duplicate_email(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from neo4j.exceptions import ConstraintError
+
+    from bracc.config import settings
     from bracc.main import app
+
+    monkeypatch.setattr(settings, "invite_code", "")
 
     driver = app.state.neo4j_driver
     mock_session = AsyncMock()
-    mock_session.run = AsyncMock(side_effect=Exception("Constraint violation"))
+    mock_session.run = AsyncMock(side_effect=ConstraintError("Node already exists"))
     driver.session.return_value.__aenter__ = AsyncMock(return_value=mock_session)
 
-    with pytest.raises(Exception, match="Constraint violation"):
-        await client.post(
-            "/api/v1/auth/register",
-            json={"email": "duplicate@example.com", "password": "password123"},
-        )
+    response = await client.post(
+        "/api/v1/auth/register",
+        json={"email": "duplicate@example.com", "password": "password123"},
+    )
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Email already registered"

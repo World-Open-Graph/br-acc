@@ -7,9 +7,9 @@ Filters to REGULAR status only (active members) to reduce volume.
 Requires `google-cloud-bigquery` and an authenticated GCP project.
 
 Usage:
-    python etl/scripts/download_tse_filiados.py --billing-project bracc-corruptos
-    python etl/scripts/download_tse_filiados.py --billing-project bracc-corruptos --skip-existing
-    python etl/scripts/download_tse_filiados.py --billing-project bracc-corruptos --all-statuses
+    python etl/scripts/download_tse_filiados.py --billing-project icarus-corruptos
+    python etl/scripts/download_tse_filiados.py --billing-project icarus-corruptos --skip-existing
+    python etl/scripts/download_tse_filiados.py --billing-project icarus-corruptos --all-statuses
 """
 
 from __future__ import annotations

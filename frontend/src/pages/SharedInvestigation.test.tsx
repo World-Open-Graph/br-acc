@@ -44,6 +44,7 @@ describe("SharedInvestigation", () => {
       updated_at: "2026-01-01T00:00:00Z",
       entity_ids: ["e1", "e2"],
       share_token: "abc-123",
+      share_expires_at: "2026-01-08T00:00:00Z",
     });
 
     renderSharedInvestigation();

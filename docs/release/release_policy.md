@@ -48,11 +48,10 @@ A release can only be published from a commit on `main` where all required gates
 Every release must include PT-BR and EN sections with:
 
 1. Scope summary.
-2. Notable changes (explicit bullet points).
-3. Included pattern IDs when release contains pattern/signal changes.
-4. Compatibility/breaking notes.
-5. Privacy/compliance notes when applicable.
-6. Non-accusatory disclaimer.
+2. Notable changes.
+3. Compatibility/breaking notes.
+4. Privacy/compliance notes when applicable.
+5. Non-accusatory disclaimer.
 
 ## Artifacts
 

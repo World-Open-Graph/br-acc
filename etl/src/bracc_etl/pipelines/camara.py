@@ -60,8 +60,9 @@ class CamaraPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._raw: pd.DataFrame = pd.DataFrame()
         self.expenses: list[dict[str, Any]] = []
         self.deputies: list[dict[str, Any]] = []

@@ -38,8 +38,9 @@ class PgfnPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._csv_files: list[Path] = []
         self.finances: list[dict[str, Any]] = []
         self.relationships: list[dict[str, Any]] = []
@@ -56,10 +57,13 @@ class PgfnPipeline(Pipeline):
 
     def extract(self) -> None:
         pgfn_dir = Path(self.data_dir) / "pgfn"
+        if not pgfn_dir.exists():
+            logger.warning("[%s] Data directory not found: %s", self.name, pgfn_dir)
+            return
         self._csv_files = sorted(pgfn_dir.glob("arquivo_lai_SIDA_*_*.csv"))
         if not self._csv_files:
-            msg = f"No PGFN CSV files found in {pgfn_dir}"
-            raise FileNotFoundError(msg)
+            logger.warning("[%s] No PGFN CSV files found in %s", self.name, pgfn_dir)
+            return
         logger.info("[pgfn] Found %d CSV files to process", len(self._csv_files))
 
     def transform(self) -> None:

@@ -44,7 +44,7 @@ def get_all_entities() -> list[dict]:
             url,
             params={"offset": offset, "limit": limit},
             timeout=60,
-            headers={"User-Agent": "BRACC-ETL/1.0"},
+            headers={"User-Agent": "BR-ACC-ETL/1.0"},
         )
         response.raise_for_status()
         data = response.json()
@@ -125,7 +125,7 @@ def download_year(
     header_written = partial.exists() and partial.stat().st_size > 0
 
     with (
-        httpx.Client(headers={"User-Agent": "BRACC-ETL/1.0"}) as client,
+        httpx.Client(headers={"User-Agent": "BR-ACC-ETL/1.0"}) as client,
         open(partial, "a", newline="", encoding="utf-8") as f,
     ):
         writer: csv.DictWriter | None = None

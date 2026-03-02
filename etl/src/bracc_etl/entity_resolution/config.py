@@ -13,7 +13,7 @@ def get_person_settings() -> dict[str, Any]:
     """
     try:
         import splink.comparison_library as cl  # type: ignore[import-not-found]
-        from splink import SettingsCreator
+        from splink import SettingsCreator  # type: ignore[import-not-found,unused-ignore]
     except ImportError as exc:
         raise ImportError(
             "splink is required for entity resolution. "

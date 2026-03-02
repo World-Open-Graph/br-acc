@@ -25,7 +25,7 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] Health check failed: $HEALTH_URL"
 if [ -n "$ALERT_WEBHOOK_URL" ]; then
     curl -sf -X POST "$ALERT_WEBHOOK_URL" \
         -H "Content-Type: application/json" \
-        -d "{\"text\":\"BRACC health check failed at $(date '+%Y-%m-%d %H:%M:%S') — ${HEALTH_URL}\"}" \
+        -d "{\"text\":\"BR-ACC health check failed at $(date '+%Y-%m-%d %H:%M:%S') — ${HEALTH_URL}\"}" \
         > /dev/null 2>&1 || true
 fi
 SCRIPT

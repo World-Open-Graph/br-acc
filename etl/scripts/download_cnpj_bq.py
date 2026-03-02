@@ -10,8 +10,8 @@ And a manifest:
   - download_manifest.json
 
 Usage:
-  python etl/scripts/download_cnpj_bq.py --billing-project bracc-corruptos
-  python etl/scripts/download_cnpj_bq.py --billing-project bracc-corruptos --tables socios
+  python etl/scripts/download_cnpj_bq.py --billing-project icarus-corruptos
+  python etl/scripts/download_cnpj_bq.py --billing-project icarus-corruptos --tables socios
 """
 
 from __future__ import annotations
@@ -103,6 +103,44 @@ TABLES: dict[str, list[str]] = {
 
 # Rows per page when streaming via BQ Storage Read API.
 PAGE_SIZE = 100_000
+
+
+def _run_bigquery_precheck(
+    *,
+    billing_project: str,
+    source_project: str,
+    source_dataset: str,
+    snapshot_start: str | None,
+) -> None:
+    """Run explicit auth/ACL prechecks before starting large table downloads."""
+    from google.cloud import bigquery
+
+    client = bigquery.Client(project=billing_project)
+    logger.info("Running BigQuery precheck: SELECT 1")
+    list(client.query("SELECT 1 AS ok").result())
+
+    socios_table = f"{source_project}.{source_dataset}.socios"
+    if snapshot_start:
+        precheck_sql = (
+            f"SELECT COUNT(1) AS n FROM `{socios_table}` "
+            "WHERE data >= @snapshot_start"
+        )
+        query_params = [
+            bigquery.ScalarQueryParameter("snapshot_start", "DATE", snapshot_start),
+        ]
+    else:
+        precheck_sql = f"SELECT COUNT(1) AS n FROM `{socios_table}`"
+        query_params = []
+
+    logger.info("Running BigQuery precheck: %s", precheck_sql)
+    rows = list(
+        client.query(
+            precheck_sql,
+            job_config=bigquery.QueryJobConfig(query_parameters=query_params),
+        ).result(),
+    )
+    check_value = rows[0].n if rows else 0
+    logger.info("BigQuery precheck OK: socios_count=%s", check_value)
 
 
 def _sha256_file(path: Path) -> str:
@@ -291,6 +329,19 @@ def main(
             f"(got: {dataset})",
         )
     source_project, source_dataset = dataset.split(".", 1)
+
+    try:
+        _run_bigquery_precheck(
+            billing_project=billing_project,
+            source_project=source_project,
+            source_dataset=source_dataset,
+            snapshot_start=snapshot_start,
+        )
+    except Exception as exc:
+        raise click.ClickException(
+            "BigQuery precheck failed. Configure a non-interactive service account "
+            "(GOOGLE_APPLICATION_CREDENTIALS) with dataset ACL and billing access.",
+        ) from exc
 
     selected = list(tables) if tables else list(TABLES.keys())
     run_id = f"cnpj-bq-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:8]}"

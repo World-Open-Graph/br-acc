@@ -1,10 +1,16 @@
+import logging
+
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 def parse_date(value: str) -> str:
     """Parse a date string to ISO format (YYYY-MM-DD) or empty string.
 
     Handles: DD/MM/YYYY, DD/MM/YYYY HH:MM:SS, YYYY-MM-DD, YYYYMMDD.
+    Returns empty string when all format attempts fail (prevents garbage
+    dates from reaching Neo4j).
     """
     value = value.strip()
     if not value:
@@ -14,4 +20,5 @@ def parse_date(value: str) -> str:
             return str(pd.to_datetime(value, format=fmt).strftime("%Y-%m-%d"))
         except ValueError:
             continue
-    return value
+    logger.debug("Could not parse date: %r", value)
+    return ""

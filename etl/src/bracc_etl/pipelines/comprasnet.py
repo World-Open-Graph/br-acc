@@ -63,7 +63,7 @@ class ComprasnetPipeline(Pipeline):
     """ETL pipeline for PNCP federal procurement contracts."""
 
     name = "comprasnet"
-    source_id = "pncp"
+    source_id = "comprasnet"
 
     def __init__(
         self,
@@ -71,8 +71,9 @@ class ComprasnetPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self.contracts: list[dict[str, Any]] = []
 
     def extract(self) -> None:

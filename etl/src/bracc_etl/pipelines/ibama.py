@@ -40,8 +40,9 @@ class IbamaPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._raw: pd.DataFrame = pd.DataFrame()
         self.embargoes: list[dict[str, Any]] = []
         self.companies: list[dict[str, Any]] = []
@@ -65,7 +66,13 @@ class IbamaPipeline(Pipeline):
 
     def extract(self) -> None:
         ibama_dir = Path(self.data_dir) / "ibama"
+        if not ibama_dir.exists():
+            logger.warning("[%s] Data directory not found: %s", self.name, ibama_dir)
+            return
         csv_path = ibama_dir / "areas_embargadas.csv"
+        if not csv_path.exists():
+            logger.warning("[%s] CSV file not found: %s", self.name, csv_path)
+            return
         logger.info("[ibama] Reading %s", csv_path)
         self._raw = pd.read_csv(
             csv_path,

@@ -14,10 +14,10 @@ from __future__ import annotations
 import json
 import logging
 import sys
+import defusedxml.ElementTree as ET
 from pathlib import Path
 
 import click
-from defusedxml import ElementTree as ET
 
 # Allow imports from scripts/ directory
 sys.path.insert(0, str(Path(__file__).parent))

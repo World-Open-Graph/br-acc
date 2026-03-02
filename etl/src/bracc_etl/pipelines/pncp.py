@@ -68,8 +68,9 @@ class PncpPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._raw_records: list[dict[str, Any]] = []
         self.bids: list[dict[str, Any]] = []
         self.coverage_start: str = ""
@@ -97,8 +98,8 @@ class PncpPipeline(Pipeline):
                 self.coverage_end = str(manifest.get("coverage_end", "")).strip()
                 self.coverage_complete = bool(manifest.get("coverage_complete", False))
                 return
-            except Exception:
-                logger.warning("Invalid PNCP coverage manifest: %s", manifest_path)
+            except Exception as exc:
+                logger.warning("Invalid PNCP coverage manifest %s: %s", manifest_path, exc)
 
         dates: list[str] = []
         for rec in records:
@@ -135,8 +136,12 @@ class PncpPipeline(Pipeline):
 
         all_records: list[dict[str, Any]] = []
         for f in json_files:
-            raw = f.read_text(encoding="utf-8")
-            payload = json.loads(raw, strict=False)
+            try:
+                raw = f.read_text(encoding="utf-8")
+                payload = json.loads(raw, strict=False)
+            except (json.JSONDecodeError, OSError) as exc:
+                logger.warning("Failed to parse JSON from %s: %s", f, exc)
+                continue
 
             # Handle both wrapped (API response) and flat (list) formats
             if isinstance(payload, dict) and "data" in payload:

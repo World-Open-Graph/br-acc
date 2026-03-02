@@ -6,6 +6,7 @@ from neo4j import AsyncSession
 
 from bracc.dependencies import get_session
 from bracc.services.neo4j_service import execute_query_single
+from bracc.services.public_guard import should_hide_person_entities
 from bracc.services.source_registry import load_source_registry, source_registry_summary
 
 router = APIRouter(prefix="/api/v1/meta", tags=["meta"])
@@ -40,7 +41,9 @@ async def database_stats(
     result = {
         "total_nodes": record["total_nodes"] if record else 0,
         "total_relationships": record["total_relationships"] if record else 0,
-        "person_count": record["person_count"] if record else 0,
+        "person_count": (
+            0 if should_hide_person_entities() else (record["person_count"] if record else 0)
+        ),
         "company_count": record["company_count"] if record else 0,
         "health_count": record["health_count"] if record else 0,
         "finance_count": record["finance_count"] if record else 0,

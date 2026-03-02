@@ -1,7 +1,7 @@
 [project]
 name = "bracc-etl"
 version = "0.1.0"
-description = "BRACC ETL — Data ingestion pipelines for Brazilian public data"
+description = "BR-ACC ETL — Data ingestion pipelines for Brazilian public data"
 requires-python = ">=3.12"
 license = "AGPL-3.0-or-later"
 dependencies = [
@@ -9,10 +9,11 @@ dependencies = [
     "pandas>=2.2.0",
     "httpx>=0.28.0",
     "click>=8.1.0",
-    "defusedxml>=0.7.1",
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
     "pypdf>=5.2.0",
+    "defusedxml>=0.7.0",
+    "pandera>=0.21.0",
 ]
 
 [project.optional-dependencies]

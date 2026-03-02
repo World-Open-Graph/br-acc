@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import argparse
 import logging
-import zipfile
+import sys
 from pathlib import Path
 
 import httpx
+
+sys.path.insert(0, str(Path(__file__).parent))
 from _download_utils import safe_extract_zip
 
 logger = logging.getLogger(__name__)
@@ -34,15 +36,14 @@ def download_year(output_dir: Path, year: int) -> None:
             url,
             follow_redirects=True,
             timeout=300,
-            headers={"User-Agent": "BRACC-ETL/1.0"},
+            headers={"User-Agent": "BR-ACC-ETL/1.0"},
         )
         response.raise_for_status()
         dest_zip.write_bytes(response.content)
         logger.info("Downloaded: %s (%d bytes)", dest_zip.name, len(response.content))
 
-        with zipfile.ZipFile(dest_zip, "r") as zf:
-            extracted = safe_extract_zip(zf, output_dir)
-            logger.info("Extracted %d files", len(extracted))
+        extracted = safe_extract_zip(dest_zip, output_dir)
+        logger.info("Extracted %d files", len(extracted))
     except httpx.HTTPError:
         logger.warning("Failed to download renuncias for %d", year)
 
