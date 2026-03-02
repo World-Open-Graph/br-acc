@@ -102,7 +102,7 @@ PIPELINES: dict[str, type] = {
 
 @click.group()
 def cli() -> None:
-    """BRACC ETL — Data ingestion pipelines for Brazilian public data."""
+    """BR-ACC ETL — Data ingestion pipelines for Brazilian public data."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
@@ -141,14 +141,14 @@ def run(
 ) -> None:
     """Run an ETL pipeline."""
     os.environ["NEO4J_DATABASE"] = neo4j_database
-    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
 
     if source not in PIPELINES:
         available = ", ".join(PIPELINES.keys())
         raise click.ClickException(f"Unknown source: {source}. Available: {available}")
 
-    pipeline_cls = PIPELINES[source]
+    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
     try:
+        pipeline_cls = PIPELINES[source]
         pipeline = pipeline_cls(
             driver=driver,
             data_dir=data_dir,
@@ -156,37 +156,89 @@ def run(
             chunk_size=chunk_size,
             history=history,
         )
-    except TypeError:
-        pipeline = pipeline_cls(
+
+        if streaming and hasattr(pipeline, "run_streaming"):
+            pipeline.run_streaming(start_phase=start_phase)
+        else:
+            pipeline.run()
+
+        run_post_load_hooks(
             driver=driver,
-            data_dir=data_dir,
-            limit=limit,
-            chunk_size=chunk_size,
+            source=source,
+            neo4j_database=neo4j_database,
+            linking_tier=linking_tier,
         )
+    finally:
+        driver.close()
 
-    if streaming and hasattr(pipeline, "run_streaming"):
-        pipeline.run_streaming(start_phase=start_phase)
+
+def _resolve_rf_release_inline(year_month: str | None = None) -> str:
+    """Resolve Receita Federal CNPJ release URL.
+
+    Tries Nextcloud shares first (new primary), falls back to dadosabertos.rfb.gov.br.
+    """
+    from datetime import UTC, datetime
+
+    import httpx
+
+    # --- Nextcloud (primary) ---
+    nextcloud_dl = "https://arquivos.receitafederal.gov.br/s/{token}/download?path=%2F&files="
+    tokens: list[str] = []
+    env_token = os.environ.get("CNPJ_SHARE_TOKEN")
+    if env_token:
+        tokens.append(env_token)
+    tokens.extend(["gn672Ad4CF8N6TK", "YggdBLfdninEJX9"])
+
+    for token in tokens:
+        share_url = f"https://arquivos.receitafederal.gov.br/s/{token}"
+        try:
+            resp = httpx.head(share_url, follow_redirects=True, timeout=30)
+            if resp.status_code < 400:
+                return nextcloud_dl.format(token=token)
+        except httpx.HTTPError:
+            pass
+
+    # --- Legacy dadosabertos (fallback) ---
+    new_base = "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj/{ym}/"
+    legacy_url = "https://dadosabertos.rfb.gov.br/CNPJ/"
+
+    now = datetime.now(UTC)
+    if year_month is not None:
+        candidates = [year_month]
     else:
-        pipeline.run()
+        current = f"{now.year:04d}-{now.month:02d}"
+        prev_m = now.month - 1 if now.month > 1 else 12
+        prev_y = now.year if now.month > 1 else now.year - 1
+        candidates = [current, f"{prev_y:04d}-{prev_m:02d}"]
 
-    run_post_load_hooks(
-        driver=driver,
-        source=source,
-        neo4j_database=neo4j_database,
-        linking_tier=linking_tier,
-    )
+    for ym in candidates:
+        url = new_base.format(ym=ym)
+        try:
+            resp = httpx.head(url, follow_redirects=True, timeout=30)
+            if resp.status_code < 400:
+                return url
+        except httpx.HTTPError:
+            pass
 
-    driver.close()
+    try:
+        resp = httpx.head(legacy_url, follow_redirects=True, timeout=30)
+        if resp.status_code < 400:
+            return legacy_url
+    except httpx.HTTPError:
+        pass
+
+    tried = ", ".join(candidates)
+    msg = f"Could not resolve CNPJ release. Tried Nextcloud tokens, months [{tried}], and legacy."
+    raise RuntimeError(msg)
 
 
 @cli.command()
 @click.option("--output-dir", default="./data/cnpj", help="Output directory")
 @click.option("--files", type=int, default=10, help="Number of files per type (0-9)")
 @click.option("--skip-existing/--no-skip-existing", default=True)
-def download(output_dir: str, files: int, skip_existing: bool) -> None:
+@click.option("--release", default=None, help="Pin to specific monthly release (YYYY-MM)")
+def download(output_dir: str, files: int, skip_existing: bool, release: str | None) -> None:
     """Download CNPJ data from Receita Federal."""
-    import shutil
-    import stat
     import zipfile
     from pathlib import Path
 
@@ -194,55 +246,12 @@ def download(output_dir: str, files: int, skip_existing: bool) -> None:
 
     logger = logging.getLogger(__name__)
 
-    base_url = "https://dadosabertos.rfb.gov.br/CNPJ/"
+    base_url = _resolve_rf_release_inline(release)
+    logger.info("Using CNPJ release URL: %s", base_url)
     file_types = ["Empresas", "Socios", "Estabelecimentos"]
 
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
-
-    def _safe_extract_zip(
-        archive: zipfile.ZipFile,
-        output_root: Path,
-        *,
-        max_members: int = 50_000,
-        max_uncompressed_bytes: int = 5_000_000_000,
-    ) -> None:
-        base = output_root.resolve()
-        infos = archive.infolist()
-        if len(infos) > max_members:
-            raise click.ClickException(
-                f"Unsafe ZIP archive: too many entries ({len(infos)} > {max_members})",
-            )
-
-        uncompressed_total = 0
-        for info in infos:
-            if not info.filename:
-                continue
-            member = info.filename.replace("\\", "/")
-            mode = info.external_attr >> 16
-            if stat.S_ISLNK(mode):
-                raise click.ClickException(f"Unsafe ZIP member (symlink): {member}")
-
-            target = (output_root / member).resolve()
-            try:
-                target.relative_to(base)
-            except ValueError as exc:
-                raise click.ClickException(f"Unsafe ZIP member path: {member}") from exc
-
-            if info.is_dir():
-                target.mkdir(parents=True, exist_ok=True)
-                continue
-
-            uncompressed_total += info.file_size
-            if uncompressed_total > max_uncompressed_bytes:
-                raise click.ClickException(
-                    "Unsafe ZIP archive: exceeds max extracted size "
-                    f"({uncompressed_total} > {max_uncompressed_bytes})",
-                )
-
-            target.parent.mkdir(parents=True, exist_ok=True)
-            with archive.open(info, "r") as source, target.open("wb") as destination:
-                shutil.copyfileobj(source, destination)
 
     for file_type in file_types:
         for i in range(min(files, 10)):
@@ -264,17 +273,84 @@ def download(output_dir: str, files: int, skip_existing: bool) -> None:
 
                 logger.info("Extracting %s...", dest.name)
                 with zipfile.ZipFile(dest, "r") as zf:
-                    _safe_extract_zip(zf, out)
+                    # Path traversal guard
+                    out_resolved = out.resolve()
+                    safe = True
+                    for info in zf.infolist():
+                        target = (out / info.filename).resolve()
+                        if not target.is_relative_to(out_resolved):
+                            logger.warning(
+                                "Path traversal in %s: %s — skipping archive",
+                                dest.name,
+                                info.filename,
+                            )
+                            safe = False
+                            break
+                    if not safe:
+                        continue
+                    # Zip bomb guard (50 GB limit for CNPJ data)
+                    total = sum(i.file_size for i in zf.infolist())
+                    if total > 50 * 1024**3:
+                        logger.warning(
+                            "Uncompressed size too large: %s (%.1f GB) — skipping",
+                            dest.name,
+                            total / 1e9,
+                        )
+                        continue
+                    zf.extractall(out)
             except httpx.HTTPError:
                 logger.warning("Failed to download %s (may not exist)", filename)
 
 
 @cli.command()
-def sources() -> None:
+@click.option("--status", "show_status", is_flag=True, help="Show ingestion status from Neo4j")
+@click.option("--neo4j-uri", default="bolt://localhost:7687", help="Neo4j URI")
+@click.option("--neo4j-user", default="neo4j")
+@click.option("--neo4j-password", default=None)
+def sources(show_status: bool, neo4j_uri: str, neo4j_user: str, neo4j_password: str | None) -> None:
     """List available data sources."""
-    click.echo("Available pipelines:")
-    for name in sorted(PIPELINES):
-        click.echo(f"  {name}")
+    if not show_status:
+        click.echo("Available pipelines:")
+        for name in sorted(PIPELINES):
+            click.echo(f"  {name}")
+        return
+
+    if not neo4j_password:
+        neo4j_password = os.environ.get("NEO4J_PASSWORD", "")
+    if not neo4j_password:
+        raise click.ClickException(
+            "--neo4j-password or NEO4J_PASSWORD env var required for --status"
+        )
+
+    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
+    try:
+        with driver.session() as session:
+            result = session.run(
+                "MATCH (r:IngestionRun) "
+                "WITH r ORDER BY r.started_at DESC "
+                "WITH r.source_id AS sid, collect(r)[0] AS latest "
+                "RETURN latest ORDER BY sid"
+            )
+            runs = {r["latest"]["source_id"]: dict(r["latest"]) for r in result}
+
+        click.echo(
+            f"{'Source':<20} {'Status':<15} {'Rows In':>10} {'Loaded':>10} "
+            f"{'Started':<20} {'Finished':<20}"
+        )
+        click.echo("-" * 100)
+
+        for name in sorted(PIPELINES):
+            run = runs.get(name, {})
+            click.echo(
+                f"{name:<20} "
+                f"{run.get('status', '-'):<15} "
+                f"{run.get('rows_in', 0):>10,} "
+                f"{run.get('rows_loaded', 0):>10,} "
+                f"{str(run.get('started_at', '-')):<20} "
+                f"{str(run.get('finished_at', '-')):<20}"
+            )
+    finally:
+        driver.close()
 
 
 if __name__ == "__main__":

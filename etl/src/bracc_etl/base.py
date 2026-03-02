@@ -21,12 +21,16 @@ class Pipeline(ABC):
         limit: int | None = None,
         chunk_size: int = 50_000,
         neo4j_database: str | None = None,
+        history: bool = False,
     ) -> None:
         self.driver = driver
         self.data_dir = data_dir
         self.limit = limit
         self.chunk_size = chunk_size
         self.neo4j_database = neo4j_database or os.getenv("NEO4J_DATABASE", "neo4j")
+        self.history = history
+        self.rows_in: int = 0
+        self.rows_loaded: int = 0
         source_key = getattr(self, "source_id", getattr(self, "name", "unknown_source"))
         self.run_id = f"{source_key}_{datetime.now(tz=UTC).strftime('%Y%m%d%H%M%S')}"
 
@@ -87,8 +91,8 @@ class Pipeline(ABC):
             "    r.started_at = coalesce($started_at, r.started_at), "
             "    r.finished_at = coalesce($finished_at, r.finished_at), "
             "    r.error = coalesce($error, r.error), "
-            "    r.rows_in = coalesce(r.rows_in, 0), "
-            "    r.rows_loaded = coalesce(r.rows_loaded, 0)"
+            "    r.rows_in = $rows_in, "
+            "    r.rows_loaded = $rows_loaded"
         )
         run_id = getattr(self, "run_id", f"{source_id}_manual")
         params = {
@@ -98,6 +102,8 @@ class Pipeline(ABC):
             "started_at": started_at,
             "finished_at": finished_at,
             "error": error,
+            "rows_in": self.rows_in,
+            "rows_loaded": self.rows_loaded,
         }
         try:
             with self.driver.session(database=self.neo4j_database) as session:

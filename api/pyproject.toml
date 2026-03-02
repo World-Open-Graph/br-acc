@@ -1,7 +1,7 @@
 [project]
 name = "bracc-api"
 version = "0.1.0"
-description = "BRACC API — Brazilian public data anti-corruption graph tool"
+description = "BR-ACC API — Brazilian public data anti-corruption graph tool"
 requires-python = ">=3.12"
 license = "AGPL-3.0-or-later"
 dependencies = [

@@ -37,19 +37,6 @@ For validation cycles use RC:
 - `prerelease`: `true` for RC, `false` for stable
 - `title_pt`: short PT-BR title
 - `title_en`: short EN title
-- `highlights_pt`: PT highlights separated by `|`
-- `highlights_en`: EN highlights separated by `|`
-- `patterns_included`: comma-separated pattern IDs (use `none` when not applicable)
-- `technical_changes_pt`: PT technical changes separated by `|`
-- `technical_changes_en`: EN technical changes separated by `|`
-
-Example inputs for a pattern release:
-
-- `highlights_pt`: `Port de 8 padrões públicos factuais | Padronização de payload público`
-- `highlights_en`: `Port of 8 factual public-safe patterns | Public payload standardization`
-- `patterns_included`: `sanctioned_still_receiving,amendment_beneficiary_contracts,split_contracts_below_threshold,contract_concentration,embargoed_receiving,debtor_contracts,srp_multi_org_hitchhiking,inexigibility_recurrence`
-- `technical_changes_pt`: `Provider community de 4 para 8 padrões | ETL criou relação Contract-REFERENTE_A-Bid`
-- `technical_changes_en`: `Community provider expanded from 4 to 8 patterns | ETL created Contract-REFERENTE_A-Bid linkage`
 
 ## 4) Workflow validations performed
 
@@ -65,7 +52,7 @@ The workflow blocks publication when:
 On success the workflow:
 
 1. Creates and pushes an annotated tag.
-2. Creates GitHub Release (PT+EN notes) with explicit highlights, patterns, and technical changes.
+2. Creates GitHub Release (PT+EN notes).
 3. Uploads `release_manifest.json` asset.
 
 ## 6) Post-release checklist
@@ -73,7 +60,6 @@ On success the workflow:
 1. Open the release page and confirm:
 - version tag is correct,
 - PT+EN notes are present,
-- included patterns are explicitly listed (or marked as none),
 - non-accusatory disclaimer line is present,
 - `release_manifest.json` is attached.
 2. Share release link in community channels.

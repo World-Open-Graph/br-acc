@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -17,6 +18,8 @@ from bracc_etl.transforms import (
     normalize_name,
     strip_document,
 )
+
+logger = logging.getLogger(__name__)
 
 # TSE 2024 masks ALL candidate CPFs as "-4". After strip_document → "4",
 # format_cpf → "4" — every candidate MERGEs into one ghost node.
@@ -36,20 +39,33 @@ class TSEPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self.candidates: list[dict[str, Any]] = []
         self.donations: list[dict[str, Any]] = []
         self.elections: list[dict[str, Any]] = []
 
     def extract(self) -> None:
         tse_dir = Path(self.data_dir) / "tse"
+        if not tse_dir.exists():
+            logger.warning("[%s] Data directory not found: %s", self.name, tse_dir)
+            self._raw_candidatos = pd.DataFrame()
+            self._raw_doacoes = pd.DataFrame()
+            return
+        candidatos_path = tse_dir / "candidatos.csv"
+        doacoes_path = tse_dir / "doacoes.csv"
+        if not candidatos_path.exists() or not doacoes_path.exists():
+            logger.warning("[%s] Required CSV files not found in %s", self.name, tse_dir)
+            self._raw_candidatos = pd.DataFrame()
+            self._raw_doacoes = pd.DataFrame()
+            return
         self._raw_candidatos = pd.read_csv(
-            tse_dir / "candidatos.csv", encoding="latin-1", dtype=str,
+            candidatos_path, encoding="latin-1", dtype=str,
             nrows=self.limit,
         )
         self._raw_doacoes = pd.read_csv(
-            tse_dir / "doacoes.csv", encoding="latin-1", dtype=str,
+            doacoes_path, encoding="latin-1", dtype=str,
             nrows=self.limit,
         )
 

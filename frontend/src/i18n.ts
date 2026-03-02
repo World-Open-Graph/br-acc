@@ -5,7 +5,7 @@ const resources = {
   "pt-BR": {
     translation: {
       app: {
-        title: "BRACC",
+        title: "BR-ACC",
         subtitle: "Plataforma de inteligência em dados públicos brasileiros",
         disclaimer:
           "Dados de registros públicos. Não constitui acusação.",
@@ -14,7 +14,7 @@ const resources = {
         hero: "Siga o dinheiro público",
         heroSubtitle:
           "87 milhões de conexões entre empresas, políticos e contratos. 13 fontes governamentais. Dados abertos.",
-        badge: "BRACC · Dados abertos",
+        badge: "BR-ACC · Dados abertos",
         cta: "Explorar o grafo",
         stats: {
           entities: "entidades",
@@ -23,7 +23,7 @@ const resources = {
         },
         features: {
           sectionLabel: "Capacidades",
-          sectionHeading: "O que o BRACC revela",
+          sectionHeading: "O que o BR-ACC revela",
           graph: "Mapeie qualquer conexão",
           graphDesc:
             "Navegue por 87 milhões de entidades — empresas, pessoas, contratos, doações, sanções — em um grafo interativo.",
@@ -100,7 +100,7 @@ const resources = {
           senado_cpis: "Senado — CPIs",
         },
         footer: {
-          brand: "BRACC v1.0",
+          brand: "BR-ACC v1.0",
           license: "AGPL-3.0",
           platform: "Plataforma",
           methodology: "Metodologia",
@@ -142,7 +142,7 @@ const resources = {
         registerError: "Erro ao registrar. Tente novamente.",
         invalidCredentials: "E-mail ou senha incorretos.",
         invalidInvite: "Código de convite inválido.",
-        loginTitle: "Acessar BRACC",
+        loginTitle: "Acessar BR-ACC",
         registerTitle: "Criar conta",
         loginSubtitle: "Plataforma de inteligência em dados públicos",
       },
@@ -411,7 +411,7 @@ const resources = {
         error: "Erro ao executar ação.",
       },
       mobile: {
-        title: "BRACC",
+        title: "BR-ACC",
         message: "Esta plataforma requer resolução mínima de 1024px para análise de grafos.",
         hint: "Acesse em um computador para a experiência completa.",
       },
@@ -432,7 +432,7 @@ const resources = {
         retry: "Tentar novamente",
       },
       error: {
-        title: "BRACC",
+        title: "BR-ACC",
         message: "Algo deu errado. Recarregue a página.",
         reload: "Recarregar",
       },
@@ -441,7 +441,7 @@ const resources = {
   en: {
     translation: {
       app: {
-        title: "BRACC",
+        title: "BR-ACC",
         subtitle: "Brazilian public data intelligence platform",
         disclaimer:
           "Data patterns from public records. Not accusations.",
@@ -450,7 +450,7 @@ const resources = {
         hero: "Follow the public money",
         heroSubtitle:
           "87 million connections between companies, politicians, and contracts. 13 government sources. Open data.",
-        badge: "BRACC · Open data",
+        badge: "BR-ACC · Open data",
         cta: "Explore the graph",
         stats: {
           entities: "entities",
@@ -459,7 +459,7 @@ const resources = {
         },
         features: {
           sectionLabel: "Capabilities",
-          sectionHeading: "What BRACC reveals",
+          sectionHeading: "What BR-ACC reveals",
           graph: "Map any connection",
           graphDesc:
             "Navigate 87 million entities — companies, people, contracts, donations, sanctions — in an interactive graph.",
@@ -536,7 +536,7 @@ const resources = {
           senado_cpis: "Senate — Parliamentary inquiry committees",
         },
         footer: {
-          brand: "BRACC v1.0",
+          brand: "BR-ACC v1.0",
           license: "AGPL-3.0",
           platform: "Platform",
           methodology: "Methodology",
@@ -578,7 +578,7 @@ const resources = {
         registerError: "Registration failed. Please try again.",
         invalidCredentials: "Invalid email or password.",
         invalidInvite: "Invalid invite code.",
-        loginTitle: "Access BRACC",
+        loginTitle: "Access BR-ACC",
         registerTitle: "Create account",
         loginSubtitle: "Public data intelligence platform",
       },
@@ -847,7 +847,7 @@ const resources = {
         error: "Action failed.",
       },
       mobile: {
-        title: "BRACC",
+        title: "BR-ACC",
         message: "This platform requires a minimum resolution of 1024px for graph analysis.",
         hint: "Access from a computer for the full experience.",
       },
@@ -868,7 +868,7 @@ const resources = {
         retry: "Retry",
       },
       error: {
-        title: "BRACC",
+        title: "BR-ACC",
         message: "Something went wrong. Please reload the page.",
         reload: "Reload",
       },

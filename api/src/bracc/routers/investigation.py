@@ -311,7 +311,7 @@ async def export_investigation_pdf(
             cpf_val = node.get("cpf")
             if cpf_val and isinstance(cpf_val, str):
                 role = str(node.get("role", node.get("cargo", ""))).lower()
-                is_pep = role in PEP_ROLES
+                is_pep = any(kw in role for kw in PEP_ROLES)
                 if not is_pep:
                     if "." in document and "-" in document:
                         document = mask_formatted_cpf(document)

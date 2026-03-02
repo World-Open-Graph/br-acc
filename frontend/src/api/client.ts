@@ -12,14 +12,13 @@ export class ApiError extends Error {
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
-  const headers = new Headers(init?.headers);
-  if (!headers.has("content-type")) {
-    headers.set("Content-Type", "application/json");
-  }
   const response = await fetch(url, {
     credentials: "include",
     ...init,
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+      ...init?.headers,
+    },
   });
 
   if (!response.ok) {
@@ -31,6 +30,24 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   }
 
   return response.json() as Promise<T>;
+}
+
+async function apiFetchBlob(path: string): Promise<Blob> {
+  const url = `${API_BASE}${path}`;
+  const response = await fetch(url, { credentials: "include" });
+
+  if (!response.ok) {
+    let detail = response.statusText;
+    try {
+      const err = await response.json();
+      detail = err.detail || detail;
+    } catch {
+      // response wasn't JSON
+    }
+    throw new ApiError(response.status, detail);
+  }
+
+  return response.blob();
 }
 
 export interface SourceAttribution {
@@ -201,7 +218,7 @@ export interface Investigation {
   updated_at: string;
   entity_ids: string[];
   share_token: string | null;
-  share_expires_at?: string | null;
+  share_expires_at: string | null;
 }
 
 export interface InvestigationListResponse {
@@ -342,19 +359,22 @@ export function getSharedInvestigation(token: string): Promise<Investigation> {
 
 export function generateShareLink(
   investigationId: string,
-): Promise<{ share_token: string; share_expires_at?: string | null }> {
-  return apiFetch<{ share_token: string; share_expires_at?: string | null }>(
+): Promise<{ share_token: string; share_expires_at: string }> {
+  return apiFetch<{ share_token: string; share_expires_at: string }>(
     `/api/v1/investigations/${encodeURIComponent(investigationId)}/share`,
     { method: "POST" },
   );
 }
 
+export function revokeShareLink(investigationId: string): Promise<void> {
+  return apiFetch<void>(
+    `/api/v1/investigations/${encodeURIComponent(investigationId)}/share`,
+    { method: "DELETE" },
+  );
+}
+
 export function exportInvestigation(investigationId: string): Promise<Blob> {
-  const url = `${API_BASE}/api/v1/investigations/${encodeURIComponent(investigationId)}/export`;
-  return fetch(url, { credentials: "include" }).then((res) => {
-    if (!res.ok) throw new ApiError(res.status, `API error: ${res.statusText}`);
-    return res.blob();
-  });
+  return apiFetchBlob(`/api/v1/investigations/${encodeURIComponent(investigationId)}/export`);
 }
 
 // --- Stats ---
@@ -444,9 +464,7 @@ export function exportInvestigationPDF(
   lang = "pt",
 ): Promise<Blob> {
   const params = new URLSearchParams({ lang });
-  const url = `${API_BASE}/api/v1/investigations/${encodeURIComponent(investigationId)}/export/pdf?${params}`;
-  return fetch(url, { credentials: "include" }).then((res) => {
-    if (!res.ok) throw new ApiError(res.status, `API error: ${res.statusText}`);
-    return res.blob();
-  });
+  return apiFetchBlob(
+    `/api/v1/investigations/${encodeURIComponent(investigationId)}/export/pdf?${params}`,
+  );
 }

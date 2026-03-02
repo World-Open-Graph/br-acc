@@ -8,8 +8,7 @@ class DummyPipeline(Pipeline):
     source_id = "test"
 
     def __init__(self) -> None:
-        self.driver = MagicMock()
-        self.data_dir = "./data"
+        super().__init__(driver=MagicMock(), data_dir="./data")
         self.extracted = False
         self.transformed = False
         self.loaded = False

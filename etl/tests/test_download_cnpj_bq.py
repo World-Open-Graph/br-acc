@@ -47,12 +47,13 @@ def test_download_cnpj_bq_writes_manifest_on_success(
         }
 
     monkeypatch.setattr(module, "_download_table", _fake_download)
+    monkeypatch.setattr(module, "_run_bigquery_precheck", lambda **kw: None)
     runner = CliRunner()
     result = runner.invoke(
         module.main,
         [
             "--billing-project",
-            "bracc-corruptos",
+            "icarus-corruptos",
             "--output-dir",
             str(tmp_path),
             "--dataset",
@@ -94,12 +95,13 @@ def test_download_cnpj_bq_fails_closed_when_table_fails(
         }
 
     monkeypatch.setattr(module, "_download_table", _fail_on_socios)
+    monkeypatch.setattr(module, "_run_bigquery_precheck", lambda **kw: None)
     runner = CliRunner()
     result = runner.invoke(
         module.main,
         [
             "--billing-project",
-            "bracc-corruptos",
+            "icarus-corruptos",
             "--output-dir",
             str(tmp_path),
             "--dataset",

@@ -10,8 +10,8 @@
     "README.md",
     "CONTRIBUTING.md",
     "frontend/src/**",
-    "api/src/icarus/queries/**",
-    "api/src/icarus/models/**",
+    "api/src/bracc/queries/**",
+    "api/src/bracc/models/**",
     "api/tests/**",
     "etl/tests/**",
     "frontend/src/**/*.test.*"

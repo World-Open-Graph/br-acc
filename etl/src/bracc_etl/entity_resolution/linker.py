@@ -13,7 +13,7 @@ class PersonLinker:
 
     def __init__(self, db_api: Any) -> None:
         try:
-            from splink import Linker  # type: ignore[import-not-found]
+            from splink import Linker
         except ImportError as exc:
             raise ImportError(
                 "splink is required for entity resolution. "

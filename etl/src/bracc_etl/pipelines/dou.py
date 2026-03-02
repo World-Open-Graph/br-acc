@@ -17,7 +17,8 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from defusedxml import ElementTree  # type: ignore[import-untyped]
+from defusedxml.ElementTree import ParseError as _XmlParseError
+from defusedxml.ElementTree import parse as _safe_xml_parse
 
 from bracc_etl.base import Pipeline
 from bracc_etl.loader import Neo4jBatchLoader
@@ -141,8 +142,9 @@ class DouPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._raw_acts: list[dict[str, str]] = []
         self.acts: list[dict[str, Any]] = []
         self.person_rels: list[dict[str, Any]] = []
@@ -173,9 +175,9 @@ class DouPipeline(Pipeline):
 
     def _extract_parquet(self, parquet_files: list[Path]) -> None:
         """Extract acts from BigQuery parquet exports (basedosdados DOU)."""
-        import pyarrow as pa  # type: ignore[import-not-found]
-        import pyarrow.compute as pc  # type: ignore[import-not-found]
-        import pyarrow.parquet as pq  # type: ignore[import-not-found]
+        import pyarrow as pa
+        import pyarrow.compute as pc
+        import pyarrow.parquet as pq
 
         parquet_cols = [
             "titulo", "orgao", "ementa", "excerto",
@@ -227,8 +229,8 @@ class DouPipeline(Pipeline):
         """Extract acts from Imprensa Nacional XML dumps."""
         for f in xml_files:
             try:
-                tree = ElementTree.parse(f)  # noqa: S314
-            except ElementTree.ParseError:
+                tree = _safe_xml_parse(f)
+            except _XmlParseError:
                 logger.warning("[dou] Failed to parse XML: %s", f.name)
                 continue
 

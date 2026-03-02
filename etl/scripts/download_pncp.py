@@ -439,7 +439,7 @@ def main(
     client = httpx.Client(
         timeout=timeout,
         follow_redirects=True,
-        headers={"User-Agent": "BRACC-ETL/1.0 (public data research)"},
+        headers={"User-Agent": "BR-ACC-ETL/1.0 (public data research)"},
     )
 
     total_records = 0

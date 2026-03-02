@@ -2,7 +2,7 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title="BRACC API",
+    title="BR-ACC API",
     description="Brazilian public data graph analysis tool",
     version="0.1.0",
     lifespan=lifespan,
@@ -85,5 +85,5 @@ app.include_router(investigation.shared_router)
 
 
 @app.get("/health")
-async def health(request: Request) -> dict[str, str]:
-    return {"status": "ok", "version": request.app.version}
+async def health() -> dict[str, str]:
+    return {"status": "ok"}

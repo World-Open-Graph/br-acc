@@ -5,9 +5,9 @@ Streams microdados_movimentacao year-by-year to separate CSVs for
 resumability and memory management on large datasets.
 
 Usage:
-    python etl/scripts/download_caged.py --billing-project bracc-corruptos
-    python etl/scripts/download_caged.py --billing-project bracc-corruptos --start-year 2024
-    python etl/scripts/download_caged.py --billing-project bracc-corruptos --skip-existing
+    python etl/scripts/download_caged.py --billing-project icarus-corruptos
+    python etl/scripts/download_caged.py --billing-project icarus-corruptos --start-year 2024
+    python etl/scripts/download_caged.py --billing-project icarus-corruptos --skip-existing
 """
 
 from __future__ import annotations

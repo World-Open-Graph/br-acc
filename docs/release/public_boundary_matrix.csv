@@ -7,8 +7,8 @@ docs/**,PUBLIC with review,Keep public documentation and legal pack,include revi
 .github/workflows/**,PUBLIC,CI and security transparency,include
 scripts/**,PUBLIC with review,Keep public utilities and gates,include reviewed subset
 data/demo/**,PUBLIC,Synthetic demo dataset only,include
-api/src/bracc/services/pattern_service.py,REMOVE_FROM_PUBLIC,Pattern engine disabled pending validation,exclude
-api/src/bracc/queries/pattern_*.cypher,REMOVE_FROM_PUBLIC,Pattern query engine disabled pending validation,exclude
+api/src/icarus/services/pattern_service.py,REMOVE_FROM_PUBLIC,Pattern engine disabled pending validation,exclude
+api/src/icarus/queries/pattern_*.cypher,REMOVE_FROM_PUBLIC,Pattern query engine disabled pending validation,exclude
 scripts/auto_finalize_pncp_backfill.sh,REMOVE_FROM_PUBLIC,Production operational script with server-specific assumptions,exclude
 docs/shadow_rollout_runbook.md,REMOVE_FROM_PUBLIC,Production operational runbook details,exclude
 docs/ingestion_priority_runbook.md,REMOVE_FROM_PUBLIC,Production operational runbook details,exclude

@@ -5,9 +5,9 @@ Streams from BigQuery table basedosdados.br_stf_corte_aberta.decisoes to local C
 Requires `google-cloud-bigquery` and an authenticated GCP project.
 
 Usage:
-    python etl/scripts/download_stf.py --billing-project bracc-corruptos
-    python etl/scripts/download_stf.py --billing-project bracc-corruptos --skip-existing
-    python etl/scripts/download_stf.py --billing-project bracc-corruptos --output-dir ./data/stf
+    python etl/scripts/download_stf.py --billing-project icarus-corruptos
+    python etl/scripts/download_stf.py --billing-project icarus-corruptos --skip-existing
+    python etl/scripts/download_stf.py --billing-project icarus-corruptos --output-dir ./data/stf
 """
 
 from __future__ import annotations

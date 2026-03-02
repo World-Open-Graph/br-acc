@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import logging
-import shutil
-import stat
 import zipfile
 from pathlib import Path
 
@@ -38,12 +36,21 @@ def download_file(url: str, dest: Path, *, timeout: int = 600) -> bool:
 
             response.raise_for_status()
 
+            # If we requested a range but server returned full content (200 vs 206),
+            # start fresh to avoid corruption
+            if start_byte > 0 and response.status_code != 206:
+                logger.warning(
+                    "Server ignored Range header for %s, restarting download",
+                    dest.name,
+                )
+                start_byte = 0
+
             total = response.headers.get("content-length")
             total_mb = f"{int(total) / 1e6:.1f} MB" if total else "unknown size"
             logger.info("Downloading %s (%s)...", dest.name, total_mb)
 
-            mode = "ab" if start_byte > 0 else "wb"
-            downloaded = start_byte
+            mode = "ab" if start_byte > 0 and response.status_code == 206 else "wb"
+            downloaded = start_byte if mode == "ab" else 0
             with open(partial, mode) as f:
                 for chunk in response.iter_bytes(chunk_size=65_536):
                     f.write(chunk)
@@ -58,24 +65,49 @@ def download_file(url: str, dest: Path, *, timeout: int = 600) -> bool:
         return False
 
 
-def extract_zip(zip_path: Path, output_dir: Path) -> list[Path]:
-    """Extract ZIP and return list of extracted files.
+def safe_extract_zip(
+    zip_path: Path,
+    output_dir: Path,
+    *,
+    max_total_bytes: int = 50 * 1024**3,  # 50GB default (CNPJ zips are huge)
+) -> list[Path]:
+    """Safely extract ZIP with path traversal and bomb guards.
 
     Deletes corrupted ZIPs for re-download.
     """
     try:
         with zipfile.ZipFile(zip_path, "r") as zf:
-            extracted = safe_extract_zip(zf, output_dir)
-        logger.info("Extracted %d files from %s", len(extracted), zip_path.name)
-        return extracted
+            # Check for path traversal
+            resolved_output = output_dir.resolve()
+            for info in zf.infolist():
+                target = (output_dir / info.filename).resolve()
+                if not target.is_relative_to(resolved_output):
+                    raise ValueError(
+                        f"Path traversal detected in {zip_path.name}: {info.filename}"
+                    )
+
+            # Check total uncompressed size (zip bomb guard)
+            total_size = sum(info.file_size for info in zf.infolist())
+            if total_size > max_total_bytes:
+                raise ValueError(
+                    f"ZIP bomb guard: {zip_path.name} would extract to "
+                    f"{total_size / 1e9:.1f}GB (limit: {max_total_bytes / 1e9:.1f}GB)"
+                )
+
+            names = zf.namelist()
+            zf.extractall(output_dir)
+
+        logger.info("Extracted %d files from %s", len(names), zip_path.name)
+        return [output_dir / n for n in names]
     except zipfile.BadZipFile:
         logger.warning("Bad ZIP file: %s — deleting for re-download", zip_path.name)
         zip_path.unlink()
         return []
-    except ValueError as exc:
-        logger.warning("Unsafe ZIP file %s: %s — deleting", zip_path.name, exc)
-        zip_path.unlink(missing_ok=True)
-        return []
+
+
+def extract_zip(zip_path: Path, output_dir: Path) -> list[Path]:
+    """Extract ZIP and return list of extracted files."""
+    return safe_extract_zip(zip_path, output_dir)
 
 
 def validate_csv(
@@ -111,60 +143,3 @@ def validate_csv(
     except Exception as e:
         logger.warning("Validation failed for %s: %s", path.name, e)
         return False
-
-
-def safe_extract_zip(
-    archive: zipfile.ZipFile,
-    output_dir: Path,
-    *,
-    max_members: int = 50_000,
-    max_uncompressed_bytes: int = 5_000_000_000,
-) -> list[Path]:
-    """Safely extract a ZIP archive.
-
-    Blocks path traversal, symlinks, and oversized archives.
-    """
-    output_root = output_dir.resolve()
-    infos = archive.infolist()
-    if len(infos) > max_members:
-        msg = f"ZIP has too many entries ({len(infos)} > {max_members})"
-        raise ValueError(msg)
-
-    extracted: list[Path] = []
-    uncompressed_total = 0
-    for info in infos:
-        member_name = info.filename.replace("\\", "/")
-        if not member_name:
-            continue
-
-        # Reject symlink entries.
-        mode = info.external_attr >> 16
-        if stat.S_ISLNK(mode):
-            msg = f"ZIP contains symlink entry: {member_name}"
-            raise ValueError(msg)
-
-        target = (output_dir / member_name).resolve()
-        try:
-            target.relative_to(output_root)
-        except ValueError as exc:
-            msg = f"Path traversal detected: {member_name}"
-            raise ValueError(msg) from exc
-
-        if info.is_dir():
-            target.mkdir(parents=True, exist_ok=True)
-            continue
-
-        uncompressed_total += info.file_size
-        if uncompressed_total > max_uncompressed_bytes:
-            msg = (
-                f"ZIP exceeds max extracted size "
-                f"({uncompressed_total} > {max_uncompressed_bytes})"
-            )
-            raise ValueError(msg)
-
-        target.parent.mkdir(parents=True, exist_ok=True)
-        with archive.open(info, "r") as source, target.open("wb") as destination:
-            shutil.copyfileobj(source, destination)
-        extracted.append(target)
-
-    return extracted

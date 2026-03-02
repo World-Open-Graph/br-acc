@@ -61,9 +61,9 @@ async def search_entities(
         {
             "query": _escape_lucene(q),
             "entity_type": type_filter,
-            "hide_person_entities": hide_person_entities,
             "skip": skip,
             "limit": size,
+            "hide_person_entities": hide_person_entities,
         },
     )
     total_record = await execute_query_single(

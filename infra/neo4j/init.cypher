@@ -1,4 +1,4 @@
-// BRACC Neo4j Schema — Constraints and Indexes
+// BR-ACC Neo4j Schema — Constraints and Indexes
 // Applied on database initialization
 
 // ── Uniqueness Constraints ──────────────────────────────

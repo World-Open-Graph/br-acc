@@ -182,7 +182,7 @@ async def get_entity_timeline(
             date=event_date,
             label=str(label),
             entity_type=entity_type,
-            properties=sanitize_props(props),
+            properties=sanitize_public_properties(sanitize_props(props)),
             sources=[SourceAttribution(database="neo4j_graph")],
         ))
 

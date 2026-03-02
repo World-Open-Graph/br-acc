@@ -12,7 +12,7 @@ def get_person_settings() -> dict[str, Any]:
     - birth_date: exact match
     """
     try:
-        import splink.comparison_library as cl  # type: ignore[import-not-found]
+        import splink.comparison_library as cl
         from splink import SettingsCreator
     except ImportError as exc:
         raise ImportError(

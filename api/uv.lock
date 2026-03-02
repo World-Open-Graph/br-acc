@@ -104,6 +104,56 @@ wheels = [
 ]
 
 [[package]]
+name = "bracc-api"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "bcrypt" },
+    { name = "fastapi" },
+    { name = "jinja2" },
+    { name = "neo4j" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "pyjwt", extra = ["crypto"] },
+    { name = "python-multipart" },
+    { name = "slowapi" },
+    { name = "uvicorn", extra = ["standard"] },
+    { name = "weasyprint" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "httpx" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+    { name = "testcontainers", extra = ["neo4j"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "bcrypt", specifier = ">=4.0.0" },
+    { name = "fastapi", specifier = ">=0.115.0" },
+    { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.28.0" },
+    { name = "jinja2", specifier = ">=3.1.0" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.14.0" },
+    { name = "neo4j", specifier = ">=5.27.0" },
+    { name = "pydantic", specifier = ">=2.10.0" },
+    { name = "pydantic-settings", specifier = ">=2.7.0" },
+    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.9.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24.0" },
+    { name = "python-multipart", specifier = ">=0.0.18" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.0" },
+    { name = "slowapi", specifier = ">=0.1.9" },
+    { name = "testcontainers", extras = ["neo4j"], marker = "extra == 'dev'", specifier = ">=4.0" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.34.0" },
+    { name = "weasyprint", specifier = ">=62.0" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "brotli"
 version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -522,56 +572,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/b1/df/48c586a5fe32a0f01
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad", size = 73517, upload-time = "2024-12-06T15:37:21.509Z" },
 ]
-
-[[package]]
-name = "bracc-api"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "bcrypt" },
-    { name = "fastapi" },
-    { name = "jinja2" },
-    { name = "neo4j" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "pyjwt", extra = ["crypto"] },
-    { name = "python-multipart" },
-    { name = "slowapi" },
-    { name = "uvicorn", extra = ["standard"] },
-    { name = "weasyprint" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "httpx" },
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "ruff" },
-    { name = "testcontainers", extra = ["neo4j"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "bcrypt", specifier = ">=4.0.0" },
-    { name = "fastapi", specifier = ">=0.115.0" },
-    { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.28.0" },
-    { name = "jinja2", specifier = ">=3.1.0" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.14.0" },
-    { name = "neo4j", specifier = ">=5.27.0" },
-    { name = "pydantic", specifier = ">=2.10.0" },
-    { name = "pydantic-settings", specifier = ">=2.7.0" },
-    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.9.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24.0" },
-    { name = "python-multipart", specifier = ">=0.0.18" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.0" },
-    { name = "slowapi", specifier = ">=0.1.9" },
-    { name = "testcontainers", extras = ["neo4j"], marker = "extra == 'dev'", specifier = ">=4.0" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.34.0" },
-    { name = "weasyprint", specifier = ">=62.0" },
-]
-provides-extras = ["dev"]
 
 [[package]]
 name = "idna"

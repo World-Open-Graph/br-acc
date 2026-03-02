@@ -42,8 +42,9 @@ class TcuPipeline(Pipeline):
         data_dir: str = "./data",
         limit: int | None = None,
         chunk_size: int = 50_000,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size)
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._raw_inabilitados: pd.DataFrame = pd.DataFrame()
         self._raw_inidoneos: pd.DataFrame = pd.DataFrame()
         self._raw_irregulares: pd.DataFrame = pd.DataFrame()
