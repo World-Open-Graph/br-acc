@@ -446,10 +446,70 @@ O projeto [Intelink](https://intelink.ia.br) (EGOS) já implementou capacidades 
 
 ---
 
+## Fork Divergence Plan: br-acc → Intelink
+
+> **Status:** Divergência em andamento. Rename planejado para quando atingir >80% de código próprio.
+
+### O que já divergiu do upstream (Bruno/World-Open-Graph)
+
+| Área | Upstream | EGOS Fork |
+|------|----------|-----------|
+| **Bots** | ❌ Nenhum | ✅ Discord + Telegram (13 tools cada) |
+| **IA** | ❌ Nenhuma | ✅ Chat com RAG, Entity Resolution, Tool Calling |
+| **Investigações** | ❌ Nenhuma | ✅ 11 relatórios reais com dados do Neo4j |
+| **API BNDES** | ❌ | ✅ Consulta automática de operações (ex: Patense) |
+| **Token** | ❌ | ✅ ETHIK token com price ticker |
+| **Comunidade** | ❌ Abandonado | ✅ Discord, Telegram, GitHub Issues automáticos |
+| **Dados** | ~40k nós | 278k nós + 4.1M OpenSanctions |
+| **Docs** | README básico | ROADMAP + SHOWCASE + INVESTIGATIONS + DIAGNOSTIC |
+| **CI/CD** | ❌ | ✅ Gitleaks + Bandit + Privacy Gate |
+
+### Plano de Rename
+
+1. **Agora:** Manter `enioxt/br-acc` no GitHub (rastrear upstream)
+2. **Agora:** Branding público como "Intelink" no README e website
+3. **Mês 2:** Quando frontend divergir >80%, criar repo `enioxt/intelink`
+4. **Mês 2:** Redirect `bracc.egos.ia.br` → `intelink.egos.ia.br`
+5. **Contínuo:** Monitorar forks do upstream para cherry-pick de melhorias
+
+### O que monitorar no upstream
+
+- BigQuery CNPJ pipeline (se alguém implementar)
+- Novos padrões de detecção de corrupção
+- Melhorias no Entity Resolution
+- Novos pipelines ETL para fontes que não temos
+
+### Por que "Intelink"?
+
+- **Intel** (intelligence) + **Link** (conexões no grafo)
+- Já é o nome do app principal no egos-lab
+- Forte identidade visual (police intelligence style)
+- Diferenciação clara do upstream
+
+---
+
+## Sobre Modelos de IA para Investigação
+
+> **Conclusão dos testes com Patense (2026-03-02):** Relatórios de investigação exigem modelos com raciocínio em cadeia (Chain of Thought). Modelos baratos funcionam para consultas individuais, mas a síntese (BNDES → pulverização → SPEs → perguntas investigativas) requer capacidade avançada.
+
+| Modelo | Adequação | Custo/1M tokens | Melhor para |
+|--------|-----------|-----------------|-------------|
+| Claude 3.5 Sonnet | ⭐⭐⭐⭐⭐ | ~$3.00 | Relatórios de investigação |
+| GPT-4o | ⭐⭐⭐⭐ | ~$2.50 | Análise de documentos |
+| Gemini 2.0 Flash | ⭐⭐⭐ | ~$0.10 | Bots, tool calling, busca |
+| Gemini 1.5 Pro | ⭐⭐⭐⭐ | ~$1.25 | Documentos longos (1M ctx) |
+| Llama 3.1 70B | ⭐⭐⭐ | ~$0.20 | Consultas simples |
+
+**Custo de um relatório completo (como o Patense):** ~$0.16 (Exa + APIs públicas + Claude)
+
+**Plano de financiamento:** Créditos da comunidade para gerar relatórios avançados com modelos premium. Ver [CREDIT_SYSTEM_PLAN.md](../docs/plans/CREDIT_SYSTEM_PLAN.md).
+
+---
+
 ## Links
 
-- **Código:** [github.com/World-Open-Graph/br-acc](https://github.com/World-Open-Graph/br-acc) (upstream)
-- **Fork EGOS:** [github.com/enioxt/br-acc](https://github.com/enioxt/br-acc) (nosso fork ativo)
+- **Código:** [github.com/enioxt/br-acc](https://github.com/enioxt/br-acc) (fork ativo, futuro "Intelink")
+- **Upstream:** World-Open-Graph/br-acc (monitorando)
 - **API ao vivo:** http://217.216.95.126/api/v1/public/
 - **Frontend:** [bracc.egos.ia.br](https://bracc.egos.ia.br) (público, sem login)
 - **Bot Discord:** EGOS Intelligence#2881 (DMs abertas, 13 tools)
