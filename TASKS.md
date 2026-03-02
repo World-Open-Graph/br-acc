@@ -259,6 +259,51 @@
 - [ ] Engenharia reversa do EGOS Inteligência para extrair tags
 - [ ] Monitoramento periódico de novos repos
 
+### TASK-035: Changelog/Updates no Website ✅ (02/03/2026)
+- [x] UpdatesTimeline component na landing page (expandable cards, tags, metricas)
+- [x] JSON changelog entries em frontend/public/updates/YYYY-MM-DD.json
+- [x] Primeira entrada: Redis cache, 108 fontes, bots, governanca
+- [x] Relatorio Patense linkado no changelog
+> **Arquivos:** `frontend/src/components/landing/UpdatesTimeline.tsx`, `frontend/public/updates/`
+
+### TASK-036: Pipeline Social Integrado (/postar) ⏳
+- [x] Workflow /postar criado (X.com, Telegram, Discord)
+- [x] Telegram e Discord postando com sucesso
+- [ ] X.com: precisa API keys (X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_TOKEN_SECRET)
+- [ ] Conta @anoineim precisa verificacao por telefone
+> **Arquivos:** `.windsurf/workflows/postar.md`, bot x-client.ts
+
+### TASK-037: Bot Self-Healing ⏳
+- [x] Cron healthcheck cada 5 min (/opt/egos-bot/healthcheck.sh)
+- [x] Auto-restart de bots crashados via PM2
+- [x] Logging em /var/log/egos-bot-health.log
+- [ ] Alertas via Telegram quando bot restartar
+- [ ] Dashboard de uptime no website
+- [ ] HGR-style 3-level memory (inspirado RokoOfficial/HGR)
+
+### TASK-038: Kubernetes / Autoscaler / Self-Healing ⬜ (P2 — Planejamento)
+- [ ] Avaliar migrar de Docker Compose para k3s (lightweight Kubernetes para VPS)
+- [ ] Configurar HPA (Horizontal Pod Autoscaler) para API
+- [ ] Liveness/readiness probes para todos os servicos
+- [ ] Auto-rollback em deploys com falha
+- [ ] Monitoramento com Prometheus + Grafana
+> **Nota:** Contabo VPS tem recursos limitados. k3s é mais viavel que k8s completo.
+
+### TASK-039: Codex CLI no Contabo VPS ⬜ (P2 — Pesquisa)
+- [ ] Verificar se OpenAI Codex CLI funciona em VPS headless
+- [ ] Configurar codex login via token (sem browser)
+- [ ] Usar codex exec para tarefas async (code review, testes)
+- [ ] Integrar com CI/CD para auto-fix de falhas
+> **Requisitos:** Conta OpenAI ativa, CODEX_TOKEN no .env
+
+### TASK-040: OpenClaw / Agentes CI/CD QA ⬜ (P2 — Pesquisa)
+- [ ] Avaliar OpenClaw como framework de agentes autonomos
+- [ ] Configurar agente QA para monitorar erros e sugerir fixes
+- [ ] Integrar com GitHub Actions para PR auto-review
+- [ ] Usar modelo Gemini 2.0 Flash (pago) via OpenRouter
+- [ ] Pipeline: erro detectado -> agente analisa -> sugere fix -> cria PR
+> **Inspiracao:** OpenClaw molt.sh self-healing pattern, RokoOfficial/OPENBOT
+
 ---
 
 ## Métricas
@@ -268,7 +313,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 23 | 02/03/2026 |
-| **Tasks concluídas** | 15/34 | 02/03/2026 |
+| **Tasks concluídas** | 19/40 | 02/03/2026 |
 | **ETL Status** | Phase 1 em andamento | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
 | **Projetos Gem Hunter** | 9 encontrados | 02/03/2026 |
