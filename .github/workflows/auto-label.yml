@@ -1,8 +1,9 @@
 name: Auto Labeler via PR Description
 
 on:
-  pull_request:
-    types: [opened, edited] # It runs when the PR is opened or when the description is edited.
+  # pull_request_target is required to write labels on PRs from forks.
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
 
 jobs:
   apply-labels:
