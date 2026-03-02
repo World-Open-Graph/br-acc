@@ -65,12 +65,14 @@
 
 .logo {
   font-family: var(--font-sans);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--accent);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.08em;
   text-decoration: none;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .navItems {

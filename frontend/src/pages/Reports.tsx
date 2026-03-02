@@ -12,8 +12,16 @@ interface Report {
 
 const PUBLISHED_REPORTS: Report[] = [
   {
+    title: "Grupo Patense — Rede Societária e Financeira",
+    file: "patense.html",
+    date: "01/03/2026",
+    scenario: "13 empresas interligadas, R$217M BNDES, R$2.15B dívida ativa",
+    entities: ["GRUPO PATENSE", "BNDES", "PGFN"],
+    sources: ["Neo4j", "BNDES", "PGFN", "Portal da Transparência"],
+  },
+  {
     title: "SUPERAR LTDA — Empresa Sancionada",
-    file: "report-01-superar-ltda.md",
+    file: "report-01-superar-ltda.html",
     date: "02/03/2026",
     scenario: "Empresa com 7 sanções no grafo, sócio PJ",
     entities: ["SUPERAR LTDA", "ALDIVAR BAGATOLI", "MASTER ELETRODOMESTICO LTDA"],
@@ -21,7 +29,7 @@ const PUBLISHED_REPORTS: Report[] = [
   },
   {
     title: "Transparência Municipal — Manaus (AM)",
-    file: "report-02-manaus-transparencia.md",
+    file: "report-02-manaus-transparencia.html",
     date: "02/03/2026",
     scenario: "Emendas parlamentares + processos judiciais + diários oficiais",
     entities: ["Manaus (AM)", "VINICIUS GURGEL", "CABUCU BORGES"],
@@ -29,7 +37,7 @@ const PUBLISHED_REPORTS: Report[] = [
   },
   {
     title: "Recuperação Judicial — São Paulo",
-    file: "report-03-recuperacao-judicial-sp.md",
+    file: "report-03-recuperacao-judicial-sp.html",
     date: "02/03/2026",
     scenario: "3.704 processos de recuperação judicial no TJSP",
     entities: ["TJSP", "Varas de Falências"],
@@ -38,9 +46,6 @@ const PUBLISHED_REPORTS: Report[] = [
 ];
 
 export function Reports() {
-  const [selectedReport, setSelectedReport] = useState<string | null>(null);
-  const [reportContent, setReportContent] = useState<string>("");
-  const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [genQuery, setGenQuery] = useState("");
   const [genResult, setGenResult] = useState<string>("");
@@ -52,21 +57,6 @@ export function Reports() {
       .then((d) => setStats({ total_nodes: d.total_nodes, total_relationships: d.total_relationships }))
       .catch(() => {});
   }, []);
-
-  const loadReport = async (file: string) => {
-    setLoading(true);
-    try {
-      const resp = await fetch(`/reports/${file}`);
-      if (resp.ok) {
-        setReportContent(await resp.text());
-        setSelectedReport(file);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const generateReport = async () => {
     if (!genQuery.trim()) return;
@@ -124,10 +114,12 @@ export function Reports() {
       <h2 className={styles.sectionTitle}>Relatórios Publicados</h2>
       <div className={styles.reportGrid}>
         {PUBLISHED_REPORTS.map((r) => (
-          <div
+          <a
             key={r.file}
-            className={`${styles.reportCard} ${selectedReport === r.file ? styles.reportCardActive : ""}`}
-            onClick={() => loadReport(r.file)}
+            className={styles.reportCard}
+            href={`/reports/${r.file}`}
+            target="_blank"
+            rel="noopener noreferrer"
           >
             <div className={styles.reportDate}>{r.date}</div>
             <h3 className={styles.reportTitle}>{r.title}</h3>
@@ -142,21 +134,10 @@ export function Reports() {
                 <span key={e} className={styles.entity}>{e}</span>
               ))}
             </div>
-          </div>
+            <span className={styles.openLink}>Abrir relatório ↗</span>
+          </a>
         ))}
       </div>
-
-      {loading && <p className={styles.loading}>Carregando relatório...</p>}
-
-      {selectedReport && reportContent && (
-        <div className={styles.reportViewer}>
-          <div className={styles.viewerHeader}>
-            <h2>{PUBLISHED_REPORTS.find((r) => r.file === selectedReport)?.title}</h2>
-            <button className={styles.closeBtn} onClick={() => setSelectedReport(null)}>Fechar</button>
-          </div>
-          <pre className={styles.reportPre}>{reportContent}</pre>
-        </div>
-      )}
 
       <div className={styles.howItWorks}>
         <h2 className={styles.sectionTitle}>Como Funciona</h2>

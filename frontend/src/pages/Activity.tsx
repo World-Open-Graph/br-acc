@@ -114,10 +114,14 @@ export function Activity() {
                   {new Date(item.timestamp).toLocaleTimeString("pt-BR")}
                 </span>
               </div>
-              <div className={styles.eventTitle}>{item.title}</div>
-              {item.description && (
-                <div className={styles.eventDesc}>{item.description}</div>
-              )}
+              <div className={styles.eventTitle}>
+                {item.type === "chat" ? "Consulta ao agente" :
+                 item.type === "search" ? "Busca realizada" :
+                 item.type === "entity_view" ? "Entidade visualizada" :
+                 item.type === "report" ? "Relatório gerado" :
+                 item.type === "tool_call" ? "Ferramenta utilizada" :
+                 "Ação registrada"}
+              </div>
               <div className={styles.eventMeta}>
                 {item.source && <span>Fonte: {item.source}</span>}
                 {item.result_count > 0 && <span>{item.result_count} resultados</span>}
