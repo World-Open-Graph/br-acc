@@ -31,11 +31,11 @@ Ele torna dados publicos que ja sao abertos, mas espalhados em dezenas de portai
 
 ## Funcionalidades
 
-- **45 pipelines de dados** — CNPJ, TSE, DataSUS, INEP, CAGED, RAIS, IBAMA, SICONFI, PNCP, Portal da Transparencia e mais 35
-- **Banco de dados em grafo Neo4j** — entidades, relacionamentos e conexoes normalizados em um unico grafo consultavel
+- **45 modulos ETL implementados** — status rastreado em `docs/source_registry_br_v1.csv` (loaded/partial/stale/blocked/not_built)
+- **Infraestrutura de grafo Neo4j** — schema, loaders e superficie de consulta para entidades e relacionamentos
 - **Frontend React** — busque, explore redes empresariais e analise conexoes de entidades
 - **API publica** — acesso programatico aos dados do grafo via FastAPI
-- **ETL reproduzivel** — cada fonte de dados tem um script de download e um pipeline de transformacao e carga
+- **Ferramentas de reprodutibilidade** — bootstrap local em um comando e fluxo BYO-data para ETL
 - **Privacy-first** — compativel com LGPD, defaults publicos seguros, sem exposicao de dados pessoais
 
 ---
@@ -43,17 +43,67 @@ Ele torna dados publicos que ja sao abertos, mas espalhados em dezenas de portai
 ## Inicio Rapido
 
 ```bash
-cp .env.example .env          # defina NEO4J_PASSWORD
-make dev                       # inicie todos os servicos
-export NEO4J_PASSWORD=sua_senha
-make seed                      # carregue dados de exemplo
+cp .env.example .env
+make bootstrap-demo
 ```
 
-Todos os containers devem estar rodando. Verifique em:
+Esse comando inicia os servicos Docker, espera Neo4j/API ficarem saudaveis e carrega seed deterministico de desenvolvimento.
+
+Verifique em:
 
 - API: http://localhost:8000/health
 - Frontend: http://localhost:3000
 - Neo4j Browser: http://localhost:7474
+
+---
+
+## Fluxo Em Um Comando
+
+```bash
+# Fluxo demo local (recomendado para primeira execucao)
+make bootstrap-demo
+
+# Orquestracao pesada de ingestao completa (Docker + todos pipelines implementados)
+make bootstrap-all
+
+# Execucao pesada nao interativa (automacao)
+make bootstrap-all-noninteractive
+
+# Exibir ultimo relatorio do bootstrap-all
+make bootstrap-all-report
+```
+
+`make bootstrap-all` e propositalmente pesado:
+- alvo padrao de ingestao historica completa
+- pode levar horas (ou mais), dependendo das fontes externas
+- exige disco, memoria e banda de rede significativos
+- continua em caso de erro e grava resumo auditavel por fonte em `audit-results/bootstrap-all/`
+
+Guia detalhado: [`docs/bootstrap_all.md`](../bootstrap_all.md)
+
+---
+
+## O Que Esta Incluido Neste Repositorio Publico
+
+- Codigo de API, frontend, framework ETL e infraestrutura.
+- Registro de fontes e documentacao de status de pipelines.
+- Dataset demo sintetico e caminho deterministico de seed local.
+- Gates publicos de seguranca/compliance e documentacao de release.
+
+## O Que Nao Esta Incluido Por Padrao
+
+- Dump Neo4j de producao pre-populado.
+- Garantia de estabilidade/disponibilidade de todos os portais externos.
+- Modulos institucionais/privados e runbooks operacionais internos.
+
+## O Que E Reproduzivel Localmente Hoje
+
+- Subida completa local (`make bootstrap-demo`) com grafo demo.
+- Fluxo BYO-data via pipelines `bracc-etl`.
+- Orquestracao pesada em um comando (`make bootstrap-all`) com relatorio explicito de fontes bloqueadas/falhas.
+- Comportamento da API publica em modo seguro de privacidade.
+
+Contadores de escala de producao sao publicados como **snapshot de referencia de producao** em [`docs/reference_metrics.md`](../reference_metrics.md), nao como resultado esperado do bootstrap local.
 
 ---
 

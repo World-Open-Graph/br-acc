@@ -14,6 +14,7 @@ Resumo:
 Release notes: {release_url}
 
 Observação de integridade: os sinais refletem coocorrências em bases públicas e não constituem prova legal.
+Divulgação obrigatória: o repositório público entrega engine + demo + fluxo BYO-data; métricas de escala são snapshots de referência com timestamp.
 
 ## Short post (EN)
 
@@ -27,6 +28,7 @@ Summary:
 Release notes: {release_url}
 
 Integrity note: signals reflect co-occurrence in public records and are not legal proof.
+Mandatory disclosure: the public repo ships engine + demo + BYO-data workflow; production-scale metrics are timestamped reference snapshots.
 
 ## Discord/Telegram long form (PT+EN)
 
@@ -42,6 +44,11 @@ Integrity note: signals reflect co-occurrence in public records and are not lega
 **Compatibilidade**
 - {pt_compat}
 
+**Reproducibility Reality Check**
+- Funciona agora: {pt_works_now}
+- Requer ingestão de dados: {pt_requires_ingestion}
+- Não incluído por padrão: {pt_not_included}
+
 **Link**
 - {release_url}
 
@@ -56,6 +63,11 @@ Integrity note: signals reflect co-occurrence in public records and are not lega
 
 **Compatibility**
 - {en_compat}
+
+**Reproducibility Reality Check**
+- Works now: {en_works_now}
+- Requires data ingestion: {en_requires_ingestion}
+- Not included by default: {en_not_included}
 
 **Link**
 - {release_url}
