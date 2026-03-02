@@ -493,3 +493,412 @@ async def tool_search_votacoes(parlamentar: str = "", proposicao: str = "", ano:
         "fonte": "Dados Abertos da Câmara dos Deputados (votações nominais)",
         "dica": "Use com o nome de um deputado para ver como ele votou em cada proposição.",
     }
+
+
+
+# ─── Portal da Transparência (with API key) ───────────────────────────
+
+PORTAL_API_KEY = "f6341a2372b17d0fe0657c616aa68fb1"
+PORTAL_BASE = "https://api.portaldatransparencia.gov.br/api-de-dados"
+PORTAL_HEADERS = {
+    "Accept": "application/json",
+    "chave-api-dados": PORTAL_API_KEY,
+}
+
+
+async def tool_search_servidores(nome: str = "", cpf: str = "", orgao: str = "") -> dict[str, Any]:
+    """Search federal public servants — name, salary, position, org."""
+    results: list[dict[str, Any]] = []
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            params: dict[str, str] = {"pagina": "1"}
+            if cpf:
+                params["cpfServidor"] = cpf.replace(".", "").replace("-", "")
+            elif orgao:
+                params["codigoOrgaoServidorExercicio"] = orgao
+            else:
+                # API requires CPF or orgao code — try by-name endpoint
+                resp = await client.get(
+                    f"{PORTAL_BASE}/servidores/remuneracao",
+                    params={"nome": nome, "pagina": "1"} if nome else {"pagina": "1"},
+                    headers=PORTAL_HEADERS,
+                )
+                if resp.status_code == 200:
+                    for s in resp.json()[:10]:
+                        results.append({
+                            "nome": s.get("nome", ""),
+                            "cpf": s.get("cpf", ""),
+                            "cargo": s.get("descricaoCargo", ""),
+                            "orgao": s.get("orgaoExercicio", ""),
+                            "remuneracao_bruta": s.get("remuneracaoBruta", ""),
+                            "remuneracao_liquida": s.get("remuneracaoLiquida", ""),
+                        })
+                return {
+                    "query": nome or cpf,
+                    "servidores": results,
+                    "fonte": "Portal da Transparência — Servidores",
+                    "nota": "Busca por nome pode ser limitada. Use CPF para resultado exato." if not cpf else "",
+                }
+
+            resp = await client.get(
+                f"{PORTAL_BASE}/servidores",
+                params=params,
+                headers=PORTAL_HEADERS,
+            )
+            if resp.status_code == 200:
+                for s in resp.json()[:10]:
+                    results.append({
+                        "nome": s.get("nome", ""),
+                        "cpf": s.get("cpf", ""),
+                        "cargo": s.get("cargo", {}).get("descricao", "") if isinstance(s.get("cargo"), dict) else s.get("descricaoCargo", ""),
+                        "orgao_exercicio": s.get("orgaoServidorExercicio", {}).get("nome", "") if isinstance(s.get("orgaoServidorExercicio"), dict) else "",
+                        "orgao_lotacao": s.get("orgaoServidorLotacao", {}).get("nome", "") if isinstance(s.get("orgaoServidorLotacao"), dict) else "",
+                        "situacao": s.get("situacaoServidor", {}).get("descricao", "") if isinstance(s.get("situacaoServidor"), dict) else "",
+                        "remuneracao_bruta": s.get("remuneracaoBruta", ""),
+                        "remuneracao_liquida": s.get("remuneracaoAposDeducoes", ""),
+                    })
+            else:
+                logger.warning("Portal servidores HTTP %s", resp.status_code)
+    except Exception as e:
+        logger.warning("Portal servidores failed: %s", e)
+
+    return {
+        "query": nome or cpf,
+        "servidores": results,
+        "fonte": "Portal da Transparência — Servidores do Poder Executivo Federal",
+        "dica": "Use o CPF para busca exata. Combine com CNPJ para investigar servidores donos de empresas.",
+    }
+
+
+async def tool_search_licitacoes(orgao: str = "", uf: str = "", modalidade: str = "", ano: int = 2024) -> dict[str, Any]:
+    """Search federal government procurement/bids."""
+    results: list[dict[str, Any]] = []
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            params: dict[str, str] = {"pagina": "1", "dataInicial": f"01/01/{ano}", "dataFinal": f"31/12/{ano}"}
+            # Licitacoes requires codigoOrgao — use contratos endpoint which is more flexible
+            if orgao:
+                params["codigoOrgao"] = orgao
+            # Try contratos endpoint instead (more flexible filters)
+            resp = await client.get(
+                f"{PORTAL_BASE}/contratos",
+                params=params,
+                headers=PORTAL_HEADERS,
+            )
+            if resp.status_code == 200:
+                for l in resp.json()[:10]:
+                    results.append({
+                        "numero": l.get("numero", ""),
+                        "objeto": l.get("objeto", "")[:200],
+                        "orgao": l.get("orgao", {}).get("nome", "") if isinstance(l.get("orgao"), dict) else "",
+                        "modalidade": l.get("modalidadeLicitacao", {}).get("descricao", "") if isinstance(l.get("modalidadeLicitacao"), dict) else "",
+                        "valor_estimado": l.get("valorEstimado", ""),
+                        "situacao": l.get("situacao", {}).get("descricao", "") if isinstance(l.get("situacao"), dict) else "",
+                        "data_abertura": l.get("dataAbertura", ""),
+                    })
+            else:
+                logger.warning("Portal licitacoes HTTP %s", resp.status_code)
+    except Exception as e:
+        logger.warning("Portal licitacoes failed: %s", e)
+
+    return {
+        "uf": uf,
+        "ano": ano,
+        "licitacoes": results,
+        "fonte": "Portal da Transparência — Licitações do Poder Executivo Federal",
+    }
+
+
+async def tool_search_cpgf(nome: str = "", orgao: str = "", mes: int = 0, ano: int = 2024) -> dict[str, Any]:
+    """Search government credit card (CPGF) expenses."""
+    results: list[dict[str, Any]] = []
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            params: dict[str, str] = {"pagina": "1"}
+            if nome:
+                params["nomePortadorCartao"] = nome
+            if orgao:
+                params["codigoOrgao"] = orgao
+            if mes:
+                params["mesExtrato"] = str(mes)
+            params["anoExtrato"] = str(ano)
+
+            resp = await client.get(
+                f"{PORTAL_BASE}/cartoes",
+                params=params,
+                headers=PORTAL_HEADERS,
+            )
+            if resp.status_code == 200:
+                for c in resp.json()[:10]:
+                    results.append({
+                        "portador": c.get("nomePortadorCartao", ""),
+                        "cpf_portador": c.get("cpfPortadorCartao", ""),
+                        "orgao": c.get("orgao", {}).get("nome", "") if isinstance(c.get("orgao"), dict) else "",
+                        "valor_transacao": c.get("valorTransacao", ""),
+                        "nome_favorecido": c.get("nomeFavorecido", ""),
+                        "data_transacao": c.get("dataTransacao", ""),
+                        "tipo_transacao": c.get("tipoTransacao", ""),
+                    })
+            else:
+                logger.warning("Portal CPGF HTTP %s", resp.status_code)
+    except Exception as e:
+        logger.warning("Portal CPGF failed: %s", e)
+
+    return {
+        "query": nome or orgao,
+        "ano": ano,
+        "gastos_cartao": results,
+        "fonte": "Portal da Transparência — Gastos por Cartão de Pagamento (CPGF)",
+        "dica": "CPGF = cartão corporativo do governo. Investigue gastos suspeitos: restaurantes caros, viagens, compras pessoais.",
+    }
+
+
+async def tool_search_viagens(nome: str = "", orgao: str = "", ano: int = 2024) -> dict[str, Any]:
+    """Search government travel expenses."""
+    results: list[dict[str, Any]] = []
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            params: dict[str, str] = {"pagina": "1"}
+            if nome:
+                params["nomeProposto"] = nome
+            if orgao:
+                params["codigoOrgao"] = orgao
+            params["anoViagem"] = str(ano)
+
+            resp = await client.get(
+                f"{PORTAL_BASE}/viagens",
+                params=params,
+                headers=PORTAL_HEADERS,
+            )
+            if resp.status_code == 200:
+                for v in resp.json()[:10]:
+                    results.append({
+                        "nome": v.get("nomeProposto", ""),
+                        "cargo": v.get("cargo", ""),
+                        "orgao": v.get("orgao", {}).get("nome", "") if isinstance(v.get("orgao"), dict) else "",
+                        "destino": v.get("destino", ""),
+                        "data_ida": v.get("dataIdaViagem", ""),
+                        "data_volta": v.get("dataVoltaViagem", ""),
+                        "valor_diarias": v.get("valorDiarias", ""),
+                        "valor_passagens": v.get("valorPassagens", ""),
+                        "motivo": v.get("motivo", "")[:150],
+                    })
+            else:
+                logger.warning("Portal viagens HTTP %s", resp.status_code)
+    except Exception as e:
+        logger.warning("Portal viagens failed: %s", e)
+
+    return {
+        "query": nome or orgao,
+        "ano": ano,
+        "viagens": results,
+        "fonte": "Portal da Transparência — Viagens a Serviço do Governo Federal",
+        "dica": "Compare viagens com votações: servidor viajou mas não estava no órgão? Viagens repetidas ao mesmo destino?",
+    }
+
+
+async def tool_search_contratos(orgao: str = "", fornecedor: str = "", ano: int = 2024) -> dict[str, Any]:
+    """Search federal government contracts."""
+    results: list[dict[str, Any]] = []
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            params: dict[str, str] = {"pagina": "1"}
+            if fornecedor:
+                params["nomeFornecedor"] = fornecedor
+            if orgao:
+                params["codigoOrgao"] = orgao
+            params["dataInicial"] = f"01/01/{ano}"
+            params["dataFinal"] = f"31/12/{ano}"
+
+            resp = await client.get(
+                f"{PORTAL_BASE}/contratos",
+                params=params,
+                headers=PORTAL_HEADERS,
+            )
+            if resp.status_code == 200:
+                for c in resp.json()[:10]:
+                    results.append({
+                        "numero": c.get("numero", ""),
+                        "objeto": c.get("objeto", "")[:200],
+                        "orgao": c.get("orgao", {}).get("nome", "") if isinstance(c.get("orgao"), dict) else "",
+                        "fornecedor": c.get("fornecedor", {}).get("nome", "") if isinstance(c.get("fornecedor"), dict) else "",
+                        "cnpj_fornecedor": c.get("fornecedor", {}).get("cnpjCpf", "") if isinstance(c.get("fornecedor"), dict) else "",
+                        "valor_inicial": c.get("valorInicial", ""),
+                        "valor_final": c.get("valorFinal", ""),
+                        "data_inicio": c.get("dataInicioVigencia", ""),
+                        "data_fim": c.get("dataFimVigencia", ""),
+                    })
+            else:
+                logger.warning("Portal contratos HTTP %s", resp.status_code)
+    except Exception as e:
+        logger.warning("Portal contratos failed: %s", e)
+
+    return {
+        "query": fornecedor or orgao,
+        "ano": ano,
+        "contratos": results,
+        "fonte": "Portal da Transparência — Contratos do Poder Executivo Federal",
+        "dica": "Investigue: mesmo fornecedor com múltiplos contratos? Valor final >> valor inicial (aditivos)?",
+    }
+
+
+async def tool_search_sancoes(cnpj: str = "", nome: str = "") -> dict[str, Any]:
+    """Search CEIS (inidôneas) + CNEP (punidas) sanctions."""
+    results: list[dict[str, Any]] = []
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            for endpoint, label in [("ceis", "CEIS - Empresa Inidônea"), ("cnep", "CNEP - Empresa Punida")]:
+                params: dict[str, str] = {"pagina": "1"}
+                if cnpj:
+                    params["cnpjSancionado"] = cnpj.replace(".", "").replace("/", "").replace("-", "")
+                if nome:
+                    params["nomeSancionado"] = nome
+
+                resp = await client.get(
+                    f"{PORTAL_BASE}/{endpoint}",
+                    params=params,
+                    headers=PORTAL_HEADERS,
+                )
+                if resp.status_code == 200:
+                    for s in resp.json()[:5]:
+                        results.append({
+                            "cadastro": label,
+                            "nome": s.get("nomeSancionado", "") or s.get("sancionado", {}).get("nome", ""),
+                            "cnpj_cpf": s.get("cnpjSancionado", "") or s.get("cpfSancionado", ""),
+                            "orgao_sancionador": s.get("orgaoSancionador", {}).get("nome", "") if isinstance(s.get("orgaoSancionador"), dict) else "",
+                            "tipo_sancao": s.get("tipoSancao", {}).get("descricaoResumida", "") if isinstance(s.get("tipoSancao"), dict) else "",
+                            "data_inicio": s.get("dataInicioSancao", ""),
+                            "data_fim": s.get("dataFimSancao", ""),
+                        })
+    except Exception as e:
+        logger.warning("Portal sancoes failed: %s", e)
+
+    return {
+        "query": cnpj or nome,
+        "sancoes": results,
+        "fonte": "Portal da Transparência — CEIS + CNEP (Empresas Inidôneas e Punidas)",
+        "dica": "Empresa sancionada ainda ganha contratos? Isso é irregularidade grave.",
+    }
+
+
+# ─── DataJud (Processos Judiciais - CNJ) ──────────────────────────────
+
+DATAJUD_API_KEY = "cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=="
+DATAJUD_BASE = "https://api-publica.datajud.cnj.jus.br"
+DATAJUD_HEADERS = {
+    "Authorization": f"APIKey {DATAJUD_API_KEY}",
+    "Content-Type": "application/json",
+}
+
+# Map of tribunals for common searches
+DATAJUD_TRIBUNAIS = {
+    "STJ": "api_publica_stj",
+    "TST": "api_publica_tst",
+    "TSE": "api_publica_tse",
+    "TRF1": "api_publica_trf1",  # DF, GO, MT, BA, MA, PI, PA, AM, RR, AP, TO, AC, RO
+    "TRF2": "api_publica_trf2",  # RJ, ES
+    "TRF3": "api_publica_trf3",  # SP, MS
+    "TRF4": "api_publica_trf4",  # PR, SC, RS
+    "TRF5": "api_publica_trf5",  # PE, CE, RN, PB, AL, SE
+    "TRF6": "api_publica_trf6",  # MG
+    "TJSP": "api_publica_tjsp",
+    "TJRJ": "api_publica_tjrj",
+    "TJMG": "api_publica_tjmg",
+    "TJRS": "api_publica_tjrs",
+    "TJPR": "api_publica_tjpr",
+    "TJSC": "api_publica_tjsc",
+    "TJBA": "api_publica_tjba",
+    "TJGO": "api_publica_tjgo",
+    "TJPE": "api_publica_tjpe",
+    "TJCE": "api_publica_tjce",
+    "TJDF": "api_publica_tjdft",
+    "TJMA": "api_publica_tjma",
+    "TJPA": "api_publica_tjpa",
+    "TJAM": "api_publica_tjam",
+    "TJMT": "api_publica_tjmt",
+    "TJMS": "api_publica_tjms",
+    "TJES": "api_publica_tjes",
+    "TJPI": "api_publica_tjpi",
+}
+
+# UF -> TRF mapping
+UF_TO_TRF = {
+    "DF": "TRF1", "GO": "TRF1", "MT": "TRF1", "BA": "TRF1", "MA": "TRF1",
+    "PI": "TRF1", "PA": "TRF1", "AM": "TRF1", "RR": "TRF1", "AP": "TRF1",
+    "TO": "TRF1", "AC": "TRF1", "RO": "TRF1",
+    "RJ": "TRF2", "ES": "TRF2",
+    "SP": "TRF3", "MS": "TRF3",
+    "PR": "TRF4", "SC": "TRF4", "RS": "TRF4",
+    "PE": "TRF5", "CE": "TRF5", "RN": "TRF5", "PB": "TRF5", "AL": "TRF5", "SE": "TRF5",
+    "MG": "TRF6",
+}
+
+
+async def tool_search_processos(numero_processo: str = "", nome_parte: str = "", tribunal: str = "TJSP", classe: str = "") -> dict[str, Any]:
+    """Search judicial processes via DataJud (CNJ)."""
+    results: list[dict[str, Any]] = []
+    try:
+        alias = DATAJUD_TRIBUNAIS.get(tribunal.upper(), f"api_publica_{tribunal.lower()}")
+        url = f"{DATAJUD_BASE}/{alias}/_search"
+
+        if numero_processo:
+            query = {
+                "query": {
+                    "match": {"numeroProcesso": numero_processo.replace(".", "").replace("-", "")}
+                },
+                "size": 5,
+            }
+        elif nome_parte:
+            query = {
+                "query": {
+                    "match": {"movimentos.complementosTabelados.descricao": nome_parte}
+                },
+                "size": 5,
+            }
+        elif classe:
+            query = {
+                "query": {
+                    "match_phrase": {"classe.nome": classe}
+                },
+                "size": 5,
+                "sort": [{"dataAjuizamento": {"order": "desc"}}],
+            }
+        else:
+            query = {
+                "query": {"match_all": {}},
+                "size": 5,
+                "sort": [{"dataAjuizamento": {"order": "desc"}}],
+            }
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(url, json=query, headers=DATAJUD_HEADERS)
+            if resp.status_code == 200:
+                hits = resp.json().get("hits", {}).get("hits", [])
+                for hit in hits[:5]:
+                    src = hit.get("_source", {})
+                    movs = src.get("movimentos", [])
+                    last_mov = movs[0] if movs else {}
+                    results.append({
+                        "numero": src.get("numeroProcesso", ""),
+                        "classe": src.get("classe", {}).get("nome", ""),
+                        "assuntos": [a.get("nome", "") for a in src.get("assuntos", [])[:3]],
+                        "orgao_julgador": src.get("orgaoJulgador", {}).get("nome", ""),
+                        "data_ajuizamento": src.get("dataAjuizamento", ""),
+                        "grau": src.get("grau", ""),
+                        "nivel_sigilo": src.get("nivelSigilo", 0),
+                        "ultimo_movimento": last_mov.get("nome", ""),
+                        "data_ultimo_movimento": last_mov.get("dataHora", ""),
+                    })
+            else:
+                logger.warning("DataJud HTTP %s: %s", resp.status_code, resp.text[:200])
+    except Exception as e:
+        logger.warning("DataJud search failed: %s", e)
+
+    return {
+        "query": numero_processo or nome_parte or classe or "recentes",
+        "tribunal": tribunal,
+        "processos": results,
+        "fonte": f"DataJud (CNJ) — {tribunal}",
+        "tribunais_disponiveis": list(DATAJUD_TRIBUNAIS.keys())[:10],
+        "dica": "Use número do processo para busca exata. Busque por classe: 'Recuperação Judicial', 'Ação de Improbidade', 'Execução Fiscal'.",
+    }

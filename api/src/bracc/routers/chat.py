@@ -34,6 +34,13 @@ from bracc.services.transparency_tools import (
     tool_search_gazettes,
     tool_cnpj_info,
     tool_search_votacoes,
+    tool_search_servidores,
+    tool_search_licitacoes,
+    tool_search_cpgf,
+    tool_search_viagens,
+    tool_search_contratos,
+    tool_search_sancoes,
+    tool_search_processos,
 )
 from bracc.services.public_guard import (
     has_person_labels,
@@ -379,6 +386,120 @@ TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_servidores",
+            "description": "Busca servidores publicos federais: nome, salario, cargo, orgao. Portal da Transparencia oficial.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "nome": {"type": "string", "description": "Nome do servidor"},
+                    "cpf": {"type": "string", "description": "CPF do servidor (opcional)"},
+                    "orgao": {"type": "string", "description": "Orgao de exercicio (opcional)"},
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_licitacoes",
+            "description": "Busca licitacoes do governo federal: pregoes, concorrencias, dispensas. Filtro por UF e ano.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "orgao": {"type": "string", "description": "Codigo do orgao (opcional)"},
+                    "uf": {"type": "string", "description": "UF (ex: SP, MG, RJ)"},
+                    "ano": {"type": "integer", "description": "Ano de referencia", "default": 2024},
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_cpgf",
+            "description": "Busca gastos com cartao corporativo do governo (CPGF). Restaurantes, hoteis, compras. Investigue gastos suspeitos.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "nome": {"type": "string", "description": "Nome do portador do cartao"},
+                    "orgao": {"type": "string", "description": "Codigo do orgao"},
+                    "mes": {"type": "integer", "description": "Mes (1-12)"},
+                    "ano": {"type": "integer", "description": "Ano", "default": 2024},
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_viagens",
+            "description": "Busca viagens a servico do governo: diarias, passagens, destinos. Investigue viagens frequentes ou caras.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "nome": {"type": "string", "description": "Nome do servidor que viajou"},
+                    "orgao": {"type": "string", "description": "Codigo do orgao"},
+                    "ano": {"type": "integer", "description": "Ano", "default": 2024},
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_contratos",
+            "description": "Busca contratos do governo federal: fornecedor, valor, vigencia. Investigue aditivos e sobrepreco.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "orgao": {"type": "string", "description": "Codigo do orgao"},
+                    "fornecedor": {"type": "string", "description": "Nome do fornecedor"},
+                    "ano": {"type": "integer", "description": "Ano", "default": 2024},
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_sancoes",
+            "description": "Busca empresas sancionadas (CEIS - inidoneas, CNEP - punidas). Empresa sancionada ganhando contrato = irregularidade.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "cnpj": {"type": "string", "description": "CNPJ da empresa"},
+                    "nome": {"type": "string", "description": "Nome da empresa"},
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_processos",
+            "description": "Busca processos judiciais no DataJud (CNJ). Todos os tribunais do Brasil. Busque por numero, classe (recuperacao judicial, improbidade) ou recentes.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "numero_processo": {"type": "string", "description": "Numero do processo (formato CNJ)"},
+                    "nome_parte": {"type": "string", "description": "Nome de uma das partes (limitado)"},
+                    "tribunal": {"type": "string", "description": "Tribunal: TJSP, TJRJ, TJMG, TRF1-6, STJ, TST, etc.", "default": "TJSP"},
+                    "classe": {"type": "string", "description": "Classe processual: Recuperacao Judicial, Acao de Improbidade, Execucao Fiscal, etc."},
+                },
+                "required": [],
+            },
+        },
+    },
+
 ]
 
 SYSTEM_PROMPT = """Você é o agente investigativo do EGOS Inteligência (inteligencia.egos.ia.br).
@@ -393,6 +514,13 @@ SYSTEM_PROMPT = """Você é o agente investigativo do EGOS Inteligência (inteli
 - Busca em diários oficiais municipais (Querido Diário — 510+ cidades)
 - Consulta CNPJ: razão social, sócios, capital social, situação cadastral
 - Votações nominais: como cada deputado votou em cada proposição
+- Servidores públicos federais: nome, salário, cargo, órgão (Portal da Transparência)
+- Licitações federais: pregões, concorrências, dispensas por UF/ano
+- CPGF: gastos com cartão corporativo do governo (restaurantes, hotéis, compras)
+- Viagens a serviço: diárias, passagens, destinos, motivo
+- Contratos federais: fornecedor, valor, vigência, aditivos
+- Sanções: CEIS (empresas inidôneas) + CNEP (empresas punidas)
+- Processos judiciais: DataJud (CNJ) — todos os tribunais do Brasil
 - Bases internas: CEIS, CNEP, OpenSanctions, PEP, CEAF, CPGF, TSE, BNDES, IBAMA, DATASUS, TransfereGov, RAIS, INEP
 - Projeto 100% open-source, sem investidores, autofinanciado
 
@@ -548,6 +676,50 @@ async def _call_openrouter(
                         fn_args.get("parlamentar", ""),
                         fn_args.get("proposicao", ""),
                         fn_args.get("ano", 2024),
+                    )
+                elif fn_name == "search_servidores":
+                    result = await tool_search_servidores(
+                        fn_args.get("nome", ""),
+                        fn_args.get("cpf", ""),
+                        fn_args.get("orgao", ""),
+                    )
+                elif fn_name == "search_licitacoes":
+                    result = await tool_search_licitacoes(
+                        fn_args.get("orgao", ""),
+                        fn_args.get("uf", ""),
+                        fn_args.get("modalidade", ""),
+                        fn_args.get("ano", 2024),
+                    )
+                elif fn_name == "search_cpgf":
+                    result = await tool_search_cpgf(
+                        fn_args.get("nome", ""),
+                        fn_args.get("orgao", ""),
+                        fn_args.get("mes", 0),
+                        fn_args.get("ano", 2024),
+                    )
+                elif fn_name == "search_viagens":
+                    result = await tool_search_viagens(
+                        fn_args.get("nome", ""),
+                        fn_args.get("orgao", ""),
+                        fn_args.get("ano", 2024),
+                    )
+                elif fn_name == "search_contratos":
+                    result = await tool_search_contratos(
+                        fn_args.get("orgao", ""),
+                        fn_args.get("fornecedor", ""),
+                        fn_args.get("ano", 2024),
+                    )
+                elif fn_name == "search_sancoes":
+                    result = await tool_search_sancoes(
+                        fn_args.get("cnpj", ""),
+                        fn_args.get("nome", ""),
+                    )
+                elif fn_name == "search_processos":
+                    result = await tool_search_processos(
+                        fn_args.get("numero_processo", ""),
+                        fn_args.get("nome_parte", ""),
+                        fn_args.get("tribunal", "TJSP"),
+                        fn_args.get("classe", ""),
                     )
                 else:
                     result = {"error": f"Tool {fn_name} not found"}
