@@ -9,26 +9,29 @@
 
 ---
 
-## Status Atual
+## Status Atual (2026-03-02)
 
 | Métrica | Valor |
 |---|---|
-| **Nós no grafo** | 210.596+ (crescendo — de 40k em fev/2026) |
-| **Relacionamentos** | 23.870+ |
-| **Empresas** | 9.645+ |
+| **Nós no grafo** | 278.501 (crescendo — de 40k em fev/2026) |
+| **Relacionamentos** | 30.916 |
+| **Empresas** | 9.645+ (CNPJ 53.6M em carregamento) |
 | **Sanções carregadas** | 23.847 (CEIS + CNEP) |
-| **OpenSanctions** | 4.136.365 entidades (ETL rodando) |
+| **OpenSanctions** | 4.136.365 entidades |
 | **PEP** | 133.859 Pessoas Expostas Politicamente |
 | **TSE** | Candidaturas + Doações + Bens (2022+2024, 1.7GB) |
 | **ICIJ Offshore Leaks** | 73MB baixado (Panama/Pandora Papers) |
+| **CNPJ Receita Federal** | 🔄 6.8GB upload para Contabo, ETL pronto |
 | **DataJud CNJ** | Script pronto para 80M+ processos judiciais |
 | **Pipelines ETL prontos** | 46 |
-| **Scripts de download** | 39 + download-datajud.sh |
-| **Servidor** | VPS Contabo 48GB RAM, Neo4j + bots 24/7 |
-| **Bot Discord** | 13 ferramentas OSINT, modo agente autônomo |
-| **Bot Telegram** | 13 ferramentas OSINT (@EGOSin_bot) |
+| **Bot Discord** | 14 ferramentas OSINT + fallback de modelos |
+| **Bot Telegram** | 14 ferramentas OSINT (@EGOSin_bot) |
+| **Bot IA** | Gemini 2.0 Flash (free) → fallback pago, memória persistente |
+| **Servidor** | Contabo Cloud VPS 40 SSD — 12 vCPU, 48GB RAM, 500GB SSD ($35/mo) |
+| **Custo total** | $36/mês (100% autofinanciado, sem grants) |
 | **Frontend** | bracc.egos.ia.br — público, sem login |
-| **Download guide** | docs/pt-BR/DOWNLOAD_DADOS.md (33 datasets) |
+| **Investigações** | 11 relatórios publicados (incluindo Patense R$217M BNDES) |
+| **Framework** | Construído com EGOS (egos.ia.br) — 24 agentes, MCP tools |
 
 ---
 
@@ -443,6 +446,98 @@ O projeto [Intelink](https://intelink.ia.br) (EGOS) já implementou capacidades 
 - **Zero infraestrutura**: Usuário instala, configura e usa — sem servidor adicional
 - **Composabilidade**: Usuário pode combinar EGOS MCP com outros MCPs (filesystem, database, etc.)
 - **Open source**: Qualquer um pode criar novos tools e contribuir
+
+---
+
+## Fase 7: Sistema Completo de Análise (Palantir-level)
+
+> **Meta:** Transformar BR/ACC de "consulta de dados" para "análise investigativa real" com expansão de entidades, cruzamentos multi-hop e detecção de anomalias.
+
+### 7.1 — Algoritmos de Grafo (PRIORIDADE MÁXIMA)
+
+| # | Task | Descrição | Depende de | Status |
+|---|------|-----------|------------|--------|
+| 7.1.1 | **PageRank** | Identificar entidades mais influentes no grafo (quem tem mais conexões) | CNPJ carregado | ⬜ |
+| 7.1.2 | **Community Detection** (Louvain) | Agrupar empresas/pessoas em clusters — detectar "famílias" de empresas | CNPJ carregado | ⬜ |
+| 7.1.3 | **Shortest Path** | Mostrar caminho mais curto entre qualquer par de entidades (ex: político ↔ empresa) | CNPJ carregado | ⬜ |
+| 7.1.4 | **Betweenness Centrality** | Detectar "pontes" — entidades que conectam grupos que não deveriam estar conectados | CNPJ carregado | ⬜ |
+| 7.1.5 | **Degree Distribution** | Encontrar outliers — entidades com número anormal de conexões | CNPJ carregado | ⬜ |
+
+### 7.2 — Expansão de Entidades (Click-to-Expand)
+
+| # | Task | Descrição | Status |
+|---|------|-----------|--------|
+| 7.2.1 | **1º grau** | Clicar em pessoa/empresa → ver todas as conexões diretas | ⬜ |
+| 7.2.2 | **2º grau** | Expandir conexões dos vizinhos → rede de 2 hops | ⬜ |
+| 7.2.3 | **3º grau** | Rede completa de 3 hops — máximo útil antes de "tudo se conecta" | ⬜ |
+| 7.2.4 | **Filtros por tipo** | Expandir apenas: SOCIO_DE, DOOU_PARA, SANCIONADO, PEP, etc. | ⬜ |
+| 7.2.5 | **Timeline de conexões** | Quando cada conexão foi criada/desfeita (data_entrada em QSA) | ⬜ |
+
+### 7.3 — Cross-Case Analysis (Padrões entre Investigações)
+
+| # | Task | Descrição | Status |
+|---|------|-----------|--------|
+| 7.3.1 | **Entity overlap** | Detectar entidades que aparecem em 2+ investigações diferentes | ⬜ |
+| 7.3.2 | **Pattern matching** | Encontrar padrões repetidos: mesma estrutura de SPEs, mesmo advogado, etc. | ⬜ |
+| 7.3.3 | **Temporal correlation** | Eventos que acontecem em datas próximas em investigações diferentes | ⬜ |
+| 7.3.4 | **Geographic clustering** | Concentração de entidades suspeitas na mesma região | ⬜ |
+
+### 7.4 — Detecção de Anomalias
+
+| # | Task | Descrição | Algoritmo | Status |
+|---|------|-----------|-----------|--------|
+| 7.4.1 | **Benford's Law** | Distribuição dos primeiros dígitos em valores de contratos/BNDES | Estatístico | ⬜ |
+| 7.4.2 | **HHI (Herfindahl)** | Concentração de contratos em poucos fornecedores por órgão | Estatístico | ⬜ |
+| 7.4.3 | **Temporal spikes** | Picos anormais de atividade (ex: 147 operações BNDES em 1 ano) | Z-score | ⬜ |
+| 7.4.4 | **Shell company detection** | Muitas empresas, poucos funcionários, mesmo endereço | Heurístico | ⬜ |
+| 7.4.5 | **Fragmentation detection** | Contratos divididos para ficar abaixo do limite de licitação | Clustering | ⬜ |
+| 7.4.6 | **Circular ownership** | Empresa A → sócia de B → sócia de C → sócia de A | Cycle detection | ⬜ |
+
+### 7.5 — Entity Resolution (Unificar Identidades)
+
+| # | Task | Descrição | Status |
+|---|------|-----------|--------|
+| 7.5.1 | **CPF/CNPJ exact match** | Mesma pessoa/empresa em CNPJ, TSE, CEIS, PEP | ⬜ |
+| 7.5.2 | **Fuzzy name matching** | Jaro-Winkler > 0.85 + data nascimento (portar do Intelink) | ⬜ |
+| 7.5.3 | **Address matching** | Parse de endereço + comparação fuzzy (portar do Intelink) | ⬜ |
+| 7.5.4 | **Merge nodes** | Criar nó unificado com todas as fontes como evidência | ⬜ |
+| 7.5.5 | **Conflict detection** | Alertar quando CPF+Nome não batem (erro de dados) | ⬜ |
+
+### 7.6 — Visualização de Grafo (Frontend)
+
+| # | Task | Descrição | Status |
+|---|------|-----------|--------|
+| 7.6.1 | **Force-directed graph** | Visualização interativa de rede (D3.js ou vis.js) | ⬜ |
+| 7.6.2 | **Color by type** | Pessoa=azul, Empresa=verde, Sanção=vermelho, PEP=amarelo | ⬜ |
+| 7.6.3 | **Size by importance** | Nós maiores = mais conexões (PageRank) | ⬜ |
+| 7.6.4 | **Click-to-expand** | Clicar em nó → carregar vizinhos → expandir grafo | ⬜ |
+| 7.6.5 | **Search + highlight** | Buscar entidade → destacar no grafo | ⬜ |
+| 7.6.6 | **Export** | Exportar subgrafo como PNG, PDF, ou CSV | ⬜ |
+
+### 7.7 — Relatórios de Investigação (Padronizados)
+
+| # | Task | Descrição | Status |
+|---|------|-----------|--------|
+| 7.7.1 | **Template de relatório** | Header, resumo, entidades, conexões, red flags, fontes | ⬜ |
+| 7.7.2 | **Shareable permalinks** | Cada relatório tem URL única (anônimo) | ⬜ |
+| 7.7.3 | **Crowd corrections** | Qualquer pessoa pode sugerir correções (moderado) | ⬜ |
+| 7.7.4 | **Confidence scores** | Cada achado tem score de confiança (alto/médio/baixo) | ⬜ |
+| 7.7.5 | **Source attribution** | Cada dado cita a fonte oficial exata | ⬜ |
+
+### 7.8 — Bases de Dados Adicionais (Próximas Prioridades)
+
+| # | Base | Volume | Cruzamento | Prioridade |
+|---|------|--------|------------|------------|
+| 7.8.1 | **DataJud** (processos judiciais) | 80M+ processos | CPF/CNPJ → quem processa quem | Alta |
+| 7.8.2 | **ICIJ Offshore** (Panama/Paradise Papers) | 4.8k entidades BR | CNPJ/Nome → offshores | Alta |
+| 7.8.3 | **ComprasNet/PNCP** (contratos federais) | 1.1M contratos | CNPJ → quem vende pro governo | Alta |
+| 7.8.4 | **CVM** (fundos/valores mobiliários) | 500k+ registros | CNPJ → mercado financeiro | Média |
+| 7.8.5 | **RAIS/CAGED** (emprego formal) | 100M+ registros | CNPJ → quantos empregados | Média |
+| 7.8.6 | **DataSUS** (saúde pública) | Hospitais, leitos, gastos | CNPJ → saúde | Média |
+| 7.8.7 | **IBAMA** (multas ambientais) | Infrações, embargos | CNPJ → ambiental | Média |
+| 7.8.8 | **STF/STJ** (supremas cortes) | 2.4M+ processos | Nome/CPF → jurisprudência | Baixa |
+| 7.8.9 | **DOU via NLP** (diários oficiais) | 4M+ atos | NER → extrair entidades | Baixa |
+| 7.8.10 | **BCB** (dados financeiros) | Taxa de câmbio, PIX stats | Contextual | Baixa |
 
 ---
 
