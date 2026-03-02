@@ -57,6 +57,12 @@ async def public_meta(
     return {
         "product": "World Transparency Graph",
         "mode": "public_safe",
+        "dataset_scope": {
+            "local_default": "demo_local",
+            "ingestion_mode": "byo_ingestion",
+            "reference_metrics": "reference_production_snapshot",
+        },
+        "metrics_as_of_utc": "2026-03-01T23:05:00Z",
         "total_nodes": record["total_nodes"] if record else 0,
         "total_relationships": record["total_relationships"] if record else 0,
         "company_count": record["company_count"] if record else 0,

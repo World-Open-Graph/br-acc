@@ -1,0 +1,45 @@
+name: Bootstrap All Audit
+
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bootstrap-all-audit:
+    name: Bootstrap All Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Prepare local env
+        run: |
+          cp .env.example .env
+          echo "NEO4J_PASSWORD=changeme" >> .env
+
+      - name: Run bootstrap-all subset (noninteractive)
+        run: |
+          bash scripts/bootstrap_all_public.sh \
+            --noninteractive \
+            --yes-reset \
+            --sources cnpj,tse,transparencia,sanctions
+
+      - name: Upload bootstrap-all artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-all-audit
+          path: audit-results/bootstrap-all/latest
+          if-no-files-found: warn
