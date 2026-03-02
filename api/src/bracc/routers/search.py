@@ -70,7 +70,7 @@ async def search_entities(
         session,
         "search_count",
         {
-            "query": q,
+            "query": _escape_lucene(q),
             "entity_type": type_filter,
             "hide_person_entities": hide_person_entities,
         },
