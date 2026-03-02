@@ -128,13 +128,15 @@ Além das recuperações judiciais, o TJSP tem **10.000+ execuções fiscais** r
 
 ### Custo Total de Operação
 
-| Item | Custo/Mês |
+| Item | Custo/Mês (USD) |
 |------|-----------|
-| Servidor Contabo | €15 (~R$ 90) |
-| OpenRouter (LLM) | ~$2 (~R$ 12) |
-| Brave Search | $0-5 (~R$ 0-30) |
-| APIs públicas | R$ 0 |
-| **TOTAL** | **~R$ 120/mês** |
+| Servidor Contabo (8vCPU, 30GB) | $35 |
+| Supabase Pro (PostgreSQL) | $20 |
+| Windsurf IDE (AI-assisted dev) | $45 |
+| OpenRouter (LLM — Gemini 2.0 Flash) | ~$5 |
+| Brave Search API | $0-5 |
+| APIs públicas (Portal, DataJud, etc.) | $0 |
+| **TOTAL** | **~US$ 105/mês (~R$ 630)** |
 
 ---
 

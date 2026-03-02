@@ -106,17 +106,19 @@ GET https://api.portaldatransparencia.gov.br/api-de-dados/ceis?pagina=1
 
 ## 5. Infraestrutura e Custos
 
-| Componente | Tecnologia | Custo Mensal |
+| Componente | Tecnologia | Custo Mensal (USD) |
 |-----------|-----------|-------------|
-| **Servidor** | Contabo VPS (8 vCPU, 30GB RAM) | ~€15/mês |
+| **Servidor** | Contabo VPS (8 vCPU, 30GB RAM) | $35/mês |
+| **Banco de dados** | Supabase Pro (PostgreSQL) | $20/mês |
+| **IDE/Dev** | Windsurf IDE (AI-assisted) | $45/mês |
 | **Banco de grafos** | Neo4j Community (317K nós) | Grátis |
-| **LLM** | Gemini 2.0 Flash via OpenRouter | ~$2/mês (uso atual) |
+| **LLM** | Gemini 2.0 Flash via OpenRouter | ~$5/mês |
 | **Web Search** | Brave Search API (2K grátis/mês) | $0-5/mês |
 | **APIs públicas** | Portal Transparência, DataJud, Querido Diário | Grátis |
-| **Frontend** | React + Vite | Grátis (Caddy) |
-| **Total mensal** | | **~R$ 120/mês** |
+| **Frontend** | React + Vite (Caddy) | Grátis |
+| **Total mensal** | | **~US$ 105/mês (~R$ 630)** |
 
-> **Comparação:** Palantir Gotham custa ~US$10 milhões/ano. Nós fazemos o mesmo tipo de análise por R$120/mês.
+> **Comparação:** Palantir Gotham custa ~US$10 milhões/ano. Nós fazemos o mesmo tipo de análise por ~US$105/mês (~R$630).
 
 ---
 
