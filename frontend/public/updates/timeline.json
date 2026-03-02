@@ -228,5 +228,28 @@
       "apis": "DuckDuckGo, TransfereGov, Câmara dos Deputados",
       "tasks": "30/49"
     }
+  },
+  {
+    "date": "2026-03-02",
+    "title": "18 Tools + Evidence Chain + Activity Feed + Eagle Eye",
+    "description": "Chatbot com 18 ferramentas (Portal Transparencia, DataJud, Brave Search). Evidence chain com proveniencia de dados. Activity feed em tempo real. Eagle Eye monitora diarios oficiais. SEO + sitemap + robots.txt. 3 relatorios de investigacao publicados.",
+    "tags": ["ai", "feature", "data", "infrastructure"],
+    "metrics": {
+      "tools": 18,
+      "reports": 3,
+      "tasks": "57/77"
+    }
+  },
+  {
+    "date": "2026-03-03",
+    "title": "Crash Fix + 108 Fontes Reais + 7 Novas Fontes Planejadas",
+    "description": "Corrigido crash do frontend (SourceRegistry + 14 componentes). 108 fontes reais no landing page com categorias e filtros. Pre-commit contra crashes. Healthchecks Docker. 7 novas fontes planejadas: ComexStat, ANM, SALIC, CADE, INPI, GLEIF, TCEs.",
+    "tags": ["fix", "data", "infrastructure", "governance"],
+    "metrics": {
+      "sources": 108,
+      "loaded": 36,
+      "categories": 27,
+      "tasks": "60/85"
+    }
   }
 ]
