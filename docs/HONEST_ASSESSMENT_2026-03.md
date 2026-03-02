@@ -1,6 +1,6 @@
 # Avaliação Honesta: O Que Realmente Funciona (e o que não funciona)
 
-> **Data:** 2026-03-02 | **Versão:** 1.0 | **Autor:** Equipe EGOS
+> **Data:** 2026-03-02 | **Versão:** 1.1 | **Autor:** Equipe EGOS
 > **Propósito:** Ser brutalmente honesto sobre nossas capacidades atuais
 
 ---
@@ -21,7 +21,7 @@
 
 | Promessa | Realidade | O que falta |
 |----------|-----------|-------------|
-| **"Grafo de vínculos"** | Sem CNPJ/QSA, o grafo não conecta sócios a empresas | Baixar 60GB CNPJ da Receita Federal |
+| **"Grafo de vínculos"** | 🔄 CNPJ (53.6M empresas) em carregamento no Neo4j — ETL rodando | Processar ~4-8h, ativar graph queries |
 | **"Investigação automática"** | O bot faz consultas individuais, não encadeia raciocínio | Modelo de IA mais potente (Gemini 3.1 Pro ou Claude Opus 4.6) |
 | **"Cross-referencing inteligente"** | Na prática são JOINs SQL entre tabelas | Algoritmos de grafo (PageRank, Community Detection) |
 | **"Detectar fraude"** | Mostramos dados, não detectamos padrões automaticamente | ML/Anomaly Detection, Benford's Law, HHI |
