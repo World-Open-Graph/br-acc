@@ -31,11 +31,11 @@ It makes public data that is already open but scattered across dozens of portals
 
 ## Features
 
-- **45 data pipelines** — CNPJ, TSE, DataSUS, INEP, CAGED, RAIS, IBAMA, SICONFI, PNCP, Portal da Transparencia, and 35 more
-- **Neo4j graph database** — entities, relationships, and connections normalized into a single queryable graph
+- **45 implemented ETL pipeline modules** — status is tracked in `docs/source_registry_br_v1.csv` (loaded/partial/stale/blocked/not_built)
+- **Neo4j graph infrastructure** — schema, loaders, and query surface for normalized entities and relationships
 - **React frontend** — search, explore corporate networks, and analyze entity connections
 - **Public API** — programmatic access to graph data via FastAPI
-- **Reproducible ETL** — every data source has a download script and a transform-load pipeline
+- **Reproducibility tooling** — one-command local bootstrap plus BYO-data ETL workflow
 - **Privacy-first** — LGPD compliant, public-safe defaults, no personal data exposure
 
 ---
@@ -43,17 +43,67 @@ It makes public data that is already open but scattered across dozens of portals
 ## Quick Start
 
 ```bash
-cp .env.example .env          # set NEO4J_PASSWORD
-make dev                       # start all services
-export NEO4J_PASSWORD=your_password
-make seed                      # load sample data
+cp .env.example .env
+make bootstrap-demo
 ```
 
-You should see all containers running. Verify with:
+This command starts Docker services, waits for Neo4j/API readiness, and loads deterministic development seed data.
+
+Verify with:
 
 - API: http://localhost:8000/health
 - Frontend: http://localhost:3000
 - Neo4j Browser: http://localhost:7474
+
+---
+
+## One-Command Flow
+
+```bash
+# Local demo flow (recommended for first run)
+make bootstrap-demo
+
+# Heavy full ingestion orchestration (Docker + all implemented pipelines)
+make bootstrap-all
+
+# Noninteractive heavy run (automation)
+make bootstrap-all-noninteractive
+
+# Print latest bootstrap-all report
+make bootstrap-all-report
+```
+
+`make bootstrap-all` is intentionally heavy:
+- full historical default ingestion target
+- can take hours (or longer) depending on source availability
+- requires substantial disk, memory, and network bandwidth
+- continues on errors and writes auditable per-source status summary under `audit-results/bootstrap-all/`
+
+Detailed guide: [`docs/bootstrap_all.md`](docs/bootstrap_all.md)
+
+---
+
+## What Is Included In This Public Repo
+
+- API, frontend, ETL framework, and infrastructure code.
+- Source registry and pipeline status documentation.
+- Synthetic demo dataset and deterministic local seed path.
+- Public safety/compliance gates and release governance docs.
+
+## What Is Not Included By Default
+
+- A pre-populated production Neo4j dump.
+- Guaranteed uptime/stability of every third-party public portal.
+- Institutional/private modules and operational runbooks.
+
+## What Is Reproducible Locally Today
+
+- Full local stack startup (`make bootstrap-demo`) with demo graph.
+- BYO-data ingestion workflow through `bracc-etl` pipelines.
+- One-command heavy orchestration (`make bootstrap-all`) with explicit blocked/failed source reporting.
+- Public-safe API behavior with privacy defaults.
+
+Production-scale counters are published as a **reference production snapshot** in [`docs/reference_metrics.md`](docs/reference_metrics.md), not as expected local bootstrap output.
 
 ---
 

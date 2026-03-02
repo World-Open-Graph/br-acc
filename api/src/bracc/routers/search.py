@@ -1,3 +1,4 @@
+import re
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
@@ -17,6 +18,13 @@ from bracc.services.public_guard import (
 )
 
 router = APIRouter(prefix="/api/v1", tags=["search"])
+
+_LUCENE_SPECIAL = re.compile(r'([+\-&|!(){}[\]^"~*?:\\/])')
+
+
+def _escape_lucene(query: str) -> str:
+    """Escape Lucene special characters so user input is treated as literals."""
+    return _LUCENE_SPECIAL.sub(r"\\\1", query)
 
 
 def _extract_name(node: Any, labels: list[str]) -> str:
@@ -51,7 +59,7 @@ async def search_entities(
         session,
         "search",
         {
-            "query": q,
+            "query": _escape_lucene(q),
             "entity_type": type_filter,
             "hide_person_entities": hide_person_entities,
             "skip": skip,
