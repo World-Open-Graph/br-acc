@@ -1,6 +1,6 @@
 # BR/ACC Open Graph — Dados Públicos do Brasil em Grafo
 
-<!-- RHO_BADGE --> **Rho Score:** 🟡 0.30 (WARNING) | Contributors: 4 | Commits (30d): 94 | Updated: 2026-03-01 <!-- /RHO_BADGE -->
+<!-- RHO_BADGE --> **Rho Score:** 🟡 0.30 (WARNING) | Contributors: 4 | Commits (30d): 94 | Updated: 2026-03-02 <!-- /RHO_BADGE -->
 
 [![BRACC Header](docs/brand/bracc-header.jpg)](docs/brand/bracc-header.jpg)
 
@@ -26,8 +26,8 @@ Site: [bracc.org](https://bracc.org) | Iniciativa: [World Open Graph](https://wo
 | **API Pública** | ✅ Online | http://217.216.95.126/health |
 | **Frontend** | ✅ Online | http://217.216.95.126 |
 | **Neo4j** | ✅ Healthy (48GB RAM) | Interno |
-| **Discord Bot** | ✅ Online | `@EGOS Intelligence#2881` |
-| **Telegram Bot** | 🔵 Em breve | [@ethikin](https://t.me/ethikin) |
+| **Discord Bot** | ✅ Online (13 tools) | `@EGOS Intelligence#2881` |
+| **Telegram Bot** | ✅ Online (13 tools) | [@EGOSin_bot](https://t.me/EGOSin_bot) |
 
 **Servidor:** Contabo VPS 40 — 12 vCPU, 48GB RAM, 250GB NVMe
 
@@ -62,7 +62,9 @@ O BR/ACC faz isso automaticamente:
 | Patrimônio de candidatos | TSE Bens | 14,3 milhões de bens declarados |
 | Filiações partidárias | TSE Filiados | 16,5 milhões de filiações |
 
-**Total: 141 milhões de nós e 92 milhões de conexões.**
+**Meta: 141 milhões de nós e 92 milhões de conexões.**
+
+**Status atual (2026-03-02): 278.501 nós e 30.916 conexões carregados.** Faltam CNPJ (53.6M), DataJud (80M+) e fontes financeiras para atingir a meta.
 
 > **Importante:** Padrões encontrados nos dados são **sinais**, não prova jurídica. Toda conclusão de alto risco exige revisão humana.
 
@@ -86,7 +88,7 @@ Exemplos de perguntas:
 @EGOS Intelligence quem são os maiores supersalários do TJSP?
 ```
 
-O bot tem **11 ferramentas OSINT** integradas:
+Os bots têm **13 ferramentas OSINT** integradas:
 
 | Ferramenta | O Que Faz | Fonte |
 |---|---|---|
@@ -101,10 +103,12 @@ O bot tem **11 ferramentas OSINT** integradas:
 | `search_gazettes` | Busca em diários oficiais de 5.570+ municípios | Querido Diário |
 | `search_licitacoes` | Busca de licitações e pregões | Querido Diário |
 | `search_contratos` | Busca de contratos públicos | Querido Diário |
+| `web_search` | Busca web contextualizada | Exa AI |
+| `task_persist` | Auto-criação de issues a partir de feedback | GitHub API |
 
-**Telegram:** [@ethikin](https://t.me/ethikin) — em integração
+**Telegram:** [@EGOSin_bot](https://t.me/EGOSin_bot) — ✅ Online 24/7 (mesmas 13 ferramentas)
 
-**WhatsApp:** Em breve
+**WhatsApp:** Em planejamento (Evolution API)
 
 ### Opção 2: Rodar Localmente (Desenvolvedores)
 
@@ -195,16 +199,33 @@ Contribuições são muito bem-vindas. Veja [CONTRIBUTING.md](CONTRIBUTING.md) e
 ### O Que Este Fork Adiciona
 
 - ✅ README PT-BR acessível para leigos
-- ✅ Servidor público com API online (48GB RAM, Contabo)
-- ✅ Bot Discord com 11 ferramentas OSINT
+- ✅ Servidor público com API online (48GB RAM, Contabo VPS)
+- ✅ 278.501 nós carregados (PEPs, sanções, empresas, OpenSanctions)
+- ✅ Bot Discord com 13 ferramentas OSINT (24/7)
+- ✅ Bot Telegram @EGOSin_bot com 13 ferramentas OSINT (24/7)
+- ✅ Auto-criação de GitHub Issues a partir de feedback dos usuários
 - ✅ ROADMAP público com coordenação de tasks
-- ✅ 11 issues organizadas para voluntários
+- ✅ 5 relatórios de investigação reais publicados
 - 🔵 Tradução completa do frontend (i18next)
-- 🔵 Bot Telegram
-- 🟡 Algoritmos: Lei de Benford, HHI
+-  Algoritmos: Lei de Benford, HHI
 - 🟡 ETL: Extrateto (salários do judiciário)
-- 🟡 Bot WhatsApp
-- 🟡 MCP Server para IDEs
+- 🟡 Bot WhatsApp (Evolution API)
+- 🟡 MCP Server para IDEs AI
+
+### Infraestrutura & Custos (Transparência Total)
+
+| Serviço | O Quê | Custo Mensal |
+|---------|-------|-------------|
+| **Contabo VPS** | Neo4j (278k nós), 2 bots AI, frontend, API, Caddy SSL | ~€10/mês |
+| **Vercel** | egos.ia.br (Mission Control), APIs serverless | Free tier |
+| **Supabase** | PostgreSQL para eventos, tasks, custos | Free tier |
+| **OpenRouter** | Gemini 2.0 Flash para IA dos bots | ~$5/mês |
+| **Domínio** | egos.ia.br | ~R$40/ano |
+| **Total** | Plataforma OSINT completa + 2 bots AI + website | **~$15/mês** |
+
+**Por que Contabo?** Neo4j na nuvem custa $65+/mês. Contabo dá 8 vCPU, 48GB RAM, 500GB SSD por €10. Quando carregarmos CNPJ (53.6M empresas) + DataJud (80M processos), vamos precisar dessa capacidade.
+
+**Por que dados locais?** APIs do governo são rate-limited, frequentemente fora do ar (Receita Federal está offline há 3+ dias), e retornam 403/400 em requisições de alto volume. Dados locais = cruzamento em milissegundos, sem dependências externas.
 
 ---
 
@@ -238,7 +259,8 @@ This fork is maintained by the [EGOS](https://egos.ia.br) community, focused on:
 |---|---|---|
 | **Public API** | ✅ Online | http://217.216.95.126/health |
 | **Frontend** | ✅ Online | http://217.216.95.126 |
-| **Discord Bot** | ✅ Online (11 OSINT tools) | `@EGOS Intelligence#2881` |
+| **Discord Bot** | ✅ Online (13 OSINT tools) | `@EGOS Intelligence#2881` |
+| **Telegram Bot** | ✅ Online (13 OSINT tools) | [@EGOSin_bot](https://t.me/EGOSin_bot) |
 
 ## Quick Start
 
@@ -251,12 +273,16 @@ export NEO4J_PASSWORD=your_password && bash infra/scripts/seed-dev.sh
 
 ## What This Fork Adds
 
+- 278,501 nodes loaded (PEPs, sanctions, companies, OpenSanctions)
 - Full PT-BR translation (docs, frontend, API errors)
 - Public server with live API (48GB RAM, Contabo VPS)
-- Discord bot with 11 OSINT tools via EGOS AI Router
+- Discord + Telegram bots with 13 OSINT tools via EGOS AI Router
+- Auto-GitHub-Issue creation from user feedback
+- 5 real investigation reports published
 - Anomaly detection: Benford's Law, HHI (in progress)
 - ETL pipeline: Extrateto judiciary salaries (in progress)
 - Public ROADMAP with task coordination
+- Full infrastructure cost transparency (~$15/mo total)
 
 ## Contributing
 
