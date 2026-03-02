@@ -496,6 +496,30 @@
 - [ ] Criar issues para novas tasks pendentes
 - [ ] Automatizar sync (script ou GitHub Action)
 
+### TASK-063: 3 Relatórios de Investigação Publicados ✅ (02/03/2026)
+- [x] Report 01: SUPERAR LTDA (CNPJ 13.482.516/0001-61) — 7 sanções no grafo, QSA com PJ sócia
+- [x] Report 02: Transparência Municipal Manaus — 15 emendas, 4.664 ACPs TJAM, diligences ambientais
+- [x] Report 03: Recuperação Judicial SP — 3.704 processos TJSP, 10K+ exec fiscais
+- [x] Cada relatório: passo a passo para leigos + stack técnica + custos + comparação Palantir
+- [x] Publicados no site: `/reports/report-0X-*.md`
+- [x] Update JSON v2 para timeline do site
+> **Arquivos:** `docs/reports/report-01-superar-ltda.md`, `report-02-manaus-transparencia.md`, `report-03-recuperacao-judicial-sp.md`
+> **Dados reais:** Neo4j 317K nós + Portal Transparência + DataJud + BrasilAPI
+
+### TASK-064: Auditoria Profunda Intelink v2 ✅ (02/03/2026)
+- [x] 44 páginas mapeadas (14 adotadas, 3 parciais, 15 gaps relevantes, 11 N/A policial)
+- [x] 135 API routes analisadas (entities, reports, analysis, documents, OCR, legal, debate)
+- [x] Top 10 features para adotar: Report Gen, Activity Feed, Evidence Chain, Chat Vision, Alerts, Analysis Suite
+- [x] Features egos-lab para trazer: Rho Score, Eagle Eye, Cost Tracking
+- [x] Comparação Palantir/NSA/i2: tabela completa
+> **Documento:** `docs/reports/intelink-deep-audit.md`
+
+### TASK-065: Fix CEIS API Filter ✅ (02/03/2026)
+- [x] Bug: Portal Transparência CEIS ignora parâmetro `cnpjSancionado`
+- [x] Fix: filtro client-side por CNPJ/nome após receber resultados
+- [x] Testado: sanções agora filtradas corretamente por empresa
+> **Arquivo:** `api/src/bracc/services/transparency_tools.py`
+
 ### TASK-043: Gem Hunter v2 — Melhorar Busca de Projetos ⏳ (P2)
 - [x] Adicionar keywords semanticas: "accountability", "civic tech", "open government"
 - [x] Busca automatizada via GitHub Search API (5 categorias, 02/03/2026)
@@ -517,7 +541,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 27 | 02/03/2026 |
-| **Tasks concluídas** | 43/62 | 02/03/2026 |
+| **Tasks concluídas** | 46/65 | 02/03/2026 |
 | **Chatbot Tools** | 18 (3 grafo + 8 livres + 6 Portal + 1 DataJud) | 02/03/2026 |
 | **ETL Status** | Phase 1 file 6/10 (15%) — Contabo CPU | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
@@ -526,6 +550,8 @@
 | **Issues GitHub** | 23 abertas (4 fechadas: #25-#28) | 02/03/2026 |
 | **APIs com chave** | Portal Transparência + DataJud + Brave | 02/03/2026 |
 | **Segurança** | GitGuardian fix — chaves em env vars | 02/03/2026 |
+| **Relatórios** | 3 publicados (SUPERAR, Manaus, RJ-SP) | 02/03/2026 |
+| **Intelink Audit** | 44 págs, 135 routes, 15 gaps relevantes | 02/03/2026 |
 
 ---
 
