@@ -6,6 +6,8 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 COPY . .
+ENV VITE_PUBLIC_MODE=true
+ENV VITE_PATTERNS_ENABLED=true
 RUN npm run build
 
 FROM nginx:alpine

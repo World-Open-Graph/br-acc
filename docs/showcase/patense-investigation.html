@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grupo Patense — Analise de Dados Publicos | EGOS Intelligence</title>
+<style>
+  :root {
+    --bg: #0a0e17; --bg2: #111827; --bg3: #1a2234;
+    --text: #e2e8f0; --muted: #94a3b8; --accent: #3b82f6;
+    --red: #ef4444; --green: #22c55e; --yellow: #eab308; --orange: #f97316;
+    --border: #1e293b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .header { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-bottom: 1px solid var(--border); padding: 2rem 0; }
+  .header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+  .logo { font-size: 0.85rem; color: var(--accent); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  .report-id { font-size: 0.75rem; color: var(--muted); font-family: monospace; }
+  .hero { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; margin: 2rem 0; }
+  .hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .hero .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 1.5rem; }
+  .hero .meta { display: flex; gap: 2rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--muted); }
+  .hero .meta span { display: flex; align-items: center; gap: 0.4rem; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 2rem 0; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; text-align: center; }
+  .stat-card .value { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+  .stat-card .label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.3rem; }
+  .section { margin: 2.5rem 0; }
+  .section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); display: inline-block; }
+  .section h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.8rem; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  th { background: var(--bg3); color: var(--accent); font-weight: 600; text-align: left; padding: 0.8rem 1rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+  td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: rgba(59,130,246,0.05); }
+  .observation { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); border-radius: 8px; padding: 1rem 1.2rem; margin: 0.8rem 0; display: flex; gap: 0.8rem; align-items: flex-start; }
+  .observation .icon { font-size: 1.2rem; flex-shrink: 0; }
+  .observation .title { font-weight: 700; color: var(--accent); }
+  .observation .desc { color: var(--muted); font-size: 0.9rem; margin-top: 0.2rem; }
+  .bar-chart { margin: 1rem 0; }
+  .bar-row { display: flex; align-items: center; margin: 0.3rem 0; font-size: 0.8rem; }
+  .bar-label { width: 60px; text-align: right; padding-right: 0.8rem; color: var(--muted); flex-shrink: 0; }
+  .bar-track { flex: 1; height: 24px; background: var(--bg3); border-radius: 4px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 0.5rem; font-size: 0.7rem; font-weight: 600; color: white; min-width: 40px; background: linear-gradient(90deg, #2563eb, #3b82f6); }
+  .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge.red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge.green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge.yellow { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .badge.blue { background: rgba(59,130,246,0.15); color: var(--accent); }
+  .note-box { background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.2); border-radius: 8px; padding: 1rem 1.2rem; margin: 0.8rem 0; }
+  .note-box .title { font-weight: 700; color: var(--yellow); }
+  .note-box .desc { color: var(--muted); font-size: 0.9rem; }
+  .cta { background: linear-gradient(135deg, #1e3a5f 0%, #1e1b4b 100%); border: 1px solid var(--accent); border-radius: 12px; padding: 2.5rem; margin: 3rem 0; text-align: center; }
+  .cta h2 { font-size: 1.6rem; margin-bottom: 1rem; }
+  .cta p { color: var(--muted); max-width: 600px; margin: 0 auto 1.5rem; }
+  .cta a { display: inline-block; background: var(--accent); color: white; padding: 0.8rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 700; margin: 0.3rem; transition: transform 0.2s; }
+  .cta a:hover { transform: translateY(-2px); }
+  .cta .secondary { background: transparent; border: 1px solid var(--accent); }
+  .footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 3rem; }
+  .footer a { color: var(--accent); text-decoration: none; }
+  .source { font-size: 0.8rem; color: var(--muted); margin: 0.3rem 0; }
+  .source a { color: var(--accent); text-decoration: none; }
+  .confidence { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; }
+  .confidence .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .confidence .dot.high { background: var(--green); }
+  .confidence .dot.medium { background: var(--yellow); }
+  .disclaimer-box { background: rgba(59,130,246,0.06); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; margin: 1.5rem 0; font-size: 0.85rem; color: var(--muted); }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.4rem; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .hero .meta { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <div>
+      <div class="logo">EGOS Intelligence</div>
+      <div style="color:var(--muted);font-size:0.85rem;margin-top:0.2rem;">Plataforma Open Source de Transparencia</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="report-id">REPORT-2026-001</div>
+      <div style="font-size:0.75rem;color:var(--muted);">02 Mar 2026 | v2.0</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="disclaimer-box">
+    <strong style="color:var(--text)">Aviso Legal:</strong> Este relatorio apresenta exclusivamente dados de acesso publico, obtidos via APIs oficiais do governo brasileiro e datasets abertos. 
+    Nao constitui acusacao, denuncia ou parecer juridico. As observacoes aqui contidas sao compilacoes factuais de registros publicos, 
+    cabendo aos orgaos competentes qualquer apuracao. O objetivo desta plataforma e promover transparencia e acesso a informacao publica.
+  </div>
+
+  <div class="hero">
+    <h1>Grupo Patense — Compilacao de Dados Publicos</h1>
+    <div class="subtitle">Levantamento de registros publicos sobre grupo empresarial do agronegocio em recuperacao judicial</div>
+    <div class="meta">
+      <span>&#128197; Data: 02/03/2026</span>
+      <span>&#128202; Fontes: 6 bases publicas</span>
+      <span>&#128270; Observacoes: 4</span>
+      <span>&#128274; Dados 100% publicos</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="value" style="color:var(--accent)">R$ 217M</div>
+      <div class="label">Total BNDES (Grupo)</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--accent)">587</div>
+      <div class="label">Operacoes BNDES</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--accent)">4</div>
+      <div class="label">Empresas com BNDES</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--accent)">13</div>
+      <div class="label">Empresas no Grupo</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--green)">0</div>
+      <div class="label">Sancoes CEIS/CNEP</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--accent)">R$ 2.15B</div>
+      <div class="label">Dividas Declaradas (RJ)</div>
+    </div>
+  </div>
+
+  <!-- Resumo -->
+  <div class="section">
+    <h2>&#128203; Resumo</h2>
+    <p style="margin:1rem 0;color:var(--muted);">
+      O <strong style="color:var(--text)">Grupo Patense</strong>, liderado pela <em>Industria de Racoes Patense Ltda</em> (CNPJ: 62.232.140/0001-39), 
+      e um conglomerado do agronegocio com sede historica em Patos de Minas/MG. Em 2024, o grupo ingressou em 
+      <strong style="color:var(--text)">recuperacao judicial</strong> com dividas declaradas de R$ 2,15 bilhoes, 
+      conforme registrado no processo 5009533-36.2024.8.13.0480 (TJMG).
+    </p>
+    <p style="margin:1rem 0;color:var(--muted);">
+      Esta compilacao reune dados de <strong style="color:var(--text)">6 bases publicas</strong> (BNDES, CEIS, CNEP, OpenSanctions, PEP e Receita Federal)
+      para apresentar um panorama factual da atuacao financeira do grupo com recursos publicos.
+    </p>
+  </div>
+
+  <!-- Como funciona -->
+  <div class="section" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:2rem 0;">
+    <h2>&#128218; Como funciona esta plataforma?</h2>
+    <p style="margin:1rem 0;color:var(--muted);">
+      Utilizamos a tecnica de <strong style="color:var(--text)">ETL (Extract, Transform, Load)</strong> — o mesmo processo 
+      usado por organizacoes de inteligencia e analise de dados em todo o mundo — para reunir informacoes de multiplas fontes publicas 
+      em um banco de dados unificado que permite cruzamentos automatizados.
+    </p>
+    <table>
+      <tr><th style="width:100px">Fase</th><th>O que faz</th><th>Exemplo neste relatorio</th></tr>
+      <tr>
+        <td><span class="badge blue">Extract</span></td>
+        <td>Coleta dados de fontes publicas oficiais</td>
+        <td>BNDES API, Receita Federal (53.6M empresas), CEIS, CNEP, OpenSanctions</td>
+      </tr>
+      <tr>
+        <td><span class="badge yellow">Transform</span></td>
+        <td>Padroniza, limpa e conecta dados entre si</td>
+        <td>Vincula CNPJ de cada empresa do grupo aos registros de financiamento no BNDES</td>
+      </tr>
+      <tr>
+        <td><span class="badge green">Load</span></td>
+        <td>Carrega em banco de grafo para consulta rapida</td>
+        <td>90M+ registros conectados: empresas, pessoas, sancoes, contratos publicos</td>
+      </tr>
+    </table>
+    <p style="margin:1rem 0;color:var(--muted);font-size:0.9rem;">
+      <strong style="color:var(--text)">Por que banco de grafo?</strong> Diferente de planilhas, um banco de grafo permite 
+      visualizar e navegar conexoes entre entidades (empresas, pessoas, contratos) de forma rapida e intuitiva, 
+      revelando relacoes que seriam dificeis de identificar manualmente em tabelas separadas.
+    </p>
+  </div>
+
+  <!-- Empresas do Grupo -->
+  <div class="section">
+    <h2>&#127970; Empresas do Grupo (13 entidades)</h2>
+    <p style="color:var(--muted);margin-bottom:1rem;">Conforme listadas no processo de recuperacao judicial 5009533-36.2024.8.13.0480 (TJMG, Patos de Minas)</p>
+    <table>
+      <tr><th>Empresa</th><th>CNPJ</th><th>Tipo</th><th>Situacao</th></tr>
+      <tr><td><strong>Industria de Racoes Patense Ltda</strong></td><td style="font-family:monospace;font-size:0.8rem">62.232.140/0001-39</td><td><span class="badge blue">Operacional</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+      <tr><td><strong>Farol Industria e Comercio S.A.</strong></td><td style="font-family:monospace;font-size:0.8rem">07.233.478/0001-53</td><td><span class="badge blue">Operacional</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+      <tr><td><strong>Faricon Agricola Ltda</strong></td><td style="font-family:monospace;font-size:0.8rem">05.152.372/0001-48</td><td><span class="badge blue">Operacional</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+      <tr><td><strong>Adasebo Industria e Comercio Ltda</strong></td><td style="font-family:monospace;font-size:0.8rem">—</td><td><span class="badge blue">Operacional</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+      <tr><td>Sebbo Passofundense Ind. e Com.</td><td style="font-family:monospace;font-size:0.8rem">—</td><td><span class="badge blue">Operacional</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+      <tr><td>Vilaca Participacoes Ltda</td><td style="font-family:monospace;font-size:0.8rem">—</td><td><span class="badge yellow">Holding</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+      <tr><td>Tax Participacoes Ltda</td><td style="font-family:monospace;font-size:0.8rem">—</td><td><span class="badge yellow">Holding</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+      <tr><td>Lale Participacoes Ltda</td><td style="font-family:monospace;font-size:0.8rem">—</td><td><span class="badge yellow">Holding</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+      <tr><td>Forca Participacoes Ltda</td><td style="font-family:monospace;font-size:0.8rem">—</td><td><span class="badge yellow">Holding</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+      <tr><td>Juquinha Participacoes Ltda</td><td style="font-family:monospace;font-size:0.8rem">—</td><td><span class="badge yellow">Holding</span></td><td><span class="badge red">Recuperacao Judicial</span></td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:0.85rem;margin-top:0.5rem;">
+      + 3 pessoas fisicas tambem listadas no processo. Holdings = empresas de participacao societaria.
+      <br>CNPJs faltantes serao preenchidos automaticamente quando a base completa da Receita Federal for carregada.
+    </p>
+  </div>
+
+  <!-- BNDES -->
+  <div class="section">
+    <h2>&#127974; Financiamentos BNDES — Operacoes Automaticas</h2>
+    <p style="color:var(--muted);margin-bottom:1rem;">Fonte: API publica do BNDES Dados Abertos (dadosabertos.bndes.gov.br). Consultado em 02/03/2026.</p>
+    
+    <h3>Resumo por Empresa do Grupo</h3>
+    <table>
+      <tr><th>Empresa</th><th style="text-align:right">Operacoes</th><th style="text-align:right">Total Desembolsado</th><th>Confianca</th></tr>
+      <tr>
+        <td><strong>Industria de Racoes Patense Ltda</strong></td>
+        <td style="text-align:right">430</td>
+        <td style="text-align:right;font-weight:700">R$ 163.312.665</td>
+        <td><span class="confidence"><span class="dot high"></span> Alta — API oficial</span></td>
+      </tr>
+      <tr>
+        <td><strong>Farol Industria e Comercio S.A.</strong></td>
+        <td style="text-align:right">130</td>
+        <td style="text-align:right;font-weight:700">R$ 40.262.054</td>
+        <td><span class="confidence"><span class="dot high"></span> Alta — API oficial</span></td>
+      </tr>
+      <tr>
+        <td><strong>Faricon Agricola Ltda</strong></td>
+        <td style="text-align:right">2</td>
+        <td style="text-align:right;font-weight:700">R$ 11.699.968</td>
+        <td><span class="confidence"><span class="dot high"></span> Alta — API oficial</span></td>
+      </tr>
+      <tr>
+        <td><strong>Adasebo Ind. e Com. Ltda</strong></td>
+        <td style="text-align:right">1</td>
+        <td style="text-align:right;font-weight:700">R$ 2.559.998</td>
+        <td><span class="confidence"><span class="dot high"></span> Alta — API oficial</span></td>
+      </tr>
+      <tr style="background:var(--bg3)">
+        <td><strong>TOTAL DO GRUPO</strong></td>
+        <td style="text-align:right;font-weight:700">563</td>
+        <td style="text-align:right;font-weight:700;color:var(--accent)">R$ 217.834.685</td>
+        <td></td>
+      </tr>
+    </table>
+    
+    <h3>Evolucao Anual — Patense Ltda (R$ milhoes)</h3>
+    <div class="bar-chart">
+      <div class="bar-row"><span class="bar-label">2002</span><div class="bar-track"><div class="bar-fill" style="width:0.7%">0.2M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2003</span><div class="bar-track"><div class="bar-fill" style="width:5%">1.6M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2007</span><div class="bar-track"><div class="bar-fill" style="width:8%">2.4M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2008</span><div class="bar-track"><div class="bar-fill" style="width:32%">9.8M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2009</span><div class="bar-track"><div class="bar-fill" style="width:47%">14.5M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2010</span><div class="bar-track"><div class="bar-fill" style="width:58%">17.9M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2011</span><div class="bar-track"><div class="bar-fill" style="width:33%">10.3M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2012</span><div class="bar-track"><div class="bar-fill" style="width:38%">11.9M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2013</span><div class="bar-track"><div class="bar-fill" style="width:100%">31.0M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2014</span><div class="bar-track"><div class="bar-fill" style="width:80%">24.8M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2015</span><div class="bar-track"><div class="bar-fill" style="width:28%">8.6M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2016</span><div class="bar-track"><div class="bar-fill" style="width:53%">16.6M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2017</span><div class="bar-track"><div class="bar-fill" style="width:0.7%">0.2M</div></div></div>
+      <div class="bar-row"><span class="bar-label">2022</span><div class="bar-track"><div class="bar-fill" style="width:50%">15.6M</div></div></div>
+    </div>
+
+    <h3>Farol S.A. — Operacao relevante</h3>
+    <p style="color:var(--muted);font-size:0.9rem;">
+      A Farol Ind. e Comercio recebeu <strong style="color:var(--text)">R$ 8.775.000</strong> em uma unica operacao em 22/12/2021, 
+      e a Faricon Agricola recebeu <strong style="color:var(--text)">R$ 11.283.608</strong> na mesma data (22/12/2021).
+      Juntas, essas duas operacoes somam R$ 20M em um unico dia.
+    </p>
+  </div>
+
+  <!-- Observacoes -->
+  <div class="section">
+    <h2>&#128270; Observacoes Factuais</h2>
+    <p style="color:var(--muted);margin-bottom:1rem;">
+      As observacoes abaixo sao compilacoes de fatos extraidos diretamente dos dados publicos. 
+      Nao constituem acusacoes ou conclusoes. Cabe aos orgaos competentes interpretar e investigar.
+    </p>
+    
+    <div class="observation">
+      <div class="icon">&#128202;</div>
+      <div>
+        <div class="title">1. Volume elevado de operacoes em anos especificos</div>
+        <div class="desc">
+          Em 2013, a Patense Ltda realizou operacoes BNDES que somaram R$ 31M — o maior valor anual do historico. 
+          Em 2016, foram registradas operacoes que somaram R$ 16.6M. Esses volumes sao significativamente 
+          superiores a media dos demais anos.
+        </div>
+      </div>
+    </div>
+    
+    <div class="observation">
+      <div class="icon">&#128202;</div>
+      <div>
+        <div class="title">2. Periodo sem operacoes seguido de retomada (2017-2021)</div>
+        <div class="desc">
+          A Patense Ltda registrou apenas R$ 212 mil em 2017 e nenhuma operacao entre 2018-2021. 
+          Em 2022, retomou com R$ 15.6M. No mesmo periodo, Farol e Faricon receberam R$ 20M em 22/12/2021 (mesma data).
+        </div>
+      </div>
+    </div>
+    
+    <div class="observation">
+      <div class="icon">&#128202;</div>
+      <div>
+        <div class="title">3. Estrutura societaria com multiplas holdings</div>
+        <div class="desc">
+          O grupo inclui 5 empresas de participacao (Vilaca, Tax, Lale, Forca, Juquinha Participacoes). 
+          Estruturas de holdings sao comuns em grupos empresariais de grande porte e podem servir a diversos propositos 
+          organizacionais, fiscais e patrimoniais.
+        </div>
+      </div>
+    </div>
+    
+    <div class="observation">
+      <div class="icon">&#128202;</div>
+      <div>
+        <div class="title">4. R$ 217M em financiamentos publicos + R$ 2.15B em dividas na RJ</div>
+        <div class="desc">
+          O grupo recebeu ao menos R$ 217M em desembolsos do BNDES ao longo de 20 anos. 
+          Atualmente declara R$ 2.15B em dividas no processo de recuperacao judicial.
+          A relacao entre financiamento publico recebido e endividamento total e um dado relevante para analise.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verificacao de Sancoes -->
+  <div class="section">
+    <h2>&#128737;&#65039; Verificacao em Bases de Sancoes e PEP</h2>
+    <table>
+      <tr><th>Base Consultada</th><th>Resultado</th><th>Confianca</th><th>Observacao</th></tr>
+      <tr>
+        <td>CEIS (Cadastro de Empresas Inideoneas)</td>
+        <td><span class="badge green">Nenhum registro</span></td>
+        <td><span class="confidence"><span class="dot high"></span> Alta</span></td>
+        <td>Verificado por CNPJ 62.232.140/0001-39</td>
+      </tr>
+      <tr>
+        <td>CNEP (Cadastro de Empresas Punidas)</td>
+        <td><span class="badge green">Nenhum registro</span></td>
+        <td><span class="confidence"><span class="dot high"></span> Alta</span></td>
+        <td>Verificado por CNPJ</td>
+      </tr>
+      <tr>
+        <td>PEP (Pessoas Politicamente Expostas)</td>
+        <td><span class="badge green">Nao consta</span></td>
+        <td><span class="confidence"><span class="dot high"></span> Alta</span></td>
+        <td>Controladores verificados</td>
+      </tr>
+      <tr>
+        <td>OpenSanctions (4.1M entidades globais)</td>
+        <td><span class="badge green">Nao encontrado</span></td>
+        <td><span class="confidence"><span class="dot high"></span> Alta</span></td>
+        <td>Inclui 7.044 registros brasileiros</td>
+      </tr>
+      <tr>
+        <td>Receita Federal (QSA/Socios)</td>
+        <td><span class="badge yellow">Carregando</span></td>
+        <td><span class="confidence"><span class="dot medium"></span> Pendente</span></td>
+        <td>53.6M empresas em processamento (ETL ativo)</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- O que falta -->
+  <div class="section">
+    <h2>&#9888;&#65039; Dados Ainda Nao Integrados</h2>
+    
+    <div class="note-box">
+      <div class="title">Receita Federal — Quadro Societario (QSA)</div>
+      <div class="desc">53.6M empresas sendo processadas. Quando concluido: composicao societaria completa de cada empresa, 
+      permitindo mapear vinculos entre socios e demais entidades no grafo.</div>
+    </div>
+    
+    <div class="note-box">
+      <div class="title">DataJud — Processos Judiciais (80M+ processos)</div>
+      <div class="desc">Ainda nao integrado. Permitira consultar todos os processos envolvendo cada empresa e socio.</div>
+    </div>
+    
+    <div class="note-box">
+      <div class="title">ComprasNet/PNCP — Contratos Publicos</div>
+      <div class="desc">Ainda nao integrado. Permitira verificar se empresas do grupo fornecem para o governo federal.</div>
+    </div>
+    
+    <div class="note-box">
+      <div class="title">Algoritmos de Grafo (PageRank, Community Detection)</div>
+      <div class="desc">Em desenvolvimento. Permitirao detectar automaticamente clusters de entidades e centralidade de conexoes.</div>
+    </div>
+  </div>
+
+  <!-- Fontes -->
+  <div class="section">
+    <h2>&#128279; Fontes Utilizadas</h2>
+    <div class="source">1. <strong>BNDES Dados Abertos</strong> — <a href="https://dadosabertos.bndes.gov.br" target="_blank">dadosabertos.bndes.gov.br</a> | API consultada em 02/03/2026</div>
+    <div class="source">2. <strong>CEIS/CNEP</strong> — Portal da Transparencia, CGU | 23.848 sancoes carregadas no grafo</div>
+    <div class="source">3. <strong>OpenSanctions</strong> — <a href="https://opensanctions.org" target="_blank">opensanctions.org</a> | 4.1M entidades globais</div>
+    <div class="source">4. <strong>PEP</strong> — Lista de Pessoas Politicamente Expostas | Dados 2024</div>
+    <div class="source">5. <strong>TJMG</strong> — Processo 5009533-36.2024.8.13.0480, 1a Vara Civel, Patos de Minas/MG</div>
+    <div class="source">6. <strong>Receita Federal</strong> — CNPJ Dados Abertos | 53.6M empresas, Jan/2026 (em processamento)</div>
+  </div>
+
+  <!-- Parcerias -->
+  <div class="section" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:2rem;margin:2rem 0;">
+    <h2>&#129309; Parcerias e Colaboracao</h2>
+    <p style="margin:1rem 0;color:var(--muted);">
+      Este projeto esta <strong style="color:var(--text)">aberto a parcerias</strong> com:
+    </p>
+    <table>
+      <tr><th>Parceiro</th><th>Como pode contribuir</th></tr>
+      <tr><td><strong>Pesquisadores e Jornalistas</strong></td><td>Criar e compartilhar investigacoes, validar dados, identificar padroes</td></tr>
+      <tr><td><strong>Desenvolvedores</strong></td><td>Contribuir com codigo, criar novos ETLs, melhorar algoritmos de analise</td></tr>
+      <tr><td><strong>Instituicoes e ONGs</strong></td><td>Integrar bases de dados proprietarias, financiar infraestrutura</td></tr>
+      <tr><td><strong>Governos e Orgaos de Controle</strong></td><td>Plugar bases oficiais (DataJud, ComprasNet, CVM), usar a plataforma para fiscalizacao</td></tr>
+      <tr><td><strong>Universidades</strong></td><td>Pesquisa academica sobre redes empresariais, ciencia de dados aplicada</td></tr>
+    </table>
+    <p style="margin:1rem 0;color:var(--muted);font-size:0.9rem;">
+      Quanto mais bases conectadas, mais poderoso o cruzamento de dados. Uma investigacao compartilhada por um usuario
+      pode se conectar automaticamente com dados de outra investigacao, fortalecendo ambas.
+    </p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2>Contribua com Transparencia</h2>
+    <p>
+      Plataforma <strong>100% open-source e autofinanciada</strong>. 
+      Nosso roadmap tem dezenas de tarefas para integrar mais bases de dados publicas, 
+      implementar algoritmos de grafo e criar visualizacoes interativas.
+    </p>
+    <a href="https://github.com/enioxt/br-acc" target="_blank">GitHub — Codigo e Roadmap</a>
+    <a href="https://bracc.egos.ia.br" target="_blank" class="secondary">Acessar Plataforma</a>
+    <a href="https://t.me/EthikIntelligence" target="_blank" class="secondary">Telegram</a>
+    <p style="font-size:0.8rem;margin-top:1.5rem;color:var(--muted);">
+      <strong>Infraestrutura:</strong> $36/mes (servidor dedicado). Sem investidores, sem publicidade, sem venda de dados. 
+      <br>Qualquer pessoa pode contribuir com codigo, dados ou ideias.
+    </p>
+  </div>
+
+  <!-- Roadmap -->
+  <div class="section">
+    <h2>&#128506;&#65039; Proximos Passos — Roadmap Aberto</h2>
+    <table>
+      <tr><th>Fase</th><th>Descricao</th><th>Status</th></tr>
+      <tr><td>7.1</td><td><strong>Algoritmos de Grafo</strong> — PageRank, Community Detection, Shortest Path entre entidades</td><td><span class="badge yellow">Planejado</span></td></tr>
+      <tr><td>7.2</td><td><strong>Expansao de Conexoes</strong> — Navegar 1o, 2o, 3o grau de conexoes de qualquer entidade</td><td><span class="badge yellow">Planejado</span></td></tr>
+      <tr><td>7.3</td><td><strong>Cruzamento entre Investigacoes</strong> — Detectar entidades que aparecem em multiplas pesquisas</td><td><span class="badge yellow">Planejado</span></td></tr>
+      <tr><td>7.4</td><td><strong>Deteccao de Padroes</strong> — Analise estatistica (Benford, HHI) e grafos estruturais</td><td><span class="badge yellow">Planejado</span></td></tr>
+      <tr><td>7.5</td><td><strong>Resolucao de Entidades</strong> — Unificar identidades entre CPF/CNPJ com fuzzy matching</td><td><span class="badge yellow">Planejado</span></td></tr>
+      <tr><td>7.6</td><td><strong>Visualizacao Interativa</strong> — Grafo navegavel com D3.js, click-to-expand</td><td><span class="badge yellow">Planejado</span></td></tr>
+      <tr><td>7.8</td><td><strong>+10 Bases de Dados</strong> — DataJud, ICIJ, ComprasNet, CVM, RAIS, IBAMA, TransfereGov</td><td><span class="badge yellow">Planejado</span></td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:0.85rem;margin-top:1rem;">
+      Todas as tarefas estao detalhadas no <a href="https://github.com/enioxt/br-acc" target="_blank" style="color:var(--accent)">GitHub do projeto</a>. 
+      Pull requests sao bem-vindos.
+    </p>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>
+    Gerado por <a href="https://github.com/enioxt/br-acc">EGOS Intelligence</a> — Plataforma Open Source de Transparencia
+    <br>Licenca: MIT | Dados: Acesso Publico | <a href="https://bracc.egos.ia.br">bracc.egos.ia.br</a>
+    <br><br>
+    <em>"Transparencia e um direito. Estamos construindo as ferramentas para exercer esse direito."</em>
+  </p>
+</div>
+
+</body>
+</html>
