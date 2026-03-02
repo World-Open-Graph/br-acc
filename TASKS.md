@@ -67,12 +67,12 @@
 - [ ] Frontend: "continuar a partir de" outra investigação (fork)
 > **Referência:** Intelink `components/shared/ShareJourneyDialog.tsx`
 
-### TASK-008: Journey Tracker / Step Counter ⬜
-- [ ] Portar JourneyContext do Intelink
-- [ ] Portar JourneyFABGlobal (balãozinho flutuante)
-- [ ] Adaptar tipos (journey.ts) para contexto BR/ACC
-- [ ] Integrar com busca (registrar cliques)
-> **Referência:** Intelink `providers/JourneyContext.tsx`, `components/shared/JourneyFABGlobal.tsx`
+### TASK-008: Journey Tracker / Step Counter ✅ (02/03/2026)
+- [x] Journey lib: localStorage, 500 entries, dedup, export JSON/MD, Web Share API
+- [x] JourneyPanel: floating panel with stats, entries, export/share/clear
+- [x] Integrado em: Chat, Search, EntityAnalysis, Dashboard, Landing, GraphExplorer, Investigations
+- [x] Registra buscas, views de entidades, queries de chat automaticamente
+> **Arquivos:** `frontend/src/lib/journey.ts`, `frontend/src/components/journey/JourneyPanel.tsx`
 
 ### TASK-009: Patense Report v2 ✅ (02/03/2026)
 - [x] Reescrever relatório com linguagem neutra
@@ -412,7 +412,7 @@
 | **Nós no grafo** | 317.583 | 02/03/2026 |
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 23 | 02/03/2026 |
-| **Tasks concluídas** | 29/49 | 02/03/2026 |
+| **Tasks concluídas** | 30/49 | 02/03/2026 |
 | **ETL Status** | Phase 1 em andamento | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
 | **Projetos Gem Hunter** | 9 encontrados | 02/03/2026 |
