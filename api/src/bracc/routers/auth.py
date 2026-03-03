@@ -48,12 +48,15 @@ async def login(
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     token = auth_service.create_access_token(user.id)
+    effective_secure = settings.auth_cookie_secure or (
+        settings.app_env.strip().lower() == "prod"
+    )
     response.set_cookie(
         key=settings.auth_cookie_name,
         value=token,
         max_age=settings.jwt_expire_minutes * 60,
         httponly=True,
-        secure=settings.auth_cookie_secure,
+        secure=effective_secure,
         samesite=settings.auth_cookie_samesite,
         path="/",
     )
