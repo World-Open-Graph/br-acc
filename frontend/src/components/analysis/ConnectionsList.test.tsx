@@ -83,4 +83,53 @@ describe("ConnectionsList", () => {
     // person group has 1 node
     expect(screen.getByText("1")).toBeInTheDocument();
   });
+
+  it("falls back to document id when label is empty", () => {
+    const withBlankLabel: GraphNode[] = [
+      ...nodes,
+      {
+        id: "n4",
+        label: "   ",
+        type: "contract",
+        document_id: "CTR-001",
+        properties: {},
+        sources: [],
+      },
+    ];
+
+    render(
+      <ConnectionsList
+        nodes={withBlankLabel}
+        centerId="center"
+        selectedNodeId={null}
+        onSelectNode={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("CTR-001")).toBeInTheDocument();
+  });
+
+  it("falls back to type and id when label and document id are empty", () => {
+    const withNoName: GraphNode[] = [
+      ...nodes,
+      {
+        id: "graph:node:42",
+        label: "",
+        type: "contract",
+        properties: {},
+        sources: [],
+      },
+    ];
+
+    render(
+      <ConnectionsList
+        nodes={withNoName}
+        centerId="center"
+        selectedNodeId={null}
+        onSelectNode={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/#42$/)).toBeInTheDocument();
+  });
 });
