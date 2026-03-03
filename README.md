@@ -163,6 +163,16 @@ If you find this project useful, **star the repo** — it helps others discover 
 
 ---
 
+## Contributors
+
+Thanks to everyone who has contributed to br/acc.
+
+[![Contributors](https://contrib.rocks/image?repo=World-Open-Graph/br-acc)](https://github.com/World-Open-Graph/br-acc/graphs/contributors)
+
+See the [full list of contributors](https://github.com/World-Open-Graph/br-acc/graphs/contributors) on GitHub.
+
+---
+
 ## Support the Project
 
 [![Sponsor](https://img.shields.io/badge/GitHub_Sponsors-Support-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/brunoclz)
