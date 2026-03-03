@@ -79,54 +79,48 @@ CREATE (p5)-[:SOCIO_DE]->(co5);
 // ── Contracts ───────────────────────────────────────────
 CREATE (c1:Contract {
   contract_id: 'CTR-001', object: 'Construcao de ponte municipal',
-  name: 'CTR-001 - Construcao de ponte municipal',
   value: 2500000.0, contracting_org: 'PREFEITURA SAO PAULO', date: '2024-03-15'
 });
 CREATE (c2:Contract {
   contract_id: 'CTR-002', object: 'Manutencao de vias publicas',
-  name: 'CTR-002 - Manutencao de vias publicas',
   value: 800000.0, contracting_org: 'PREFEITURA SAO PAULO', date: '2024-06-01'
 });
 CREATE (c3:Contract {
   contract_id: 'CTR-003', object: 'Servicos de limpeza hospitalar',
-  name: 'CTR-003 - Servicos de limpeza hospitalar',
   value: 1200000.0, contracting_org: 'PREFEITURA RIO DE JANEIRO', date: '2024-01-10'
 });
 CREATE (c4:Contract {
   contract_id: 'CTR-004', object: 'Sistema de gestao publica',
-  name: 'CTR-004 - Sistema de gestao publica',
   value: 3500000.0, contracting_org: 'PREFEITURA BELO HORIZONTE', date: '2024-07-20'
 });
 CREATE (c5:Contract {
   contract_id: 'CTR-005', object: 'Consultoria em licitacoes',
-  name: 'CTR-005 - Consultoria em licitacoes',
   value: 450000.0, contracting_org: 'PREFEITURA SAO PAULO', date: '2024-09-05'
 });
 CREATE (c6:Contract {
   contract_id: 'CTR-006', object: 'Reforma de escola municipal',
-  name: 'CTR-006 - Reforma de escola municipal',
   value: 1800000.0, contracting_org: 'PREFEITURA SAO PAULO', date: '2024-04-12'
 });
 CREATE (c7:Contract {
   contract_id: 'CTR-007', object: 'Pavimentacao de estradas rurais',
-  name: 'CTR-007 - Pavimentacao de estradas rurais',
   value: 950000.0, contracting_org: 'PREFEITURA SAO PAULO', date: '2024-11-01'
 });
 CREATE (c8:Contract {
   contract_id: 'CTR-008', object: 'Fornecimento de equipamentos medicos',
-  name: 'CTR-008 - Fornecimento de equipamentos medicos',
   value: 600000.0, contracting_org: 'PREFEITURA RIO DE JANEIRO', date: '2024-02-28'
 });
 CREATE (c9:Contract {
   contract_id: 'CTR-009', object: 'Servicos de TI - datacenter',
-  name: 'CTR-009 - Servicos de TI - datacenter',
   value: 2200000.0, contracting_org: 'PREFEITURA SAO PAULO', date: '2024-08-15'
 });
 CREATE (c10:Contract {
   contract_id: 'CTR-010', object: 'Auditoria contabil publica',
-  name: 'CTR-010 - Auditoria contabil publica',
   value: 350000.0, contracting_org: 'PREFEITURA SAO PAULO', date: '2024-10-01'
 });
+
+// Set contract names programmatically
+MATCH (c:Contract)
+SET c.name = c.contract_id + ' - ' + c.object;
 
 // ── Amendment (for self-dealing pattern) ──────────────────
 CREATE (a1:Amendment {

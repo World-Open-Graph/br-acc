@@ -35,7 +35,7 @@ function ConnectionsListInner({
       const documentId = node.document_id?.trim();
       if (documentId) return documentId;
 
-      const shortId = node.id.split(":").at(-1) ?? node.id;
+      const shortId = node.id.substring(node.id.lastIndexOf(":") + 1) || node.id;
       return `${t(`entity.${node.type}`, node.type)} #${shortId}`;
     },
     [t],
