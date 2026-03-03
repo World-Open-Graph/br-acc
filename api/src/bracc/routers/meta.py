@@ -141,22 +141,21 @@ async def etl_progress() -> dict[str, Any]:
         },
     }
 
-    if not os.path.exists(log_path):
+    if not os.path.exists(log_path) or not os.path.isfile(log_path):
         return result
 
     try:
+        stat = os.stat(log_path)
+        if stat.st_size == 0:
+            return result  # Empty file (e.g. Docker bind mount placeholder)
+
+        import time as _time
+        age_seconds = _time.time() - stat.st_mtime
+        result["running"] = age_seconds < 10800  # updated in last 3h (each CSV file takes ~2h)
+        result["log_age_seconds"] = int(age_seconds)
+
         with open(log_path, "r") as f:
             lines = f.readlines()
-
-        # Check if ETL is running by checking if log was updated recently
-        import subprocess
-        try:
-            stat = os.stat(log_path)
-            import time as _time
-            age_seconds = _time.time() - stat.st_mtime
-            result["running"] = age_seconds < 10800  # updated in last 3h (each CSV file takes ~2h)
-        except Exception:
-            result["running"] = False
 
         # Parse phases and files
         current_phase = 0

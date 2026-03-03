@@ -26,9 +26,22 @@ export function ETLProgress() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!data || (!data.running && data.phase === null)) return null;
+  if (!data) return null;
 
-  const phaseLabel = data.phase ? data.phases[String(data.phase)] || `Fase ${data.phase}` : "Aguardando";
+  // Hide widget entirely if ETL never ran (no log file, no progress)
+  const neverRan = !data.running && data.phase === null && data.files_processed === 0;
+  if (neverRan) return null;
+
+  const isIdle = !data.running && (data.phase === 0 || data.phase === null);
+  const phaseLabel = data.phase ? data.phases[String(data.phase)] || `Fase ${data.phase}` : "Aguardando início";
+
+  const statusLabel = data.running
+    ? "ETL em andamento"
+    : data.percent >= 95
+      ? "ETL concluído"
+      : isIdle
+        ? "ETL pausado"
+        : "ETL pausado";
 
   return (
     <div
@@ -44,7 +57,7 @@ export function ETLProgress() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-        {data.running && (
+        {data.running ? (
           <span
             style={{
               width: 8,
@@ -55,9 +68,19 @@ export function ETLProgress() {
               flexShrink: 0,
             }}
           />
+        ) : (
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: data.percent >= 95 ? "#10b981" : "#64748b",
+              flexShrink: 0,
+            }}
+          />
         )}
         <span style={{ fontSize: "0.75rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          {data.running ? "ETL em andamento" : "ETL concluido"}
+          {statusLabel}
         </span>
         {data.last_update && (
           <span style={{ fontSize: "0.625rem", color: "#475569", marginLeft: "auto" }}>
@@ -67,7 +90,7 @@ export function ETLProgress() {
       </div>
 
       <div style={{ fontSize: "0.8125rem", color: "#e2e8f0", marginBottom: "0.5rem" }}>
-        Fase {data.phase}/4: {phaseLabel}
+        {data.phase ? `Fase ${data.phase}/4: ${phaseLabel}` : phaseLabel}
       </div>
 
       {/* Progress bar */}
