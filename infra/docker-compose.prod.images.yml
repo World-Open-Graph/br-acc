@@ -1,0 +1,11 @@
+# Override for production when using pre-built images from GHCR.
+# Set REGISTRY_IMAGE_PREFIX (e.g. ghcr.io/owner/br-acc) and REGISTRY_IMAGE_TAG (e.g. latest or sha-xxx).
+# Use with: COMPOSE_FILE=infra/docker-compose.prod.yml:infra/docker-compose.prod.images.yml
+services:
+  api:
+    image: ${REGISTRY_IMAGE_PREFIX}_api:${REGISTRY_IMAGE_TAG:-latest}
+    build: ~
+
+  frontend:
+    image: ${REGISTRY_IMAGE_PREFIX}_frontend:${REGISTRY_IMAGE_TAG:-latest}
+    build: ~
