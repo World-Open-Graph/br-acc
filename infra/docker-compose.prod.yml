@@ -46,6 +46,7 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       INVITE_CODE: ${INVITE_CODE:-}
       CORS_ORIGINS: https://${DOMAIN}
+      AUTH_COOKIE_SECURE: "true"
       LOG_LEVEL: ${LOG_LEVEL:-info}
     networks:
       - bracc

@@ -43,6 +43,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         else:
             _logger.critical(msg)
             raise RuntimeError(msg)
+    app_env = settings.app_env.strip().lower()
+    if app_env not in {"dev", "test"} and settings.neo4j_password == "changeme":
+        msg = "Neo4j default password not allowed in production — set NEO4J_PASSWORD"
+        _logger.critical(msg)
+        raise RuntimeError(msg)
     driver = await init_driver()
     app.state.neo4j_driver = driver
     await ensure_schema(driver)
