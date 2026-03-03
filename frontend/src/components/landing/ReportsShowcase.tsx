@@ -15,7 +15,7 @@ const REPORTS: Report[] = [
     id: "patense",
     title: "Grupo Patense — Rede Societaria e Financeira",
     date: "2026-03-01",
-    description: "Investigacao de 13 empresas interligadas com R$217M em financiamentos BNDES e R$2.15B em divida ativa.",
+    description: "Pesquisa de 13 empresas interligadas com R$217M em financiamentos BNDES e R$2.15B em divida ativa.",
     tags: ["BNDES", "rede societaria", "divida ativa"],
     url: "/reports/patense.html",
     highlight: "R$2.15B em divida ativa",
@@ -24,7 +24,7 @@ const REPORTS: Report[] = [
     id: "superar",
     title: "SUPERAR LTDA — Empresa Sancionada",
     date: "2026-03-02",
-    description: "Empresa com 7 sancoes no grafo, socio PJ — investigacao de cadeia societaria e beneficiarios finais.",
+    description: "Empresa com 7 sancoes no grafo, socio PJ — pesquisa de cadeia societaria e beneficiarios finais.",
     tags: ["sancoes", "CEIS", "cadeia societaria"],
     url: "/reports/report-01-superar-ltda.html",
     highlight: "7 sancoes",
@@ -63,7 +63,7 @@ export function ReportsShowcase() {
   return (
     <section style={{ padding: "2rem 1.5rem", maxWidth: 1000, margin: "0 auto" }}>
       <span style={{ display: "block", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "#94a3b8", marginBottom: "0.5rem" }}>
-        Investigacoes Reais
+        Pesquisas Reais
       </span>
       <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#f1f5f9", marginBottom: "0.25rem" }}>
         Relatorios Publicados

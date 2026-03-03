@@ -92,8 +92,11 @@ export function App() {
         <Route path="reports" element={<Suspense fallback={<Spinner />}><ReportsPage /></Suspense>} />
         <Route path="activity" element={<Suspense fallback={<Spinner />}><ActivityPage /></Suspense>} />
         <Route path="baseline/:entityId" element={<Baseline />} />
-        {!IS_PUBLIC_MODE && <Route path="investigations" element={<Investigations />} />}
-        {!IS_PUBLIC_MODE && <Route path="investigations/:investigationId" element={<Investigations />} />}
+        {!IS_PUBLIC_MODE && <Route path="pesquisas" element={<Investigations />} />}
+        {!IS_PUBLIC_MODE && <Route path="pesquisas/:investigationId" element={<Investigations />} />}
+        {/* Backwards compat redirect */}
+        {!IS_PUBLIC_MODE && <Route path="investigations" element={<Navigate to="/app/pesquisas" replace />} />}
+        {!IS_PUBLIC_MODE && <Route path="investigations/:investigationId" element={<Navigate to="/app/pesquisas" replace />} />}
       </Route>
 
       {/* Catch-all */}

@@ -31,7 +31,7 @@ import styles from "./AppShell.module.css";
 const NAV_ITEMS = [
   { path: "/app", icon: BarChart3, labelKey: "nav.dashboard" },
   { path: "/app/search", icon: Search, labelKey: "nav.search" },
-  { path: "/app/investigations", icon: FolderOpen, labelKey: "nav.investigations" },
+  { path: "/app/pesquisas", icon: FolderOpen, labelKey: "nav.investigations" },
   { path: "/app/analytics", icon: Activity, labelKey: "nav.analytics" },
   { path: "/app/reports", icon: FileText, labelKey: "nav.reports" },
   { path: "/app/activity", icon: Clock, labelKey: "nav.activity" },
@@ -116,7 +116,7 @@ export function AppShell() {
       }
       if (!IS_PUBLIC_MODE) {
         base.push(
-          { id: "go-investigations", label: t("command.goToInvestigations"), shortcut: "cmd+4", group: t("command.navigation"), handler: () => navigate("/app/investigations") },
+          { id: "go-investigations", label: t("command.goToInvestigations"), shortcut: "cmd+4", group: t("command.navigation"), handler: () => navigate("/app/pesquisas") },
         );
       }
       return base;
@@ -148,7 +148,7 @@ export function AppShell() {
           zIndex: 50,
         }}>
           {NAV_ITEMS
-            .filter((item) => !(IS_PUBLIC_MODE && item.path.includes("investigations")))
+            .filter((item) => !(IS_PUBLIC_MODE && item.path.includes("pesquisas")))
             .map(({ path, icon: Icon, labelKey }) => (
             <Link
               key={path}
@@ -181,7 +181,7 @@ export function AppShell() {
 
         <div className={styles.navItems}>
           {NAV_ITEMS
-            .filter((item) => !(IS_PUBLIC_MODE && item.path.includes("investigations")))
+            .filter((item) => !(IS_PUBLIC_MODE && item.path.includes("pesquisas")))
             .map(({ path, icon: Icon, labelKey }) => (
             <Link
               key={path}

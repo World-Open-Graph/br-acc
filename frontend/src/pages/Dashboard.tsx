@@ -98,7 +98,7 @@ export function Dashboard() {
               <button
                 key={inv.id}
                 className={styles.investigationCard}
-                onClick={() => navigate(`/app/investigations/${inv.id}`)}
+                onClick={() => navigate(`/app/pesquisas/${inv.id}`)}
               >
                 <span className={styles.invTitle}>{inv.title}</span>
                 <span className={styles.invMeta}>

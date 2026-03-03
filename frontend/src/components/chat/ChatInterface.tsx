@@ -83,7 +83,7 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
         setMessages([{
           id: "welcome",
           role: "assistant",
-          text: `Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n🔍 **${nodes} mil entidades** e **${rels} mil conexões** em dados públicos brasileiros.\n📊 **24 ferramentas** integradas em **${sources} fontes** (Portal da Transparência, DataJud, BNMP, Interpol, PNCP, OAB, e mais).\n\n**Você não precisa de CNPJ ou nome completo!** Escolha uma sugestão abaixo ou digite:\n- 🏙️ Uma **cidade** (ex: "Uberlândia", "Manaus")\n- 👤 Um **nome** (parcial ok: "Silva", "Bolsonaro")\n- 🏢 Uma **empresa** (nome fantasia: "Odebrecht")\n- 📋 Um **tema** ("licitações SP", "trabalho escravo")\n\n⚡ Modelo: GPT-4o-mini · Custo por consulta: ~$0.001`,
+          text: `Olá! Sou o agente de pesquisa do **EGOS Inteligência**.\n\n🔍 **${nodes} mil entidades** e **${rels} mil conexões** em dados públicos brasileiros.\n📊 **24 ferramentas** integradas em **${sources} fontes** (Portal da Transparência, DataJud, BNMP, Interpol, PNCP, OAB, e mais).\n\n**Você não precisa de CNPJ ou nome completo!** Escolha uma sugestão abaixo ou digite:\n- 🏙️ Uma **cidade** (ex: "Uberlândia", "Manaus")\n- 👤 Um **nome** (parcial ok: "Silva", "Bolsonaro")\n- 🏢 Uma **empresa** (nome fantasia: "Odebrecht")\n- 📋 Um **tema** ("licitações SP", "trabalho escravo")\n\n⚡ Modelo: GPT-4o-mini · Custo por consulta: ~$0.001`,
           suggestions: [
             "Políticos de São Paulo",
             "Empresas sancionadas que ainda recebem contratos",
@@ -100,7 +100,7 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
         setMessages([{
           id: "welcome",
           role: "assistant",
-          text: "Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n**Você não precisa de CNPJ!** Digite uma cidade, nome, empresa ou tema para começar.\n\n⚡ Modelo: GPT-4o-mini",
+          text: "Olá! Sou o agente de pesquisa do **EGOS Inteligência**.\n\n**Você não precisa de CNPJ!** Digite uma cidade, nome, empresa ou tema para começar.\n\n⚡ Modelo: GPT-4o-mini",
           suggestions: [
             "Políticos de São Paulo",
             "Empresas sancionadas com contratos",
@@ -446,7 +446,7 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
                     background: "#00e5c3",
                     animation: "pulse 1.5s infinite",
                   }} />
-                  Investigando dados públicos...
+                  Pesquisando dados públicos...
                 </span>
               </div>
             ) : (
