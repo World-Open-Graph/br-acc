@@ -115,6 +115,12 @@
   color: var(--accent);
 }
 
+.fieldError {
+  color: var(--color-danger);
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-2xs);
+}
+
 .error {
   color: var(--color-danger);
   font-size: var(--font-size-xs);

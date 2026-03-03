@@ -118,6 +118,10 @@ CREATE (c10:Contract {
   value: 350000.0, contracting_org: 'PREFEITURA SAO PAULO', date: '2024-10-01'
 });
 
+// Set contract names programmatically
+MATCH (c:Contract)
+SET c.name = c.contract_id + ' - ' + c.object;
+
 // ── Amendment (for self-dealing pattern) ──────────────────
 CREATE (a1:Amendment {
   amendment_id: 'EMD-001', type: 'Individual', function: 'Urbanismo',

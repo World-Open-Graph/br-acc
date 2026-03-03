@@ -1,7 +1,13 @@
-import { type FormEvent, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 
+import {
+  loginSchema,
+  type LoginFormValues,
+  getAuthErrorMessage,
+} from "@/lib/validations/auth";
 import { useAuthStore } from "@/stores/auth";
 
 import styles from "./Login.module.css";
@@ -11,16 +17,20 @@ export function Login() {
   const navigate = useNavigate();
   const { login, loading, error } = useAuthStore();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+    mode: "onTouched",
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    await login(email, password);
+  const onSubmit = form.handleSubmit(async (data) => {
+    await login(data.email, data.password);
     if (useAuthStore.getState().token) {
       navigate("/app");
     }
-  };
+  });
+
+  const { errors } = form.formState;
 
   return (
     <div className={styles.page}>
@@ -30,7 +40,7 @@ export function Login() {
           <p className={styles.subtitle}>{t("auth.loginSubtitle")}</p>
         </div>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={onSubmit}>
           {error && <div className={styles.error}>{t(error)}</div>}
 
           <div className={styles.field}>
@@ -41,11 +51,16 @@ export function Login() {
               id="email"
               className={styles.input}
               type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "email-error" : undefined}
+              {...form.register("email")}
             />
+            {errors.email?.message && (
+              <span id="email-error" className={styles.fieldError} role="alert">
+                {getAuthErrorMessage(errors.email.message, t)}
+              </span>
+            )}
           </div>
 
           <div className={styles.field}>
@@ -56,18 +71,22 @@ export function Login() {
               id="password"
               className={styles.input}
               type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              {...form.register("password")}
             />
+            {errors.password?.message && (
+              <span id="password-error" className={styles.fieldError} role="alert">
+                {getAuthErrorMessage(errors.password.message, t)}
+              </span>
+            )}
           </div>
 
           <button
             type="submit"
             className={styles.submitBtn}
-            disabled={loading}
+            disabled={form.formState.isSubmitting || loading}
           >
             {loading ? t("common.loading") : t("auth.login")}
           </button>

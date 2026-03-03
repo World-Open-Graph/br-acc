@@ -27,6 +27,20 @@ function ConnectionsListInner({
   const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement>(null);
 
+  const getDisplayName = useCallback(
+    (node: GraphNode): string => {
+      const label = node.label.trim();
+      if (label) return label;
+
+      const documentId = node.document_id?.trim();
+      if (documentId) return documentId;
+
+      const shortId = node.id.substring(node.id.lastIndexOf(":") + 1) || node.id;
+      return `${t(`entity.${node.type}`, node.type)} #${shortId}`;
+    },
+    [t],
+  );
+
   const grouped = useMemo(() => {
     const groups = new Map<string, GraphNode[]>();
     for (const node of nodes) {
@@ -114,7 +128,7 @@ function ConnectionsListInner({
                     className={styles.itemDot}
                     style={{ backgroundColor: color }}
                   />
-                  <span className={styles.itemName}>{node.label}</span>
+                  <span className={styles.itemName}>{getDisplayName(node)}</span>
                   <span className={styles.itemSource}>
                     {node.sources[0]?.database ?? ""}
                   </span>

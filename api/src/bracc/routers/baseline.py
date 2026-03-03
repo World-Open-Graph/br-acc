@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession
 
+from bracc.config import settings
 from bracc.dependencies import get_session
 from bracc.models.baseline import BaselineResponse
 from bracc.services.baseline_service import BASELINE_QUERIES, run_all_baselines, run_baseline
@@ -21,10 +22,13 @@ async def get_baseline_for_entity(
     if dimension:
         if dimension not in BASELINE_QUERIES:
             available = list(BASELINE_QUERIES.keys())
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid dimension: {dimension}. Available: {available}",
+            app_env = settings.app_env.strip().lower()
+            detail = (
+                "Invalid dimension"
+                if app_env in ("prod", "production")
+                else f"Invalid dimension: {dimension}. Available: {available}"
             )
+            raise HTTPException(status_code=400, detail=detail)
         results = await run_baseline(session, dimension, entity_id)
     else:
         results = await run_all_baselines(session, entity_id)

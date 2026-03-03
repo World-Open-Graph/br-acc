@@ -100,10 +100,13 @@ async def get_specific_pattern(
         enforce_entity_lookup_enabled()
     available = [row["id"] for row in provider.list_patterns()]
     if pattern_name not in set(available):
-        raise HTTPException(
-            status_code=404,
-            detail=f"Pattern not found: {pattern_name}. Available: {available}",
+        app_env = settings.app_env.strip().lower()
+        detail = (
+            "Pattern not found"
+            if app_env in ("prod", "production")
+            else f"Pattern not found: {pattern_name}. Available: {available}"
         )
+        raise HTTPException(status_code=404, detail=detail)
     results = await run_pattern(
         session,
         pattern_name,
