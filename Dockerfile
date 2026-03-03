@@ -1,3 +1,4 @@
+# Multi-stage Dockerfile (root). Prefer per-service Dockerfiles: api/Dockerfile, frontend/Dockerfile, etl/Dockerfile.
 FROM python:3.12-slim AS api
 
 WORKDIR /app
@@ -44,11 +45,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /workspace/etl
 
-COPY etl/pyproject.toml ./
-COPY etl/src ./src
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-RUN python -m pip install --upgrade pip \
-    && python -m pip install .
+COPY etl/pyproject.toml etl/uv.lock ./
+RUN uv sync --no-dev --no-install-project
+
+COPY etl/src ./src
+RUN uv sync --no-dev
 
 WORKDIR /workspace
 CMD ["bash"]
