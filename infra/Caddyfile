@@ -1,20 +1,33 @@
 {$DOMAIN} {
+    # --- API routes ---
     handle /api/* {
         reverse_proxy api:8000
+        header {
+            Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+        }
     }
 
     handle /health {
         reverse_proxy api:8000
     }
 
+    # --- Frontend routes ---
     handle {
         reverse_proxy frontend:3000
+        header {
+            Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://{$DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        }
     }
 
+    # --- Global security headers ---
     header {
         X-Content-Type-Options nosniff
         X-Frame-Options DENY
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-XSS-Protection "1; mode=block"
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
         Referrer-Policy strict-origin-when-cross-origin
+        Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()"
+        -Server
+        -X-Powered-By
     }
 }
