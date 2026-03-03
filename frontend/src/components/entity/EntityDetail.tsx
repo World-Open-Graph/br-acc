@@ -68,7 +68,7 @@ export function EntityDetail({ entityId, onClose }: EntityDetailProps) {
             ).map(([key, value]) => (
               <div key={key} className={styles.property}>
                 <span className={styles.propKey}>{key}</span>
-                <span className={styles.propValue}>{String(value ?? "—")}</span>
+                <span className={styles.propValue}>{String(value ?? "-")}</span>
               </div>
             ))}
           </div>

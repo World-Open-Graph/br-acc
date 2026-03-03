@@ -14,7 +14,7 @@ interface TimelineViewProps {
 }
 
 function formatDate(iso: string): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;

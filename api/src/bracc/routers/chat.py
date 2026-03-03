@@ -748,6 +748,7 @@ Você DEVE chamar ferramentas ANTES de responder. Se o usuário pergunta QUALQUE
 - Perguntas analíticas → chame cypher_query (contagens, rankings, cruzamentos)
 - NUNCA diga "temos X mil entidades" sem chamar data_summary primeiro
 - NUNCA invente números — busque sempre dados reais
+- Ao listar DEPUTADOS/POLÍTICOS: SEMPRE mostre dados de mandato quando disponíveis: legislatura atual, total de mandatos (1o, 2o, 3o mandato etc.), período do mandato (data início/fim), condição eleitoral. Exemplo: "Benes Leocádio (UNIÃO) - 2o mandato (2019-2027)"
 
 ## REGRA #2: USE MÚLTIPLAS FERRAMENTAS EM PARALELO
 Chame 2-4 ferramentas simultaneamente. Quanto mais cruzamento, melhor a pesquisa.

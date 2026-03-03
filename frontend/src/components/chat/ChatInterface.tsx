@@ -59,6 +59,8 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
   const [activeConvId, setActiveConvId] = useState<string>(() => {
     try { return localStorage.getItem(ACTIVE_CONV_KEY) ?? ""; } catch { return ""; }
   });
+  const [totalCostUsd, setTotalCostUsd] = useState(0);
+  const [queryCount, setQueryCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -215,6 +217,8 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
         } catch { /* continue without persistence */ }
       }
       const response: ChatResponse = await sendChatMessage(msg, convId || undefined);
+      setTotalCostUsd((prev) => prev + (response.cost_usd ?? 0));
+      setQueryCount((prev) => prev + 1);
       setMessages((prev) =>
         prev.filter((m) => !m.loading).concat({
           id: `assistant-${Date.now()}`,
@@ -542,6 +546,30 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
           </div>
         ))}
         <div ref={messagesEndRef} />
+      </div>
+
+      {/* Disclaimer + Cost */}
+      <div style={{
+        padding: "6px 18px", background: "#0c1210",
+        borderTop: "1px solid rgba(255,255,255,0.04)",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: 8, flexWrap: "wrap",
+      }}>
+        <span style={{ fontSize: 10, color: "#5a6b60", fontStyle: "italic" }}>
+          Pesquisa pessoal com dados públicos. Padrões são sinais, não prova jurídica. Não constitui acusação.
+        </span>
+        {queryCount > 0 && (
+          <span style={{
+            fontSize: 10, color: "#5a6b60",
+            fontFamily: "var(--font-mono, monospace)",
+            background: "rgba(255,255,255,0.03)",
+            padding: "2px 8px", borderRadius: 6,
+            border: "1px solid rgba(255,255,255,0.06)",
+            whiteSpace: "nowrap",
+          }}>
+            Custo aprox: R$ {(totalCostUsd * 5.8).toFixed(2)} | {queryCount} {queryCount === 1 ? "consulta" : "consultas"}
+          </span>
+        )}
       </div>
 
       {/* Input */}

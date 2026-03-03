@@ -80,7 +80,7 @@ export function Activity() {
     <div className={styles.container}>
       <h1 className={styles.title}>Feed de Atividades</h1>
       <p className={styles.subtitle}>
-        Todas as ações do sistema em tempo real — Mycelium Event Trail
+        Todas as ações do sistema em tempo real - Mycelium Event Trail
       </p>
 
       <div className={styles.statsBar}>

@@ -13,7 +13,7 @@ interface Report {
 const REPORTS: Report[] = [
   {
     id: "patense",
-    title: "Grupo Patense — Rede Societaria e Financeira",
+    title: "Grupo Patense - Rede Societária e Financeira",
     date: "2026-03-01",
     description: "Pesquisa de 13 empresas interligadas com R$217M em financiamentos BNDES e R$2.15B em divida ativa.",
     tags: ["BNDES", "rede societaria", "divida ativa"],

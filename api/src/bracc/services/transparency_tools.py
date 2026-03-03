@@ -8,6 +8,7 @@ Tools:
 - search_pep_city: Politically exposed persons by city
 """
 
+import asyncio
 import logging
 import os
 import re
@@ -270,7 +271,7 @@ async def tool_search_pep_city(cidade: str, uf: str = "") -> dict[str, Any]:
         results = await tool_web_search(q, max_results=2)
         all_results.extend(results)
 
-    # Search Câmara API for deputies from this state
+    # Search Câmara API for deputies from this state (with mandate info)
     deputados: list[dict[str, str]] = []
     if uf:
         try:
@@ -279,7 +280,49 @@ async def tool_search_pep_city(cidade: str, uf: str = "") -> dict[str, Any]:
                 resp = await client.get(dep_url, headers={"Accept": "application/json"})
                 if resp.status_code == 200:
                     deps = resp.json().get("dados", [])
-                    for dep in deps:
+
+                    async def _enrich_deputy(dep: dict) -> dict[str, str]:
+                        dep_id = dep.get("id")
+                        dep_info: dict[str, str] = {
+                            "nome": dep.get("nome", ""),
+                            "partido": dep.get("siglaPartido", ""),
+                            "uf": dep.get("siglaUf", ""),
+                            "email": dep.get("email", ""),
+                            "id_camara": str(dep_id or ""),
+                        }
+                        if not dep_id:
+                            return dep_info
+                        try:
+                            # Fetch detail + legislatures in parallel
+                            detail_resp, hist_resp = await asyncio.gather(
+                                client.get(f"https://dadosabertos.camara.leg.br/api/v2/deputados/{dep_id}", headers={"Accept": "application/json"}),
+                                client.get(f"https://dadosabertos.camara.leg.br/api/v2/deputados/{dep_id}/legislaturas", headers={"Accept": "application/json"}),
+                            )
+                            if detail_resp.status_code == 200:
+                                detail = detail_resp.json().get("dados", {})
+                                status = detail.get("ultimoStatus", {})
+                                dep_info["legislatura_atual"] = str(status.get("idLegislatura", ""))
+                                dep_info["data_inicio_mandato"] = status.get("data", "")
+                                dep_info["condicao_eleitoral"] = status.get("condicaoEleitoral", "")
+                                dep_info["situacao"] = status.get("situacao", "")
+                            if hist_resp.status_code == 200:
+                                legislaturas = hist_resp.json().get("dados", [])
+                                dep_info["total_mandatos"] = str(len(legislaturas))
+                                if legislaturas:
+                                    mandatos_periodos = []
+                                    for leg in legislaturas:
+                                        inicio = leg.get("dataInicio", "")
+                                        fim = leg.get("dataFim", "")
+                                        mandatos_periodos.append(f"{inicio} a {fim}")
+                                    dep_info["mandatos_periodos"] = "; ".join(mandatos_periodos)
+                        except Exception:
+                            pass  # mandate info is best-effort
+                        return dep_info
+
+                    # Enrich up to 15 deputies in parallel, rest get basic info
+                    enriched = await asyncio.gather(*[_enrich_deputy(d) for d in deps[:15]])
+                    deputados.extend(enriched)
+                    for dep in deps[15:]:
                         deputados.append({
                             "nome": dep.get("nome", ""),
                             "partido": dep.get("siglaPartido", ""),
