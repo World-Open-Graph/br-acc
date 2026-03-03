@@ -15,15 +15,18 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.18",
+    "@hookform/resolvers": "^5.2.2",
     "cmdk": "^1.1.1",
     "i18next": "^24.0.0",
     "lucide-react": "^0.575.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-force-graph-2d": "^1.26.0",
+    "react-hook-form": "^7.71.2",
     "react-i18next": "^15.0.0",
     "react-resizable-panels": "^4.6.5",
     "react-router": "^7.0.0",
+    "zod": "^4.3.6",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
