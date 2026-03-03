@@ -2,7 +2,7 @@ import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
-import { type StatsResponse, getStats } from "@/api/client";
+import { type StatsResponse, getStats, getActivityStats } from "@/api/client";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import {
   GraphIcon,
@@ -57,22 +57,23 @@ interface SourceDef {
   nameKey: string;
   descKey: string;
   countFn: (s: StatsResponse) => number | null;
+  url: string;
 }
 
 const DATA_SOURCES: SourceDef[] = [
-  { nameKey: "CNPJ", descKey: "landing.sources.cnpj", countFn: (s) => s.company_count },
-  { nameKey: "TSE", descKey: "landing.sources.tse", countFn: (s) => s.person_count },
-  { nameKey: "Transparência", descKey: "landing.sources.transparencia", countFn: (s) => s.contract_count },
-  { nameKey: "CEIS/CNEP", descKey: "landing.sources.sanctions", countFn: (s) => s.sanction_count },
-  { nameKey: "DATASUS", descKey: "landing.sources.cnes", countFn: (s) => s.health_count },
-  { nameKey: "BNDES", descKey: "landing.sources.bndes", countFn: (s) => s.finance_count },
-  { nameKey: "PGFN", descKey: "landing.sources.pgfn", countFn: () => null },
-  { nameKey: "IBAMA", descKey: "landing.sources.ibama", countFn: (s) => s.embargo_count },
-  { nameKey: "ComprasNet", descKey: "landing.sources.comprasnet", countFn: () => null },
-  { nameKey: "TCU", descKey: "landing.sources.tcu", countFn: () => null },
-  { nameKey: "TransfereGov", descKey: "landing.sources.transferegov", countFn: (s) => s.amendment_count },
-  { nameKey: "RAIS", descKey: "landing.sources.rais", countFn: (s) => s.laborstats_count },
-  { nameKey: "INEP", descKey: "landing.sources.inep", countFn: (s) => s.education_count },
+  { nameKey: "CNPJ", descKey: "landing.sources.cnpj", countFn: (s) => s.company_count, url: "https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-da-pessoa-juridica---cnpj" },
+  { nameKey: "TSE", descKey: "landing.sources.tse", countFn: (s) => s.person_count, url: "https://dadosabertos.tse.jus.br/" },
+  { nameKey: "Transparência", descKey: "landing.sources.transparencia", countFn: (s) => s.contract_count, url: "https://portaldatransparencia.gov.br/" },
+  { nameKey: "CEIS/CNEP", descKey: "landing.sources.sanctions", countFn: (s) => s.sanction_count, url: "https://portaldatransparencia.gov.br/sancoes" },
+  { nameKey: "DATASUS", descKey: "landing.sources.cnes", countFn: (s) => s.health_count, url: "https://datasus.saude.gov.br/" },
+  { nameKey: "BNDES", descKey: "landing.sources.bndes", countFn: (s) => s.finance_count, url: "https://dadosabertos.bndes.gov.br/" },
+  { nameKey: "PGFN", descKey: "landing.sources.pgfn", countFn: () => null, url: "https://www.gov.br/pgfn/pt-br/assuntos/divida-ativa-da-uniao" },
+  { nameKey: "IBAMA", descKey: "landing.sources.ibama", countFn: (s) => s.embargo_count, url: "https://dados.gov.br/dados/organizacoes/visualizar/instituto-brasileiro-do-meio-ambiente-e-dos-recursos-naturais-renovaveis-ibama" },
+  { nameKey: "ComprasNet", descKey: "landing.sources.comprasnet", countFn: () => null, url: "https://pncp.gov.br/" },
+  { nameKey: "TCU", descKey: "landing.sources.tcu", countFn: () => null, url: "https://portal.tcu.gov.br/licitacoes-e-contratos-do-tcu/" },
+  { nameKey: "TransfereGov", descKey: "landing.sources.transferegov", countFn: (s) => s.amendment_count, url: "https://transferegov.sistema.gov.br/" },
+  { nameKey: "RAIS", descKey: "landing.sources.rais", countFn: (s) => s.laborstats_count, url: "https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/estatisticas-trabalho/rais" },
+  { nameKey: "INEP", descKey: "landing.sources.inep", countFn: (s) => s.education_count, url: "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos" },
 ];
 
 interface FeatureDef {
@@ -171,6 +172,19 @@ function LiveDatabaseStatus({ stats }: { stats: StatsResponse | null }) {
 }
 
 function PartnershipCTA() {
+  const [activityCost, setActivityCost] = useState<{ totalBrl: string; queries: number } | null>(null);
+
+  useEffect(() => {
+    getActivityStats()
+      .then((data) => {
+        setActivityCost({
+          totalBrl: (data.total_cost_usd * 5.8).toFixed(2),
+          queries: data.total_events,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section style={{
       padding: "clamp(3rem, 6vw, 4.5rem) 0",
@@ -201,7 +215,7 @@ function PartnershipCTA() {
             background: "rgba(59,130,246,0.9)", color: "white", borderRadius: "0.6rem",
             textDecoration: "none", fontWeight: 600, fontSize: "0.9rem",
           }}>
-            GitHub — Código e Roadmap
+            GitHub - Código e Roadmap
           </a>
           <a href="https://t.me/EthikIntelligence" target="_blank" rel="noopener noreferrer" style={{
             display: "inline-flex", alignItems: "center", padding: "0.75rem 1.8rem",
@@ -217,6 +231,9 @@ function PartnershipCTA() {
           color: "rgba(148,163,154,0.7)", fontFamily: "var(--font-mono)",
         }}>
           100% open-source · Infraestrutura: $105/mês autofinanciado · Sem investidores, sem publicidade
+          {activityCost && activityCost.queries > 0 && (
+            <> · Custo aprox. acumulado: R$ {activityCost.totalBrl} ({activityCost.queries} consultas)</>
+          )}
         </p>
       </div>
     </section>
@@ -356,9 +373,14 @@ export function Landing() {
               return (
                 <div key={source.nameKey} className={styles.sourceCard}>
                   <div className={styles.sourceHeader}>
-                    <span className={styles.sourceName}>{source.nameKey}</span>
+                    <a href={source.url} target="_blank" rel="noopener noreferrer" className={styles.sourceName} style={{ color: "inherit", textDecoration: "none" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "#00e5c3"; e.currentTarget.style.textDecoration = "underline"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "inherit"; e.currentTarget.style.textDecoration = "none"; }}
+                    >
+                      {source.nameKey}
+                    </a>
                     <span className={styles.sourceCount}>
-                      {count != null ? formatCount(count) : "\u2014"}
+                      {count != null ? formatCount(count) : "-"}
                     </span>
                   </div>
                   <span className={styles.sourceDesc}>{t(source.descKey)}</span>

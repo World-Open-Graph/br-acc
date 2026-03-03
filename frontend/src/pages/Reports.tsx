@@ -12,7 +12,7 @@ interface Report {
 
 const PUBLISHED_REPORTS: Report[] = [
   {
-    title: "SUPERAR LTDA — Empresa Sancionada",
+    title: "SUPERAR LTDA - Empresa Sancionada",
     file: "report-01-superar-ltda.md",
     date: "02/03/2026",
     scenario: "Empresa com 7 sanções no grafo, sócio PJ",
@@ -20,7 +20,7 @@ const PUBLISHED_REPORTS: Report[] = [
     sources: ["Neo4j", "BrasilAPI", "Portal da Transparência"],
   },
   {
-    title: "Transparência Municipal — Manaus (AM)",
+    title: "Transparência Municipal - Manaus (AM)",
     file: "report-02-manaus-transparencia.md",
     date: "02/03/2026",
     scenario: "Emendas parlamentares + processos judiciais + diários oficiais",
@@ -28,7 +28,7 @@ const PUBLISHED_REPORTS: Report[] = [
     sources: ["Portal da Transparência", "DataJud TJAM", "Querido Diário"],
   },
   {
-    title: "Recuperação Judicial — São Paulo",
+    title: "Recuperação Judicial - São Paulo",
     file: "report-03-recuperacao-judicial-sp.md",
     date: "02/03/2026",
     scenario: "3.704 processos de recuperação judicial no TJSP",

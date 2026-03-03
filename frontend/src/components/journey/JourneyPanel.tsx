@@ -156,7 +156,7 @@ export function JourneyPanel() {
               </a>
               <span style={{ fontSize: 9, color: "#475569" }}>
                 {new Date(e.timestamp).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                {e.description && (" — " + e.description.slice(0, 40))}
+                {e.description && (" - " + e.description.slice(0, 40))}
               </span>
             </div>
             <button

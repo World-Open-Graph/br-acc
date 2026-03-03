@@ -84,7 +84,7 @@ export function StatsBar() {
       <div className={styles.bar}>
         <div className={styles.inner}>
           <div className={styles.item}>
-            <span className={styles.number}>{"\u2014"}</span>
+            <span className={styles.number}>{"-"}</span>
             <span className={styles.label}>{t("common.loading")}</span>
           </div>
         </div>

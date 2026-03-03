@@ -412,6 +412,18 @@ export function sendChatMessage(message: string): Promise<ChatResponse> {
   });
 }
 
+// --- Activity Stats ---
+
+export interface ActivityStatsResponse {
+  total_events: number;
+  total_cost_usd: number;
+  avg_cost_per_query: number;
+}
+
+export function getActivityStats(): Promise<ActivityStatsResponse> {
+  return apiFetch<ActivityStatsResponse>("/api/v1/activity/stats");
+}
+
 // --- Stats ---
 
 export interface StatsResponse {

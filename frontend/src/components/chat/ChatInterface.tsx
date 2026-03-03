@@ -43,6 +43,8 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(embedded);
   const [isLoading, setIsLoading] = useState(false);
+  const [totalCostUsd, setTotalCostUsd] = useState(0);
+  const [queryCount, setQueryCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -62,7 +64,7 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
       setMessages([{
         id: "welcome",
         role: "assistant",
-        text: "Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n🔍 Tenho acesso a **317 mil entidades** e **34 mil conexões** em dados públicos brasileiros — empresas, políticos, contratos, sanções, licitações e muito mais.\n\n📊 **18 ferramentas** de busca integradas: Portal da Transparência, DataJud, Querido Diário, CEAP, e mais.\n\n📋 **4 relatórios** de investigação já publicados.\n\nDigite um CNPJ, nome de empresa, cidade, ou escolha uma sugestão abaixo:",
+        text: "Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n🔍 Tenho acesso a **317 mil entidades** e **34 mil conexões** em dados públicos brasileiros: empresas, políticos, contratos, sanções, licitações e muito mais.\n\n📊 **18 ferramentas** de busca integradas: Portal da Transparência, DataJud, Querido Diário, CEAP, e mais.\n\n📋 **4 relatórios** de investigação já publicados.\n\nDigite um CNPJ, nome de empresa, cidade, ou escolha uma sugestão abaixo:",
         suggestions: [
           "Investigar empresa por CNPJ",
           "Ver relatórios de investigação",
@@ -99,6 +101,8 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
 
     try {
       const response: ChatResponse = await sendChatMessage(msg);
+      setTotalCostUsd((prev) => prev + (response.cost_usd ?? 0));
+      setQueryCount((prev) => prev + 1);
       setMessages((prev) =>
         prev.filter((m) => !m.loading).concat({
           id: `assistant-${Date.now()}`,
@@ -340,6 +344,30 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
           </div>
         ))}
         <div ref={messagesEndRef} />
+      </div>
+
+      {/* Disclaimer + Cost */}
+      <div style={{
+        padding: "6px 18px", background: "#0c1210",
+        borderTop: "1px solid rgba(255,255,255,0.04)",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: 8, flexWrap: "wrap",
+      }}>
+        <span style={{ fontSize: 10, color: "#5a6b60", fontStyle: "italic" }}>
+          Pesquisa pessoal com dados públicos. Padrões são sinais, não prova jurídica. Não constitui acusação.
+        </span>
+        {queryCount > 0 && (
+          <span style={{
+            fontSize: 10, color: "#5a6b60",
+            fontFamily: "var(--font-mono, monospace)",
+            background: "rgba(255,255,255,0.03)",
+            padding: "2px 8px", borderRadius: 6,
+            border: "1px solid rgba(255,255,255,0.06)",
+            whiteSpace: "nowrap",
+          }}>
+            Custo aprox: R$ {(totalCostUsd * 5.8).toFixed(2)} | {queryCount} {queryCount === 1 ? "consulta" : "consultas"}
+          </span>
+        )}
       </div>
 
       {/* Input */}
