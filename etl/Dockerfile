@@ -6,11 +6,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /workspace/etl
 
-COPY pyproject.toml ./
-COPY src ./src
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-RUN python -m pip install --upgrade pip \
-    && python -m pip install .
+COPY pyproject.toml uv.lock ./
+RUN uv sync --no-dev --no-install-project
+
+COPY src ./src
+RUN uv sync --no-dev
 
 WORKDIR /workspace
 CMD ["bash"]
