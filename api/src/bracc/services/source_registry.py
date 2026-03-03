@@ -63,6 +63,11 @@ def _default_registry_path() -> Path:
 
 
 def get_registry_path() -> Path:
+    """Return the source registry CSV path from env or default.
+
+    BRACC_SOURCE_REGISTRY_PATH must be set only by administrators in a trusted
+    environment; do not allow untrusted users or processes to set it.
+    """
     configured = os.getenv("BRACC_SOURCE_REGISTRY_PATH", "").strip()
     return Path(configured) if configured else _default_registry_path()
 
