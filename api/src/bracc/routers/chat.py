@@ -532,6 +532,7 @@ TOOLS = [
                 "properties": {
                     "orgao": {"type": "string", "description": "Codigo do orgao (opcional)"},
                     "uf": {"type": "string", "description": "UF (ex: SP, MG, RJ)"},
+                    "modalidade": {"type": "string", "description": "Modalidade da licitacao (ex: Pregao, Concorrencia, Dispensa)"},
                     "ano": {"type": "integer", "description": "Ano de referencia", "default": 2024},
                 },
                 "required": [],

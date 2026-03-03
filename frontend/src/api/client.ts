@@ -474,6 +474,9 @@ export interface ActivityStatsResponse {
   total_events: number;
   total_cost_usd: number;
   avg_cost_per_query: number;
+  total_results: number;
+  by_type: Record<string, number>;
+  by_source: Record<string, number>;
 }
 
 export function getActivityStats(): Promise<ActivityStatsResponse> {

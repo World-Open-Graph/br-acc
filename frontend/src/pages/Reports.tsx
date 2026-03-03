@@ -74,6 +74,8 @@ export function Reports() {
         }
         if (data.error) md += `\n**Erro:** ${data.error}`;
         setGenResult(md);
+      } else {
+        setGenResult(`Erro ao gerar relatório (${resp.status}). Tente outro município.`);
       }
     } catch (e) {
       setGenResult("Erro ao gerar relatório");

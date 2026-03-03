@@ -18,7 +18,7 @@ interface ChatMessage {
   text: string;
   entities?: ChatEntityCard[];
   suggestions?: string[];
-  evidence_chain?: { tool: string; source: string; result_count: number }[];
+  evidence_chain?: { tool: string; source: string; query: string; result_count: number; timestamp: string; api_url: string }[];
   cost_usd?: number;
   loading?: boolean;
 }
@@ -203,7 +203,7 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
     setMessages((prev) => [...prev, userMsg, loadingMsg]);
     setInput("");
     setIsLoading(true);
-      addJourneyEntry({ type: "chat", title: msg.slice(0, 80), query: msg, url: window.location.pathname, description: "Chat EGOS" });
+    addJourneyEntry({ type: "chat", title: msg.slice(0, 80), query: msg, url: window.location.pathname, description: "Chat EGOS" });
 
     try {
       // Auto-create conversation on first message if none active
@@ -242,7 +242,7 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading]);
+  }, [input, isLoading, activeConvId]);
 
   // Listen for "send to chat" events from landing page search
   useEffect(() => {
