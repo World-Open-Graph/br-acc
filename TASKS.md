@@ -1,6 +1,6 @@
 # TASKS.md — EGOS Inteligência (SSOT)
 
-> **Updated:** 2026-03-03 (session 6) | **Stars:** 74 ⭐ | **Forks:** 8 | **Patterns:** 10 | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
+> **Updated:** 2026-03-03 (session 9) | **Stars:** 74 ⭐ | **Forks:** 8 | **Patterns:** 10 | **GitHub Issues:** https://github.com/enioxt/EGOS-Inteligencia/issues
 
 ---
 
@@ -641,6 +641,64 @@
 > **Projetos avaliados:** 9 anteriores + LMCache + 3 RokoOfficial + Bruin + 4 novos OSINT (total: 18)
 > **Bruin:** getbruin.com — declarative YAML+SQL+Python pipelines. Suporta Postgres/DuckDB/BigQuery. SEM Neo4j. Futuro: DuckDB analytics layer.
 
+### TASK-091: Chat Agent Upgrade — 24 Tools + GPT-4o-mini ✅ (03/03/2026)
+- [x] LLM: Gemini Flash → GPT-4o-mini (melhor multi-tool calling, 4 tools paralelos vs 1)
+- [x] 6 novos OSINT tools: BNMP mandados, procurados Interpol, lista suja, PNCP licitações, OAB advogados, OpenCNPJ
+- [x] System prompt: enforce 2-4 tool calls paralelos por query
+- [x] max_rounds: 6 → 8, timeout: 30s → 45s
+- [x] search_servidores: corrigido com SIAPE org codes (Senado=11001, STF=10001)
+- [x] Custo: ~$0.001/query (4 tools), era ~$0.0003 (1 tool)
+> **Arquivos:** `chat.py`, `transparency_tools.py`, `config.py`
+
+### TASK-092: Exposure Score Fix — 5-Factor Scoring ✅ (03/03/2026)
+- [x] Bug: pattern_percentile e baseline_percentile hardcoded 0.0 (30% do peso desperdiçado)
+- [x] entity_score.cypher: retorna sanction_count, embargo_count, contract_count, amendment_count
+- [x] score_service.py: compute real pattern percentile (sancionada+contratos=80%, sancionada=45%)
+- [x] intelligence_provider.py: community tier agora usa 5 fatores (era 1)
+- [x] Resultado: empresa 64 sanções: 90.0 (inflado) → 39.1 (realista)
+> **Feedback do colaborador:** Corrigido conforme sugestão. Ranking agora é significativo.
+> **Arquivos:** `score_service.py`, `intelligence_provider.py`, `entity_score.cypher`
+
+### TASK-093: Activity Feed Pagination ✅ (03/03/2026)
+- [x] 10 eventos por página (era 100 sem paginação)
+- [x] Botões Anterior/Próxima com info "Página X de Y (N eventos)"
+- [x] Reset de página ao mudar filtro
+> **Arquivos:** `Activity.tsx`, `Activity.module.css`
+
+### TASK-094: Chat UX — Guided Search + Model Transparency ✅ (03/03/2026)
+- [x] Welcome: "Você não precisa de CNPJ!" + 4 exemplos de input
+- [x] 8 sugestões acionáveis (políticos por cidade, lista suja, mandados, licitações)
+- [x] Mostra modelo e custo no welcome message
+- [x] 24 tools contados corretamente
+> **Arquivos:** `ChatInterface.tsx`
+
+### TASK-095: Model Fallback + Rate Limit + BYOK ✅ (03/03/2026)
+- [x] 10 msgs/dia premium (GPT-4o-mini), 20 msgs/dia free (Gemini Flash), depois aviso BYOK
+- [x] BYOK via header `x-openrouter-key` (chave do usuário no OpenRouter)
+- [x] Aviso automático ao atingir limites de cada tier
+- [x] Tier logado no activity feed (model + tier em cada evento)
+- [x] _call_openrouter aceita model + api_key params
+> **Arquivos:** `chat.py`
+
+### TASK-096: Bug Fixes — DDG Search + PNCP API ⬜ (GitHub #32, #33)
+- [ ] DDG fallback falhando silenciosamente (8x nos logs)
+- [ ] PNCP HTTP 400: parâmetro obrigatório `codigoModalidadeContratacao` ausente
+> **Issues:** #32 (P1), #33 (P2)
+
+### TASK-097: System Map — API/Routes/Pages Inventory ⬜ (GitHub #34)
+- [ ] Documentar 30+ endpoints em 10 routers
+- [ ] Frontend: 14 páginas inventory
+- [ ] Docker: 5 containers topology
+- [ ] OSINT: 24 tools com rate limits
+- [ ] Observability: structured logging, request tracing
+> **Issue:** #34 (P2)
+
+### TASK-098: BYOK Settings Page ⬜ (GitHub #35)
+- [ ] Frontend: modal de settings no chat header
+- [ ] Instruções: criar conta OpenRouter, inserir créditos, colar chave
+- [ ] Security: chave só em localStorage, nunca logada no backend
+> **Issue:** #35 (P2)
+
 ---
 
 ## Métricas
@@ -651,18 +709,20 @@
 | **Relacionamentos** | 34.507 | 02/03/2026 |
 | **Issues GitHub abertas** | 27 | 02/03/2026 |
 | **Tasks concluídas** | 60/85 | 03/03/2026 |
-| **Chatbot Tools** | 18 (3 grafo + 8 livres + 6 Portal + 1 DataJud) | 02/03/2026 |
+| **Chatbot Tools** | 24 (3 grafo + 8 livres + 6 Portal + 1 DataJud + 6 novos OSINT) | 03/03/2026 |
+| **LLM Model** | GPT-4o-mini (premium) + Gemini Flash (free tier) | 03/03/2026 |
+| **Rate Limit** | 10 premium + 20 free/dia por IP, BYOK suportado | 03/03/2026 |
 | **ETL Status** | Phase 1 file 6/10 (15%) — Contabo CPU | 02/03/2026 |
 | **Website** | inteligencia.egos.ia.br (SSL ✅) | 02/03/2026 |
 | **Analytics** | Self-hosted + Clarity + Dashboard frontend ✅ | 02/03/2026 |
 | **Web Search** | Brave Search (primário) + DDG (fallback) | 02/03/2026 |
-| **Issues GitHub** | 23 abertas (4 fechadas: #25-#28) | 02/03/2026 |
+| **Issues GitHub** | 35 abertas (4 fechadas: #25-#28) | 03/03/2026 |
 | **APIs com chave** | Portal Transparência + DataJud + Brave | 02/03/2026 |
 | **Segurança** | GitGuardian fix — chaves em env vars | 02/03/2026 |
-| **Relatórios** | 3 publicados (SUPERAR, Manaus, RJ-SP) | 02/03/2026 |
-| **Intelink Audit** | 44 págs, 135 routes, 15 gaps relevantes | 02/03/2026 |
+| **Relatórios** | 4 publicados (Patense, SUPERAR, Manaus, RJ-SP) | 02/03/2026 |
+| **Exposure Index** | 5-factor scoring (connections, sources, financial, patterns, baseline) | 03/03/2026 |
 | **Evidence Chain** | Proveniência de dados em cada query ✅ | 02/03/2026 |
-| **Cost/Query** | ~$0.0006/query (~R$ 0,003) | 02/03/2026 |
+| **Cost/Query** | ~$0.001/query premium, ~$0.0003 free (~R$ 0,006) | 03/03/2026 |
 | **Custo Mensal Real** | ~$105/mês (~R$ 630) | 02/03/2026 |
 
 ### TASK-090: UI Polish — Scrollbar, Reports HTML, Privacy, Sidebar ✅ (03/03/2026)
