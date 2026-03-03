@@ -394,10 +394,77 @@ export interface ChatResponse {
   cost_usd: number;
 }
 
-export function sendChatMessage(message: string): Promise<ChatResponse> {
+export function sendChatMessage(
+  message: string,
+  conversationId?: string,
+): Promise<ChatResponse> {
+  const clientId = getOrCreateClientId();
   return apiFetch<ChatResponse>("/api/v1/chat", {
     method: "POST",
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, conversation_id: conversationId ?? "" }),
+    headers: { "x-client-id": clientId },
+  });
+}
+
+// --- Client Identity (anonymous, localStorage-based) ---
+
+const CLIENT_ID_KEY = "egos_client_id";
+
+export function getOrCreateClientId(): string {
+  try {
+    let id = localStorage.getItem(CLIENT_ID_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(CLIENT_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return "anon";
+  }
+}
+
+// --- Conversations ---
+
+export interface ConversationSummary {
+  id: string;
+  title: string;
+  created_at: number;
+  updated_at: number;
+  message_count: number;
+}
+
+export interface ConversationDetail {
+  id: string;
+  title: string;
+  created_at: number;
+  updated_at: number;
+  messages: { role: string; content: string }[];
+}
+
+function convHeaders(): Record<string, string> {
+  return { "x-client-id": getOrCreateClientId() };
+}
+
+export function listConversations(): Promise<{ conversations: ConversationSummary[]; client_id: string }> {
+  return apiFetch("/api/v1/conversations", { headers: convHeaders() });
+}
+
+export function createConversation(title?: string): Promise<ConversationDetail> {
+  return apiFetch("/api/v1/conversations", {
+    method: "POST",
+    body: JSON.stringify({ title: title ?? "Nova pesquisa" }),
+    headers: convHeaders(),
+  });
+}
+
+export function getConversation(id: string): Promise<ConversationDetail> {
+  return apiFetch(`/api/v1/conversations/${encodeURIComponent(id)}`, { headers: convHeaders() });
+}
+
+export function deleteConversation(id: string): Promise<{ status: string }> {
+  return apiFetch(`/api/v1/conversations/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: convHeaders(),
   });
 }
 

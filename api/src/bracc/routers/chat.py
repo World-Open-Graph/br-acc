@@ -138,6 +138,7 @@ def _trim_conversation(history: list[dict[str, str]]) -> None:
 
 class ChatMessage(BaseModel):
     message: str = Field(min_length=1, max_length=1000)
+    conversation_id: str = Field(default="", max_length=64)
 
 
 class EntityCard(BaseModel):
@@ -1139,7 +1140,17 @@ async def chat(
     """AI-powered conversational search for EGOS Inteligência."""
 
     client_id = _get_client_id(request)
-    history = _get_conversation(client_id)
+    
+    # Conversation persistence: use Redis if conversation_id provided
+    conv_id = body.conversation_id.strip() if body.conversation_id else ""
+    client_header = (request.headers.get("x-client-id") or "").strip()
+    effective_client = client_header if client_header else client_id
+    
+    if conv_id:
+        from bracc.routers.conversations import get_conversation_messages
+        history = await get_conversation_messages(conv_id, effective_client)
+    else:
+        history = _get_conversation(client_id)
 
     # BYOK: user can pass own OpenRouter key via header
     byok_key = (request.headers.get("x-openrouter-key") or "").strip()
@@ -1203,9 +1214,15 @@ async def chat(
         reply += "\n\n⚠️ Limite diário atingido. Crie uma conta grátis em [openrouter.ai](https://openrouter.ai) e insira sua chave para continuar sem limites."
 
     # Save to conversation memory
-    history.append({"role": "user", "content": body.message})
-    history.append({"role": "assistant", "content": reply})
-    _trim_conversation(history)
+    if conv_id:
+        from bracc.routers.conversations import save_conversation_messages
+        await save_conversation_messages(
+            conv_id, effective_client, body.message, reply, auto_title=True
+        )
+    else:
+        history.append({"role": "user", "content": body.message})
+        history.append({"role": "assistant", "content": reply})
+        _trim_conversation(history)
 
     suggestions = _generate_suggestions(reply, entities, body.message)
 

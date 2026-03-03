@@ -20,6 +20,7 @@ from bracc.routers import (
     analytics,
     auth,
     baseline,
+    conversations,
     monitor,
     chat,
     entity,
@@ -83,6 +84,7 @@ app.include_router(baseline.router)
 app.include_router(investigation.router)
 app.include_router(investigation.shared_router)
 app.include_router(chat.router)
+app.include_router(conversations.router)
 app.include_router(analytics.router)
 app.include_router(monitor.router)
 app.include_router(activity.router)

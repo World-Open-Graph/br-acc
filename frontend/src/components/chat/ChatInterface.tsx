@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageCircle, Send, Sparkles, X } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Plus, Trash2, History, ChevronLeft } from "lucide-react";
 import { addJourneyEntry } from "@/lib/journey";
-import { sendChatMessage, type ChatEntityCard, type ChatResponse } from "@/api/client";
+import {
+  sendChatMessage,
+  listConversations,
+  createConversation,
+  getConversation,
+  deleteConversation,
+  type ChatEntityCard,
+  type ChatResponse,
+  type ConversationSummary,
+} from "@/api/client";
 
 interface ChatMessage {
   id: string;
@@ -38,11 +47,18 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
   finance: "Financeiro",
 };
 
+const ACTIVE_CONV_KEY = "egos_active_conv";
+
 export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(embedded);
   const [isLoading, setIsLoading] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [activeConvId, setActiveConvId] = useState<string>(() => {
+    try { return localStorage.getItem(ACTIVE_CONV_KEY) ?? ""; } catch { return ""; }
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -57,49 +73,113 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
+  const loadWelcomeMessage = useCallback(() => {
+    fetch("/api/v1/meta/stats")
+      .then((r) => r.json())
+      .then((s) => {
+        const nodes = Math.round(s.total_nodes / 1000);
+        const rels = Math.round(s.total_relationships / 1000);
+        const sources = s.data_sources || 108;
+        setMessages([{
+          id: "welcome",
+          role: "assistant",
+          text: `Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n🔍 **${nodes} mil entidades** e **${rels} mil conexões** em dados públicos brasileiros.\n📊 **24 ferramentas** integradas em **${sources} fontes** (Portal da Transparência, DataJud, BNMP, Interpol, PNCP, OAB, e mais).\n\n**Você não precisa de CNPJ ou nome completo!** Escolha uma sugestão abaixo ou digite:\n- 🏙️ Uma **cidade** (ex: "Uberlândia", "Manaus")\n- 👤 Um **nome** (parcial ok: "Silva", "Bolsonaro")\n- 🏢 Uma **empresa** (nome fantasia: "Odebrecht")\n- 📋 Um **tema** ("licitações SP", "trabalho escravo")\n\n⚡ Modelo: GPT-4o-mini · Custo por consulta: ~$0.001`,
+          suggestions: [
+            "Políticos de São Paulo",
+            "Empresas sancionadas que ainda recebem contratos",
+            "Emendas parlamentares Minas Gerais 2024",
+            "Deputados que mais gastaram com cartão corporativo",
+            "Lista suja trabalho escravo",
+            "Licitações suspeitas Rio de Janeiro",
+            "Mandados de prisão pendentes",
+            "Recuperações judiciais recentes TJSP",
+          ],
+        }]);
+      })
+      .catch(() => {
+        setMessages([{
+          id: "welcome",
+          role: "assistant",
+          text: "Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n**Você não precisa de CNPJ!** Digite uma cidade, nome, empresa ou tema para começar.\n\n⚡ Modelo: GPT-4o-mini",
+          suggestions: [
+            "Políticos de São Paulo",
+            "Empresas sancionadas com contratos",
+            "Emendas parlamentares 2024",
+            "Deputados que mais gastaram",
+            "Lista suja trabalho escravo",
+            "Licitações suspeitas",
+            "Mandados de prisão pendentes",
+            "Recuperações judiciais TJSP",
+          ],
+        }]);
+      });
+  }, []);
+
+  // Load conversation from server when activeConvId changes
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      fetch("/api/v1/meta/stats")
-        .then((r) => r.json())
-        .then((s) => {
-          const nodes = Math.round(s.total_nodes / 1000);
-          const rels = Math.round(s.total_relationships / 1000);
-          const sources = s.data_sources || 108;
-          setMessages([{
-            id: "welcome",
-            role: "assistant",
-            text: `Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n🔍 **${nodes} mil entidades** e **${rels} mil conexões** em dados públicos brasileiros.\n📊 **24 ferramentas** integradas em **${sources} fontes** (Portal da Transparência, DataJud, BNMP, Interpol, PNCP, OAB, e mais).\n\n**Você não precisa de CNPJ ou nome completo!** Escolha uma sugestão abaixo ou digite:\n- 🏙️ Uma **cidade** (ex: "Uberlândia", "Manaus")\n- 👤 Um **nome** (parcial ok: "Silva", "Bolsonaro")\n- 🏢 Uma **empresa** (nome fantasia: "Odebrecht")\n- 📋 Um **tema** ("licitações SP", "trabalho escravo")\n\n⚡ Modelo: GPT-4o-mini · Custo por consulta: ~$0.001`,
-            suggestions: [
-              "Políticos de São Paulo",
-              "Empresas sancionadas que ainda recebem contratos",
-              "Emendas parlamentares Minas Gerais 2024",
-              "Deputados que mais gastaram com cartão corporativo",
-              "Lista suja trabalho escravo",
-              "Licitações suspeitas Rio de Janeiro",
-              "Mandados de prisão pendentes",
-              "Recuperações judiciais recentes TJSP",
-            ],
-          }]);
+    if (!isOpen) return;
+    if (activeConvId) {
+      getConversation(activeConvId)
+        .then((conv) => {
+          if (conv.messages && conv.messages.length > 0) {
+            setMessages(conv.messages.map((m, i) => ({
+              id: `${m.role}-${i}`,
+              role: m.role as "user" | "assistant",
+              text: m.content,
+            })));
+          } else {
+            loadWelcomeMessage();
+          }
         })
-        .catch(() => {
-          setMessages([{
-            id: "welcome",
-            role: "assistant",
-            text: "Olá! Sou o agente investigativo do **EGOS Inteligência**.\n\n**Você não precisa de CNPJ!** Digite uma cidade, nome, empresa ou tema para começar.\n\n⚡ Modelo: GPT-4o-mini",
-            suggestions: [
-              "Políticos de São Paulo",
-              "Empresas sancionadas com contratos",
-              "Emendas parlamentares 2024",
-              "Deputados que mais gastaram",
-              "Lista suja trabalho escravo",
-              "Licitações suspeitas",
-              "Mandados de prisão pendentes",
-              "Recuperações judiciais TJSP",
-            ],
-          }]);
-        });
+        .catch(() => loadWelcomeMessage());
+    } else {
+      loadWelcomeMessage();
     }
-  }, [isOpen, messages.length]);
+  }, [isOpen, activeConvId, loadWelcomeMessage]);
+
+  // Load conversation list when history panel opens
+  useEffect(() => {
+    if (showHistory) {
+      listConversations()
+        .then((res) => setConversations(res.conversations ?? []))
+        .catch(() => setConversations([]));
+    }
+  }, [showHistory]);
+
+  const handleNewConversation = useCallback(async () => {
+    try {
+      const conv = await createConversation();
+      setActiveConvId(conv.id);
+      localStorage.setItem(ACTIVE_CONV_KEY, conv.id);
+      setMessages([]);
+      setShowHistory(false);
+      loadWelcomeMessage();
+      // Refresh list
+      listConversations().then((res) => setConversations(res.conversations ?? [])).catch(() => {});
+    } catch {
+      // Fallback: just clear messages
+      setActiveConvId("");
+      localStorage.removeItem(ACTIVE_CONV_KEY);
+      setMessages([]);
+      loadWelcomeMessage();
+    }
+  }, [loadWelcomeMessage]);
+
+  const handleSwitchConversation = useCallback((convId: string) => {
+    setActiveConvId(convId);
+    localStorage.setItem(ACTIVE_CONV_KEY, convId);
+    setShowHistory(false);
+  }, []);
+
+  const handleDeleteConversation = useCallback(async (convId: string) => {
+    await deleteConversation(convId).catch(() => {});
+    setConversations((prev) => prev.filter((c) => c.id !== convId));
+    if (convId === activeConvId) {
+      setActiveConvId("");
+      localStorage.removeItem(ACTIVE_CONV_KEY);
+      loadWelcomeMessage();
+    }
+  }, [activeConvId, loadWelcomeMessage]);
 
   const handleSend = useCallback(async (text?: string) => {
     const msg = (text ?? input).trim();
@@ -124,7 +204,17 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
       addJourneyEntry({ type: "chat", title: msg.slice(0, 80), query: msg, url: window.location.pathname, description: "Chat EGOS" });
 
     try {
-      const response: ChatResponse = await sendChatMessage(msg);
+      // Auto-create conversation on first message if none active
+      let convId = activeConvId;
+      if (!convId) {
+        try {
+          const conv = await createConversation(msg.slice(0, 60));
+          convId = conv.id;
+          setActiveConvId(convId);
+          localStorage.setItem(ACTIVE_CONV_KEY, convId);
+        } catch { /* continue without persistence */ }
+      }
+      const response: ChatResponse = await sendChatMessage(msg, convId || undefined);
       setMessages((prev) =>
         prev.filter((m) => !m.loading).concat({
           id: `assistant-${Date.now()}`,
@@ -242,12 +332,26 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
             </span>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{
             width: 6, height: 6, borderRadius: "50%",
             background: "#00e5c3",
             boxShadow: "0 0 8px rgba(0,229,195,0.5)",
           }} />
+          <button
+            onClick={handleNewConversation}
+            title="Nova conversa"
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}
+          >
+            <Plus size={16} color="#5a6b60" />
+          </button>
+          <button
+            onClick={() => setShowHistory((v) => !v)}
+            title="Histórico de conversas"
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}
+          >
+            <History size={16} color={showHistory ? "#00e5c3" : "#5a6b60"} />
+          </button>
           {!embedded && (
             <button
               onClick={() => setIsOpen(false)}
@@ -258,6 +362,65 @@ export function ChatInterface({ embedded = false }: { embedded?: boolean }) {
           )}
         </div>
       </div>
+
+      {/* Conversation History Panel */}
+      {showHistory && (
+        <div style={{
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          background: "#0e1512",
+          maxHeight: 240, overflowY: "auto",
+          scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.1) transparent",
+        }}>
+          <div style={{ padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#94a39a", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              Conversas anteriores
+            </span>
+            <button
+              onClick={() => setShowHistory(false)}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}
+            >
+              <ChevronLeft size={14} color="#5a6b60" style={{ transform: "rotate(-90deg)" }} />
+            </button>
+          </div>
+          {conversations.length === 0 ? (
+            <div style={{ padding: "8px 14px 14px", fontSize: 12, color: "#5a6b60" }}>
+              Nenhuma conversa salva ainda.
+            </div>
+          ) : (
+            conversations.map((conv) => (
+              <div
+                key={conv.id}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "8px 14px", cursor: "pointer",
+                  background: conv.id === activeConvId ? "rgba(0,229,195,0.08)" : "transparent",
+                  borderLeft: conv.id === activeConvId ? "2px solid #00e5c3" : "2px solid transparent",
+                  transition: "all 100ms ease-out",
+                }}
+                onClick={() => handleSwitchConversation(conv.id)}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: 12, color: "#e8ede9", fontWeight: 500,
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>
+                    {conv.title}
+                  </div>
+                  <div style={{ fontSize: 10, color: "#5a6b60", marginTop: 2 }}>
+                    {conv.message_count} msgs · {new Date(conv.updated_at * 1000).toLocaleDateString("pt-BR")}
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv.id); }}
+                  style={{ background: "none", border: "none", cursor: "pointer", padding: 4, flexShrink: 0 }}
+                >
+                  <Trash2 size={13} color="#5a6b60" />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Messages */}
       <div ref={messagesContainerRef} style={{
