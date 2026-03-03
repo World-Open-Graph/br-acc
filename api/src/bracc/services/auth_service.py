@@ -1,3 +1,4 @@
+import hmac
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -8,6 +9,8 @@ from neo4j import AsyncSession
 from bracc.config import settings
 from bracc.models.user import UserResponse
 from bracc.services.neo4j_service import execute_query_single
+
+ALLOWED_JWT_ALGORITHMS = ["HS256"]
 
 
 def hash_password(password: str) -> str:
@@ -21,12 +24,13 @@ def verify_password(plain: str, hashed: str) -> bool:
 def create_access_token(user_id: str) -> str:
     expire = datetime.now(UTC) + timedelta(minutes=settings.jwt_expire_minutes)
     payload = {"sub": user_id, "exp": expire}
-    return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+    algo = settings.jwt_algorithm if settings.jwt_algorithm in ALLOWED_JWT_ALGORITHMS else "HS256"
+    return jwt.encode(payload, settings.jwt_secret_key, algorithm=algo)
 
 
 def decode_access_token(token: str) -> str | None:
     try:
-        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=ALLOWED_JWT_ALGORITHMS)
         user_id: str | None = payload.get("sub")
         return user_id
     except jwt.PyJWTError:
@@ -39,7 +43,9 @@ async def register_user(
     password: str,
     invite_code: str,
 ) -> UserResponse:
-    if settings.invite_code and invite_code != settings.invite_code:
+    if settings.invite_code and not hmac.compare_digest(
+        str(invite_code), str(settings.invite_code)
+    ):
         msg = "Invalid invite code"
         raise ValueError(msg)
 

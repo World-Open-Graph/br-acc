@@ -1,6 +1,9 @@
 .PHONY: dev stop api etl frontend lint type-check test test-api test-etl test-frontend test-integration-api test-integration-etl test-integration check seed clean download-cnpj download-tse download-transparencia download-sanctions download-all etl-cnpj etl-cnpj-stream etl-tse etl-transparencia etl-sanctions etl-all link-persons bootstrap-demo bootstrap-full bootstrap-all bootstrap-all-noninteractive bootstrap-all-report check-public-claims check-source-urls check-pipeline-contracts check-pipeline-inputs generate-pipeline-status generate-source-summary generate-reference-metrics
 
 # ── Development ─────────────────────────────────────────
+setup-env:
+	bash scripts/init_env.sh
+
 dev:
 	docker compose up -d
 
