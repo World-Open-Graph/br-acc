@@ -61,7 +61,10 @@ describe("Register", () => {
     renderRegister();
 
     expect(screen.getByLabelText(/e-mail/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/senha/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^senha$/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/confirmar senha/i),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/c\u00F3digo de convite/i)).toBeInTheDocument();
   });
 
@@ -69,7 +72,7 @@ describe("Register", () => {
     renderRegister();
 
     const emailInput = screen.getByLabelText(/e-mail/i);
-    const passwordInput = screen.getByLabelText(/senha/i);
+    const passwordInput = screen.getByLabelText(/^senha$/i);
 
     expect(emailInput).toHaveAttribute("type", "email");
     expect(passwordInput).toHaveAttribute("type", "password");
@@ -83,11 +86,31 @@ describe("Register", () => {
     expect(submitBtn).toBeInTheDocument();
 
     await user.type(screen.getByLabelText(/e-mail/i), "test@example.com");
-    await user.type(screen.getByLabelText(/senha/i), "password123");
+    await user.type(screen.getByLabelText(/^senha$/i), "password123");
+    await user.type(
+      screen.getByLabelText(/confirmar senha/i),
+      "password123",
+    );
     await user.type(screen.getByLabelText(/c\u00F3digo de convite/i), "INV-123");
     await user.click(submitBtn);
 
-    expect(mockRegister).toHaveBeenCalledWith("test@example.com", "password123", "INV-123");
+    expect(mockRegister).toHaveBeenCalledWith(
+      "test@example.com",
+      "password123",
+      "INV-123",
+    );
+  });
+
+  it("shows validation errors when submitting empty form", async () => {
+    const user = userEvent.setup();
+    renderRegister();
+
+    await user.click(screen.getByRole("button", { name: /registrar/i }));
+
+    expect(mockRegister).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(/e-mail é obrigatório/i),
+    ).toBeInTheDocument();
   });
 
   it("shows error from store", () => {

@@ -73,6 +73,7 @@ function GraphCanvasInner({
   const { t } = useTranslation();
   const fgRef = useRef<ForceGraphMethods<GraphNodeObject, GraphLinkObject> | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [selectedEdge, setSelectedEdge] = useState<GraphLinkObject | null>(null);
   const [, setSearchQuery] = useState("");
@@ -364,14 +365,56 @@ function GraphCanvasInner({
   const handleFitView = useCallback(() => fgRef.current?.zoomToFit(300, 40), []);
   const handleResetZoom = useCallback(() => fgRef.current?.zoom(1, 300), []);
 
+  const handleExportPng = useCallback(() => {
+    try {
+      const canvas = containerRef.current?.querySelector("canvas") || wrapperRef.current?.querySelector("canvas");
+      if (!canvas) return;
+
+      const exportCanvas = document.createElement("canvas");
+      exportCanvas.width = canvas.width;
+      exportCanvas.height = canvas.height;
+      const ctx = exportCanvas.getContext("2d");
+      if (!ctx) return;
+
+      // Draw background (matching the UI's dark background)
+      ctx.fillStyle = "#060a07";
+      ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+      // Draw the graph canvas on top
+      ctx.drawImage(canvas, 0, 0);
+
+      const link = document.createElement("a");
+      link.download = `world-graph-export-${new Date().toISOString().split("T")[0]}.png`;
+      link.href = exportCanvas.toDataURL("image/png");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      // Silently fail or handle as needed
+    }
+  }, []);
+
+  const handleFullscreenToggle = useCallback(() => {
+    const elem = wrapperRef.current;
+    if (!elem) return;
+
+    if (!document.fullscreenElement) {
+      elem.requestFullscreen().catch(() => {});
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+    
+    onFullscreen();
+  }, [onFullscreen]);
+
   return (
-    <div className={styles.canvas}>
+    <div className={styles.canvas} ref={wrapperRef}>
       <GraphToolbar
         onSearch={setSearchQuery}
         layoutMode={layoutMode}
         onLayoutChange={onLayoutChange}
-        onFullscreen={onFullscreen}
-        onExportPng={() => {/* TODO: implement PNG export */}}
+        onFullscreen={handleFullscreenToggle}
+        onExportPng={handleExportPng}
       />
 
       <div ref={containerRef} className={styles.graphContainer}>

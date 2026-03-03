@@ -85,6 +85,18 @@ describe("Login", () => {
     expect(mockLogin).toHaveBeenCalledWith("test@example.com", "password123");
   });
 
+  it("shows validation errors when submitting empty form", async () => {
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.click(screen.getByRole("button", { name: /entrar/i }));
+
+    expect(mockLogin).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(/e-mail é obrigatório/i),
+    ).toBeInTheDocument();
+  });
+
   it("shows error from store", () => {
     mockStoreState.error = "auth.invalidCredentials";
     renderLogin();

@@ -1,9 +1,25 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import "@/i18n";
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+  initReactI18next: {
+    type: "3rdParty",
+    init: vi.fn(),
+  },
+}));
 
 import type { GraphData } from "@/api/client";
+
+// Polyfill for jsdom
+if (typeof Element.prototype.requestFullscreen === "undefined") {
+  Element.prototype.requestFullscreen = vi.fn().mockResolvedValue(undefined);
+}
+if (typeof document.exitFullscreen === "undefined") {
+  document.exitFullscreen = vi.fn().mockResolvedValue(undefined);
+}
 
 let capturedProps: Record<string, unknown> = {};
 
@@ -87,5 +103,17 @@ describe("GraphCanvas", () => {
     const handler = capturedProps.onNodeClick as (node: { id: string }) => void;
     handler({ id: "n2" });
     expect(onNodeClick).toHaveBeenCalledWith("n2");
+  });
+
+  it("invokes onFullscreen when toolbar fullscreen button is clicked", () => {
+    const onFullscreen = vi.fn();
+    render(<GraphCanvas {...defaultProps} onFullscreen={onFullscreen} />);
+    
+    // The GraphToolbar's onFullscreen is connected to handleFullscreenToggle
+    // We can find the button by its title from i18n
+    const fullscreenBtn = screen.getByTitle("graph.fullscreen");
+    fullscreenBtn.click();
+    
+    expect(onFullscreen).toHaveBeenCalled();
   });
 });
