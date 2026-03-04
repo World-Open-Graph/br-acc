@@ -23,6 +23,10 @@
 data
 docs
 audit-results
+scripts
+**/tests
+**/test_*
+**/*.md
 
 .vscode
 .idea

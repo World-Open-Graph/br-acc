@@ -55,6 +55,23 @@ Verifique em:
 - Frontend: http://localhost:3000
 - Neo4j Browser: http://localhost:7474
 
+### Subir com Docker
+
+Voce pode subir a stack (Neo4j, API, frontend) com Docker Compose sem rodar o bootstrap completo:
+
+```bash
+cp .env.example .env
+docker compose up -d
+```
+
+Opcional: incluir o servico ETL (para rodar pipelines no container):
+
+```bash
+docker compose --profile etl up -d
+```
+
+As mesmas URLs de verificacao valem. Para um grafo demo pronto com dados de seed, use `make bootstrap-demo`.
+
 ---
 
 ## Fluxo Em Um Comando
