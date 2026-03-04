@@ -44,26 +44,54 @@ It makes public data that is already open but scattered across dozens of portals
 
 ```bash
 cp .env.example .env
-make bootstrap-demo
+docker compose up -d --build
+bash infra/scripts/seed-dev.sh
 ```
 
-This command starts Docker services, waits for Neo4j/API readiness, and loads deterministic development seed data.
+This flow starts the Docker stack from the repository root and then loads deterministic development seed data into Neo4j.
 
 Verify with:
 
 - API: http://localhost:8000/health
+- API Docs: http://localhost:8000/docs
 - Frontend: http://localhost:3000
 - Neo4j Browser: http://localhost:7474
+
+### Starting with Docker
+
+You can start the stack (Neo4j, API, frontend) with Docker Compose without running the full bootstrap:
+
+```bash
+cp .env.example .env
+docker compose up -d
+```
+
+Optional: include the ETL service (for running pipelines in a container):
+
+```bash
+docker compose --profile etl up -d
+```
+
+Same verification URLs apply. For a ready-to-use demo graph with seed data, use `make bootstrap-demo` instead.
 
 ---
 
 ## One-Command Flow
 
 ```bash
-# Local demo flow (recommended for first run)
-make bootstrap-demo
+# Start all core services (Neo4j + API + Frontend)
+docker compose up -d --build
 
-# Heavy full ingestion orchestration (Docker + all implemented pipelines)
+# Load deterministic demo seed
+bash infra/scripts/seed-dev.sh
+
+# Include ETL service when needed
+docker compose --profile etl up -d --build
+
+# Stop stack
+docker compose down
+
+# Heavy full ingestion orchestration (all implemented pipelines)
 make bootstrap-all
 
 # Noninteractive heavy run (automation)
@@ -98,7 +126,7 @@ Detailed guide: [`docs/bootstrap_all.md`](docs/bootstrap_all.md)
 
 ## What Is Reproducible Locally Today
 
-- Full local stack startup (`make bootstrap-demo`) with demo graph.
+- Full local stack startup (`docker compose up -d --build`) with demo graph seed (`bash infra/scripts/seed-dev.sh`).
 - BYO-data ingestion workflow through `bracc-etl` pipelines.
 - One-command heavy orchestration (`make bootstrap-all`) with explicit blocked/failed source reporting.
 - Public-safe API behavior with privacy defaults.
