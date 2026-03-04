@@ -57,6 +57,23 @@ Verify with:
 - Frontend: http://localhost:3000
 - Neo4j Browser: http://localhost:7474
 
+### Starting with Docker
+
+You can start the stack (Neo4j, API, frontend) with Docker Compose without running the full bootstrap:
+
+```bash
+cp .env.example .env
+docker compose up -d
+```
+
+Optional: include the ETL service (for running pipelines in a container):
+
+```bash
+docker compose --profile etl up -d
+```
+
+Same verification URLs apply. For a ready-to-use demo graph with seed data, use `make bootstrap-demo` instead.
+
 ---
 
 ## One-Command Flow
