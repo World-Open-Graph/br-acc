@@ -212,6 +212,15 @@ If you want to support development directly:
 | Solana | `HFceUyei1ndQypNKoiYSsHLHrVcaMZeNBeRhs8LmmkLn` |
 | Ethereum | `0xbB3538D3e1B1Dd7c916BE7DfAC9ac7e322f592c7` |
 
+### Token Disclosure (Transparency)
+
+A community member created an unofficial token and configured creator rewards to the maintainer wallet.
+
+- Token address: `4CtXkPU8oUXVjofhgrX6nALuQw2ZSK2U7tTZKB8qpump` <!-- gitleaks:allow -->
+- This token is not an official project product.
+- Holding or trading it does not provide ownership, governance rights, privileged access, or guaranteed benefits in this repository.
+- This is not financial advice. Crypto assets are high risk; verify addresses on-chain and do your own research.
+
 ---
 
 ## Community
