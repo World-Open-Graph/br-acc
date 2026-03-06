@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import click
@@ -114,7 +114,7 @@ def main(
     out.mkdir(parents=True, exist_ok=True)
 
     if end_year is None:
-        end_year = datetime.now(tz=timezone.utc).year
+        end_year = datetime.now(tz=UTC).year
 
     years = list(range(start_year, end_year + 1))
 

@@ -28,7 +28,7 @@ async def list_emendas_tesouro(
         company_props = None
         if record["c"] is not None:
             company_props = sanitize_public_properties(sanitize_props(dict(record["c"])))
-        
+
         results.append({
             "payment": payment_props,
             "beneficiary": company_props,

@@ -14,6 +14,7 @@ Requires: pip install httpx
 from __future__ import annotations
 
 import argparse
+import contextlib
 import csv
 import logging
 import sys
@@ -108,10 +109,8 @@ def download_year(
         with open(partial, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                try:
+                with contextlib.suppress(ValueError, TypeError):
                     done_codes.add(int(row.get("cod_ibge", 0)))
-                except (ValueError, TypeError):
-                    pass
         logger.info(
             "Resuming %s %d: %d entities already fetched",
             file_prefix, year, len(done_codes),

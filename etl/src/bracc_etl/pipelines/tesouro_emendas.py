@@ -10,6 +10,8 @@ from bracc_etl.base import Pipeline
 
 if TYPE_CHECKING:
     from neo4j import Driver
+import contextlib
+
 from bracc_etl.loader import Neo4jBatchLoader
 from bracc_etl.transforms import deduplicate_rows, normalize_name
 
@@ -56,7 +58,7 @@ class TesouroEmendasPipeline(Pipeline):
         companies: list[dict[str, Any]] = []
         transfer_rels: list[dict[str, Any]] = []
 
-        for idx, row in self._raw.iterrows():
+        for _idx, row in self._raw.iterrows():
             ob = str(row.get("OB", "")).strip()
             if not ob:
                 continue
@@ -65,10 +67,9 @@ class TesouroEmendasPipeline(Pipeline):
             date_val = str(row.get("Data", "")).strip()
             formatted_date = date_val
             if date_val.isdigit():
-                try:
-                    formatted_date = pd.to_datetime(int(date_val), unit='D', origin='1899-12-30').strftime('%Y-%m-%d')
-                except Exception:
-                    pass
+                with contextlib.suppress(Exception):
+                    dt = pd.to_datetime(int(date_val), unit='D', origin='1899-12-30')
+                    formatted_date = dt.strftime('%Y-%m-%d')
 
             ano = str(row.get("Ano", "")).strip()
             mes = str(row.get("Mês", "")).strip()
@@ -98,7 +99,7 @@ class TesouroEmendasPipeline(Pipeline):
 
             cnpj_raw = str(row.get("CNPJ do Favorecido", "")).strip()
             nome_fav = normalize_name(str(row.get("Nome Favorecido", "")))
-            
+
             # Format CNPJ to 14 digits with zeros if needed
             cnpj = cnpj_raw.zfill(14) if cnpj_raw else ""
             if len(cnpj) == 14:

@@ -298,23 +298,20 @@ def main(
     success_count = 0
     total = len(dataset_list)
 
-    if "compras" in dataset_list:
-        if process_compras(
-            year, month_list, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
-        ):
-            success_count += 1
+    if "compras" in dataset_list and process_compras(
+        year, month_list, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
+    ):
+        success_count += 1
 
-    if "servidores" in dataset_list:
-        if process_servidores(
-            year, month_list, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
-        ):
-            success_count += 1
+    if "servidores" in dataset_list and process_servidores(
+        year, month_list, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
+    ):
+        success_count += 1
 
-    if "emendas" in dataset_list:
-        if process_emendas(
-            year, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
-        ):
-            success_count += 1
+    if "emendas" in dataset_list and process_emendas(
+        year, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
+    ):
+        success_count += 1
 
     logger.info("=== Done: %d/%d datasets downloaded ===", success_count, total)
     if success_count == 0:

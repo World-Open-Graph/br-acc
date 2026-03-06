@@ -16,6 +16,7 @@ from bracc.middleware.security_headers import SecurityHeadersMiddleware
 from bracc.routers import (
     auth,
     baseline,
+    emendas,
     entity,
     graph,
     investigation,
@@ -23,7 +24,6 @@ from bracc.routers import (
     patterns,
     public,
     search,
-    emendas,
 )
 from bracc.services.neo4j_service import ensure_schema
 

@@ -16,7 +16,7 @@ import json
 import logging
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import click
@@ -99,7 +99,7 @@ def resolve_rf_release(year_month: str | None = None) -> str:
     Returns the resolved base URL. For Nextcloud, files are fetched via
     ``{base_url}{filename}``.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # --- Nextcloud (primary) ---
     tokens_to_try: list[str] = []
@@ -156,7 +156,7 @@ def _write_manifest(
     started_at: str,
 ) -> Path:
     """Write download manifest JSON after download completes."""
-    finished_at = datetime.now(timezone.utc).isoformat()
+    finished_at = datetime.now(UTC).isoformat()
 
     # Compute an aggregate checksum over all successful file names + sizes
     hasher = hashlib.sha256()
@@ -200,7 +200,7 @@ def main(
     release: str | None,
 ) -> None:
     """Download and extract CNPJ data from Receita Federal."""
-    started_at = datetime.now(timezone.utc).isoformat()
+    started_at = datetime.now(UTC).isoformat()
 
     base_url = resolve_rf_release(release)
     # Extract the release identifier from the resolved URL

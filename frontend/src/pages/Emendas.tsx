@@ -50,8 +50,8 @@ export function Emendas() {
         }
         const json = await res.json();
         setData(json);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (e: unknown) {
+        setError((e instanceof Error) ? e.message : String(e));
       } finally {
         setLoading(false);
       }

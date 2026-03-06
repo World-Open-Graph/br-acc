@@ -16,12 +16,12 @@ import hashlib
 import json
 import logging
 import re
-import defusedxml.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import click
+import defusedxml.ElementTree as ET
 import httpx
 from download_senado_cpi_archive import fetch_archive_historical
 
