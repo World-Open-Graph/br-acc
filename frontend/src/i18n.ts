@@ -116,6 +116,7 @@ const resources = {
       },
       nav: {
         dashboard: "Painel",
+        emendas: "Emendas",
         search: "Buscar",
         graph: "Grafo",
         patterns: "Padrões",
@@ -559,6 +560,7 @@ const resources = {
       },
       nav: {
         dashboard: "Dashboard",
+        emendas: "Amendments",
         search: "Search",
         graph: "Graph",
         patterns: "Patterns",
