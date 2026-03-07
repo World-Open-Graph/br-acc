@@ -50,6 +50,23 @@ class Settings(BaseSettings):
     pattern_min_recurrence: int = Field(default=2, ge=1)
     pattern_min_discrepancy_ratio: float = Field(default=0.30, ge=0, le=1)
 
+    # AI Intelligence
+    ai_provider_api_key: str = ""
+    ai_provider_model: str = "gpt-4"
+    ai_enabled: bool = True
+
+    # Web Crawling
+    web_crawl_timeout: float = Field(default=30.0, ge=1.0, le=120.0)
+    web_crawl_max_pages: int = Field(default=10, ge=1, le=50)
+
+    # Journalist Tools
+    journalist_tools_enabled: bool = True
+
+    # Voice Interface
+    voice_enabled: bool = False
+    tts_voice: str = "alloy"
+    stt_model: str = "whisper-1"
+
     model_config = {"env_prefix": "", "env_file": ".env"}
 
 
