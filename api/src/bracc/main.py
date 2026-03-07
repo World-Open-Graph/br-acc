@@ -16,6 +16,7 @@ from bracc.middleware.security_headers import SecurityHeadersMiddleware
 from bracc.routers import (
     auth,
     baseline,
+    emendas,
     entity,
     graph,
     investigation,
@@ -87,6 +88,7 @@ app.include_router(patterns.router)
 app.include_router(baseline.router)
 app.include_router(investigation.router)
 app.include_router(investigation.shared_router)
+app.include_router(emendas.router)
 
 
 @app.get("/health")
