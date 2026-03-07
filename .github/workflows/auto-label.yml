@@ -9,7 +9,7 @@ jobs:
   apply-labels:
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: read
+      pull-requests: write
       issues: write # PR labels are managed via the Issues API.
       
     steps:

@@ -6,16 +6,19 @@ from neo4j import GraphDatabase
 
 from bracc_etl.linking_hooks import run_post_load_hooks
 from bracc_etl.pipelines.bcb import BcbPipeline
+from bracc_etl.pipelines.bcb_liquidacao import BcbLiquidacaoPipeline
 from bracc_etl.pipelines.bndes import BndesPipeline
 from bracc_etl.pipelines.caged import CagedPipeline
 from bracc_etl.pipelines.camara import CamaraPipeline
 from bracc_etl.pipelines.camara_inquiries import CamaraInquiriesPipeline
+from bracc_etl.pipelines.camara_votes_bills import CamaraVotesBillsPipeline
 from bracc_etl.pipelines.ceaf import CeafPipeline
 from bracc_etl.pipelines.cepim import CepimPipeline
 from bracc_etl.pipelines.cnpj import CNPJPipeline
 from bracc_etl.pipelines.comprasnet import ComprasnetPipeline
 from bracc_etl.pipelines.cpgf import CpgfPipeline
 from bracc_etl.pipelines.cvm import CvmPipeline
+from bracc_etl.pipelines.cvm_full_ownership import CvmFullOwnershipPipeline
 from bracc_etl.pipelines.cvm_funds import CvmFundsPipeline
 from bracc_etl.pipelines.datajud import DatajudPipeline
 from bracc_etl.pipelines.datasus import DatasusPipeline
@@ -38,9 +41,11 @@ from bracc_etl.pipelines.renuncias import RenunciasPipeline
 from bracc_etl.pipelines.sanctions import SanctionsPipeline
 from bracc_etl.pipelines.senado import SenadoPipeline
 from bracc_etl.pipelines.senado_cpis import SenadoCpisPipeline
+from bracc_etl.pipelines.senado_votes_bills import SenadoVotesBillsPipeline
 from bracc_etl.pipelines.siconfi import SiconfiPipeline
 from bracc_etl.pipelines.siop import SiopPipeline
 from bracc_etl.pipelines.stf import StfPipeline
+from bracc_etl.pipelines.stj_dados_abertos import StjPipeline
 from bracc_etl.pipelines.tcu import TcuPipeline
 from bracc_etl.pipelines.tesouro_emendas import TesouroEmendasPipeline
 from bracc_etl.pipelines.transferegov import TransferegovPipeline
@@ -73,9 +78,13 @@ PIPELINES: dict[str, type] = {
     "opensanctions": OpenSanctionsPipeline,
     "cvm": CvmPipeline,
     "cvm_funds": CvmFundsPipeline,
+    "cvm_full_ownership_chain": CvmFullOwnershipPipeline,
     "camara": CamaraPipeline,
     "camara_inquiries": CamaraInquiriesPipeline,
+    "camara_votes_bills": CamaraVotesBillsPipeline,
     "senado": SenadoPipeline,
+    "senado_cpis": SenadoCpisPipeline,
+    "senado_votes_bills": SenadoVotesBillsPipeline,
     "ceaf": CeafPipeline,
     "cepim": CepimPipeline,
     "cpgf": CpgfPipeline,
@@ -90,12 +99,13 @@ PIPELINES: dict[str, type] = {
     "tse_bens": TseBensPipeline,
     "tse_filiados": TseFiliadosPipeline,
     "bcb": BcbPipeline,
+    "bcb_liquidacao": BcbLiquidacaoPipeline,
     "stf": StfPipeline,
+    "stj_dados_abertos": StjPipeline,
     "caged": CagedPipeline,
     "eu_sanctions": EuSanctionsPipeline,
     "un_sanctions": UnSanctionsPipeline,
     "world_bank": WorldBankPipeline,
-    "senado_cpis": SenadoCpisPipeline,
     "mides": MidesPipeline,
     "querido_diario": QueridoDiarioPipeline,
     "datajud": DatajudPipeline,
