@@ -78,6 +78,17 @@ link-persons:
 frontend:
 	cd frontend && npm run dev
 
+# ── Telegram Bot ────────────────────────────────────────
+bot:
+	cd bots/telegram && uv run python -m bracc_telegram.bot
+
+test-bot:
+	cd bots/telegram && uv run pytest -q
+
+lint-bot:
+	cd bots/telegram && uv run ruff check src/ tests/
+	cd bots/telegram && uv run mypy src/
+
 # ── Quality ─────────────────────────────────────────────
 lint:
 	cd api && uv run ruff check src/ tests/
