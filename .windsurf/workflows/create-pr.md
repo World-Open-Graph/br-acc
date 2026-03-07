@@ -100,15 +100,39 @@ Breaking change?
 
 **Critical**: Mark EXACTLY ONE release label with `[x]`. All other checkboxes should be `[ ]` except validation and compliance items which should be `[x]`.
 
-### 3. Create PR
-```bash
-gh pr create --title "<type>(<scope>): <description>" --body "<complete-pr-body-from-step-2>"
-```
+### 3. Preflight GitHub remote and permission setup
+Before creating the PR, confirm whether your branch is on the upstream repo or on a fork you can push to.
 
-### 4. Verify auto-labeling
 // turbo
 ```bash
-gh pr view
+git remote -v
+```
+
+Use this decision rule:
+- If you have write access to `World-Open-Graph/br-acc`, push your branch normally and keep using that branch as the PR head.
+- If you do **not** have write access to `World-Open-Graph/br-acc`, do **not** push to upstream. Push the branch to your fork and create the PR from `<your-user>:<branch>` into `World-Open-Graph/br-acc`.
+- If no fork remote exists yet, create one first with GitHub CLI, add it as a git remote if needed, and push the branch there before opening the PR.
+
+Recommended fork flow when upstream push would 403:
+```bash
+gh repo fork World-Open-Graph/br-acc --remote-name fork
+git push -u fork <branch-name>
+```
+
+### 4. Create PR
+```bash
+gh pr create --repo World-Open-Graph/br-acc --head <owner>:<branch-name> --title "<type>(<scope>): <description>" --body "<complete-pr-body-from-step-2>"
+```
+
+Rules for the command:
+- Set `<owner>` to `World-Open-Graph` only if the branch exists on upstream and you have push permission there.
+- Otherwise set `<owner>` to your GitHub username and use the branch pushed to your fork.
+- Always pass `--repo World-Open-Graph/br-acc` so the base repository is explicit.
+
+### 5. Verify PR creation and auto-labeling
+// turbo
+```bash
+gh pr view --repo World-Open-Graph/br-acc
 ```
 
 Confirm the auto-labeler applied the correct release label based on the `[x]` selection.
@@ -135,6 +159,12 @@ The repository's auto-label workflow reads the PR description and:
 - Automatically applies that label to the PR
 - Removes any conflicting release labels
 - **Requires exactly one `[x]` selection to function**
+
+**403 Prevention and Fallback:**
+- A 403 usually means your GitHub user does not have push permission to `World-Open-Graph/br-acc`
+- Avoid that failure by pushing your branch to your fork first and creating the PR with `--repo World-Open-Graph/br-acc --head <your-user>:<branch-name>`
+- If the PR is created successfully but the release label is still missing after the workflow runs, verify the body still has exactly one checked release label
+- If labeling still does not occur, ask a maintainer with write access to apply the release label manually in GitHub
 
 ## Key Points
 
