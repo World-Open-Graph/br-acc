@@ -16,6 +16,7 @@ from bracc.middleware.security_headers import SecurityHeadersMiddleware
 from bracc.routers import (
     auth,
     baseline,
+    emendas,
     entity,
     graph,
     investigation,
@@ -80,6 +81,7 @@ app.add_middleware(CPFMaskingMiddleware)
 app.include_router(meta.router)
 app.include_router(public.router)
 app.include_router(auth.router)
+app.include_router(emendas.router)
 app.include_router(entity.router)
 app.include_router(search.router)
 app.include_router(graph.router)

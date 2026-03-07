@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import logging
 import zipfile
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import httpx
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 logger = logging.getLogger(__name__)
 

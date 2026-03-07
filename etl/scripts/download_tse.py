@@ -144,13 +144,7 @@ def _find_receita_files(extracted: list[Path]) -> list[Path]:
         if f.is_dir():
             continue
         # Match 2002-2006 format: ReceitaCandidato.csv
-        if name_lower == "receitacandidato.csv":
-            result.append(f)
-        # Match nested format: ReceitasCandidatos.txt
-        elif name_lower == "receitascandidatos.txt":
-            result.append(f)
-        # Match flat format: receitas_candidatos_*
-        elif name_lower.startswith("receitas_candidatos"):
+        if name_lower == "receitacandidato.csv" or name_lower == "receitascandidatos.txt" or name_lower.startswith("receitas_candidatos"):
             result.append(f)
     return result
 
@@ -351,17 +345,15 @@ def main(
     logger.info("=== TSE download: years %s ===", year_list)
 
     success_count = 0
-    if not donations_only:
-        if _download_candidates(
-            year_list, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
-        ):
-            success_count += 1
+    if not donations_only and _download_candidates(
+        year_list, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
+    ):
+        success_count += 1
 
-    if not candidates_only:
-        if _download_donations(
-            year_list, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
-        ):
-            success_count += 1
+    if not candidates_only and _download_donations(
+        year_list, raw_dir, out, skip_existing=skip_existing, timeout=timeout,
+    ):
+        success_count += 1
 
     logger.info("=== Done: %d dataset(s) downloaded ===", success_count)
     if success_count == 0:

@@ -17,6 +17,7 @@ import { SharedInvestigation } from "./pages/SharedInvestigation";
 import { useAuthStore } from "./stores/auth";
 
 const EntityAnalysis = lazy(() => import("./pages/EntityAnalysis").then((m) => ({ default: m.EntityAnalysis })));
+const Emendas = lazy(() => import("./pages/Emendas").then((m) => ({ default: m.Emendas })));
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -76,6 +77,7 @@ export function App() {
         <Route index element={<Dashboard />} />
         <Route path="search" element={<Search />} />
         <Route path="analysis/:entityId" element={<Suspense fallback={<Spinner />}><EntityAnalysis /></Suspense>} />
+        <Route path="emendas" element={<Suspense fallback={<Spinner />}><Emendas /></Suspense>} />
         <Route path="graph/:entityId" element={<GraphRedirect />} />
         {IS_PATTERNS_ENABLED && <Route path="patterns" element={<Patterns />} />}
         {IS_PATTERNS_ENABLED && <Route path="patterns/:entityId" element={<Patterns />} />}

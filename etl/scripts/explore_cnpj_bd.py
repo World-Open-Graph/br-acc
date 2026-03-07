@@ -29,7 +29,7 @@ TABLES = ["empresas", "socios", "estabelecimentos"]
 IN_CLAUSE_BATCH_SIZE = 10_000
 
 
-def _query(sql: str, billing_project: str | None = None) -> "pd.DataFrame":
+def _query(sql: str, billing_project: str | None = None) -> pd.DataFrame:
     """Execute a BigQuery SQL query via basedosdados."""
     import basedosdados as bd
 
@@ -57,7 +57,7 @@ def _explore_table(table: str, limit: int, billing_project: str | None) -> None:
         sample_str = str(sample)[:50]
         print(f"    {col:<40} {str(dtype):<10} nulls={nulls:<4} sample={sample_str}")
 
-    print(f"\n  First 3 rows:")
+    print("\n  First 3 rows:")
     pd.set_option("display.max_columns", None)
     pd.set_option("display.width", 200)
     print(df.head(3).to_string(index=False))
@@ -68,7 +68,7 @@ def _query_batched_in(
     column: str,
     values: list[str],
     billing_project: str | None,
-) -> "pd.DataFrame":
+) -> pd.DataFrame:
     """Query a table with IN clause, batching to avoid BQ query size limits."""
     import pandas as pd
 
