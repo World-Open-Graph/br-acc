@@ -468,3 +468,226 @@ export function exportInvestigationPDF(
     `/api/v1/investigations/${encodeURIComponent(investigationId)}/export/pdf?${params}`,
   );
 }
+
+// --- AI Intelligence ---
+
+export interface AIInsight {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  confidence: number;
+  evidence: string[];
+  severity?: string;
+  sources: string[];
+}
+
+export interface AIAnalysisResponse {
+  entity_id: string;
+  summary: string;
+  insights: AIInsight[];
+  risk_level: string;
+  risk_score: number;
+  processed_at: string;
+}
+
+export interface WebEnrichmentResult {
+  source: string;
+  url: string;
+  title: string;
+  snippet: string;
+  published_at: string | null;
+  relevance_score: number;
+}
+
+export interface WebEnrichmentResponse {
+  entity_id: string;
+  results: WebEnrichmentResult[];
+  total_results: number;
+  processed_at: string;
+}
+
+export interface EntityScore {
+  entity_id: string;
+  entity_name: string;
+  entity_type: string;
+  risk_score: number;
+  risk_factors: string[];
+  priority: number;
+}
+
+export interface InvestigativeScoreResponse {
+  investigation_id: string;
+  investigation_title: string;
+  overall_risk_score: number;
+  entity_count: number;
+  high_risk_entities: number;
+  entity_scores: EntityScore[];
+  recommended_actions: string[];
+  generated_at: string;
+}
+
+export interface TimelineEventExt {
+  id: string;
+  date: string;
+  label: string;
+  entity_type: string;
+  properties: Record<string, unknown>;
+  sources: string[];
+  ai_annotation?: string;
+}
+
+export interface TimelineGenerationResponse {
+  entity_id: string;
+  events: TimelineEventExt[];
+  total: number;
+  next_cursor: string | null;
+  generated_at: string;
+}
+
+export interface VerifiedSource {
+  url: string;
+  is_verified: boolean;
+  source_name: string | null;
+  published_date: string | null;
+  author: string | null;
+  credibility_score: number;
+  bias_indicator?: string;
+  fact_check_result?: string;
+}
+
+export interface SourceVerificationResponse {
+  entity_id: string;
+  verified_sources: VerifiedSource[];
+  total_verified: number;
+  processed_at: string;
+}
+
+export interface AIStatusResponse {
+  ai_enabled: boolean;
+  journalist_tools_enabled: boolean;
+  voice_enabled: boolean;
+}
+
+export function analyzeEntity(
+  entityId: string,
+  includeRelationships = true,
+  includeTimeline = true,
+  includeAnomalies = true,
+  lang = "pt",
+): Promise<AIAnalysisResponse> {
+  return apiFetch<AIAnalysisResponse>("/api/v1/ai/analyze", {
+    method: "POST",
+    body: JSON.stringify({
+      entity_id: entityId,
+      include_relationships: includeRelationships,
+      include_timeline: includeTimeline,
+      include_anomalies: includeAnomalies,
+      lang,
+    }),
+  });
+}
+
+export function enrichEntity(
+  entityId: string,
+  sources: string[] = ["news", "social", "company_registry"],
+  maxPages = 10,
+): Promise<WebEnrichmentResponse> {
+  return apiFetch<WebEnrichmentResponse>("/api/v1/ai/enrich", {
+    method: "POST",
+    body: JSON.stringify({
+      entity_id: entityId,
+      sources,
+      max_pages: maxPages,
+    }),
+  });
+}
+
+export function getInvestigativeScores(
+  investigationId: string,
+  includeEntityScores = true,
+): Promise<InvestigativeScoreResponse> {
+  const params = new URLSearchParams({
+    include_entity_scores: String(includeEntityScores),
+  });
+  return apiFetch<InvestigativeScoreResponse>(
+    `/api/v1/ai/score/${encodeURIComponent(investigationId)}?${params}`,
+  );
+}
+
+export function generateTimeline(
+  entityId: string,
+  startDate?: string,
+  endDate?: string,
+  includeAiInsights = true,
+): Promise<TimelineGenerationResponse> {
+  return apiFetch<TimelineGenerationResponse>("/api/v1/ai/timeline", {
+    method: "POST",
+    body: JSON.stringify({
+      entity_id: entityId,
+      start_date: startDate,
+      end_date: endDate,
+      include_ai_insights: includeAiInsights,
+    }),
+  });
+}
+
+export function verifySources(
+  entityId: string,
+  urls: string[],
+): Promise<SourceVerificationResponse> {
+  const params = new URLSearchParams({ urls: urls.join(",") });
+  return apiFetch<SourceVerificationResponse>(
+    `/api/v1/journalist/sources/${encodeURIComponent(entityId)}?${params}`,
+  );
+}
+
+export function getAIStatus(): Promise<AIStatusResponse> {
+  return apiFetch<AIStatusResponse>("/api/v1/ai/status");
+}
+
+// --- Voice ---
+
+export interface TTSRequest {
+  text: string;
+  voice?: string;
+  speed?: number;
+  format?: string;
+}
+
+export interface TTSResponse {
+  audio_base64: string;
+  duration_seconds: number;
+}
+
+export interface STTRequest {
+  audio_base64: string;
+  language?: string;
+}
+
+export interface STTResponse {
+  text: string;
+  confidence: number;
+}
+
+export function textToSpeech(
+  text: string,
+  voice = "alloy",
+  speed = 1.0,
+  format = "mp3",
+): Promise<TTSResponse> {
+  return apiFetch<TTSResponse>("/api/v1/voice/tts", {
+    method: "POST",
+    body: JSON.stringify({ text, voice, speed, format }),
+  });
+}
+
+export function speechToText(
+  audioBase64: string,
+  language = "pt",
+): Promise<STTResponse> {
+  return apiFetch<STTResponse>("/api/v1/voice/stt", {
+    method: "POST",
+    body: JSON.stringify({ audio_base64: audioBase64, language }),
+  });
+}
