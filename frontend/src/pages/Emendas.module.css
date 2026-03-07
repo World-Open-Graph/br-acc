@@ -1,0 +1,155 @@
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: inherit;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.header p {
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  gap: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.errorState {
+  padding: 1.5rem;
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.tableContainer {
+  background: var(--color-surface);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table th {
+  background-color: var(--color-surface-hover);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.val {
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.beneficiaryInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.cnpjLabel {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.2rem;
+}
+
+.actionBtn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.actionBtn:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+}
+
+.pageBtn {
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-primary);
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
