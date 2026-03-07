@@ -136,30 +136,30 @@ bootstrap-all-noninteractive:
 	bash scripts/bootstrap_all_public.sh --noninteractive --yes-reset
 
 bootstrap-all-report:
-	python3 scripts/run_bootstrap_all.py --repo-root . --report-latest
+	uv run python scripts/run_bootstrap_all.py --repo-root . --report-latest
 
 # ── Quality checks ────────────────────────────────────────
 check-public-claims:
-	python3 scripts/check_public_claims.py --repo-root .
+	uv run python scripts/check_public_claims.py --repo-root .
 
 check-source-urls:
-	python3 scripts/check_source_urls.py --registry-path docs/source_registry_br_v1.csv --exceptions-path config/source_url_exceptions.yml --output audit-results/public-trust/latest/source-url-audit.json
+	uv run python scripts/check_source_urls.py --registry-path docs/source_registry_br_v1.csv --exceptions-path config/source_url_exceptions.yml --output audit-results/public-trust/latest/source-url-audit.json
 
 check-pipeline-contracts:
-	python3 scripts/check_pipeline_contracts.py
+	uv run python scripts/check_pipeline_contracts.py
 
 check-pipeline-inputs:
-	python3 scripts/check_pipeline_inputs.py
+	uv run python scripts/check_pipeline_inputs.py
 
 # ── Generators ────────────────────────────────────────────
 generate-pipeline-status:
-	python3 scripts/generate_pipeline_status.py
+	uv run python scripts/generate_pipeline_status.py
 
 generate-source-summary:
-	python3 scripts/generate_data_sources_summary.py
+	uv run python scripts/generate_data_sources_summary.py
 
 generate-reference-metrics:
-	python3 scripts/generate_reference_metrics.py
+	uv run python scripts/generate_reference_metrics.py
 
 # ── Cleanup ─────────────────────────────────────────────
 clean:

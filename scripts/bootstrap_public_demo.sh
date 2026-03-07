@@ -96,10 +96,10 @@ if [[ "$PROFILE" == "full" ]]; then
       (cd etl && uv run bracc-etl download --output-dir ../data/cnpj --files "$CNPJ_FILES" --skip-existing)
     fi
     if [[ "$PIPELINES" == *"comprasnet"* ]]; then
-      python3 scripts/download_comprasnet.py 2024
+      uv run python scripts/download_comprasnet.py 2024
     fi
     if [[ "$PIPELINES" == *"datasus"* ]]; then
-      python3 scripts/download_datasus.py
+      uv run python scripts/download_datasus.py
     fi
   fi
 

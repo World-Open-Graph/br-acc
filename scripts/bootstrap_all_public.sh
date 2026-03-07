@@ -6,4 +6,4 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 echo "bootstrap-all runs full historical ingestion and may take many hours with high disk/network usage."
 
-exec python3 "${REPO_ROOT}/scripts/run_bootstrap_all.py" --repo-root "${REPO_ROOT}" "$@"
+exec uv run python "${REPO_ROOT}/scripts/run_bootstrap_all.py" --repo-root "${REPO_ROOT}" "$@"
