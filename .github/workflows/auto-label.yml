@@ -50,13 +50,7 @@ jobs:
               return;
             }
 
-            if (uniqueSelected.length > 1) {
-              throw new Error(
-                `Multiple release labels selected: ${uniqueSelected.join(', ')}. Select exactly one.`
-              );
-            }
-
-            const chosen = uniqueSelected[0];
+            const chosen = uniqueSelected;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const issue_number = context.issue.number;
@@ -72,7 +66,8 @@ jobs:
               .map(l => l.name)
               .filter(name => allowedReleaseLabels.has(name));
 
-            const toRemove = existingReleaseLabels.filter(name => name !== chosen);
+            // Sync: remove any existing release:* labels that are no longer selected.
+            const toRemove = existingReleaseLabels.filter(name => !chosen.includes(name));
             for (const name of toRemove) {
               await github.rest.issues.removeLabel({
                 owner,
@@ -83,14 +78,16 @@ jobs:
               console.log(`Removed label: ${name}`);
             }
 
-            if (!existingReleaseLabels.includes(chosen)) {
+            // Add any selected release:* labels that are not yet present.
+            const toAdd = chosen.filter(name => !existingReleaseLabels.includes(name));
+            if (toAdd.length > 0) {
               await github.rest.issues.addLabels({
                 owner,
                 repo,
                 issue_number,
-                labels: [chosen],
+                labels: toAdd,
               });
-              console.log(`Added label: ${chosen}`);
+              console.log(`Added labels: ${toAdd.join(', ')}`);
             } else {
-              console.log(`Label already present: ${chosen}`);
+              console.log('All selected release labels already present; nothing to add.');
             }
