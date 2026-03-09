@@ -91,3 +91,11 @@ jobs:
             } else {
               console.log('All selected release labels already present; nothing to add.');
             }
+
+            if (chosenLabels.length === 0) {
+              core.setFailed(
+                [
+                  "PR must have release labels.",
+                ].join("\n"),
+              );
+            }
