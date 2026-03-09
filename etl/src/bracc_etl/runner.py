@@ -42,6 +42,7 @@ from bracc_etl.pipelines.siconfi import SiconfiPipeline
 from bracc_etl.pipelines.siop import SiopPipeline
 from bracc_etl.pipelines.stf import StfPipeline
 from bracc_etl.pipelines.tcu import TcuPipeline
+from bracc_etl.pipelines.tesouro_emendas import TesouroEmendasPipeline
 from bracc_etl.pipelines.transferegov import TransferegovPipeline
 from bracc_etl.pipelines.transparencia import TransparenciaPipeline
 from bracc_etl.pipelines.tse import TSEPipeline
@@ -97,6 +98,7 @@ PIPELINES: dict[str, type] = {
     "mides": MidesPipeline,
     "querido_diario": QueridoDiarioPipeline,
     "datajud": DatajudPipeline,
+    "tesouro_emendas": TesouroEmendasPipeline,
 }
 
 

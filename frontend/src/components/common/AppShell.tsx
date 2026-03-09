@@ -11,6 +11,7 @@ import {
   Moon,
   Search,
   Sun,
+  Landmark,
 } from "lucide-react";
 
 import { registerActions, type Action } from "@/actions/registry";
@@ -27,6 +28,7 @@ import styles from "./AppShell.module.css";
 
 const NAV_ITEMS = [
   { path: "/app", icon: BarChart3, labelKey: "nav.dashboard" },
+  { path: "/app/emendas", icon: Landmark, labelKey: "nav.emendas" },
   { path: "/app/search", icon: Search, labelKey: "nav.search" },
   { path: "/app/investigations", icon: FolderOpen, labelKey: "nav.investigations" },
 ] as const;
@@ -152,16 +154,16 @@ export function AppShell() {
           {NAV_ITEMS
             .filter((item) => !(IS_PUBLIC_MODE && item.path.includes("investigations")))
             .map(({ path, icon: Icon, labelKey }) => (
-            <Link
-              key={path}
-              to={path}
-              className={`${styles.navItem} ${isActive(path) ? styles.navItemActive : ""}`}
-              title={sidebarCollapsed ? t(labelKey) : undefined}
-            >
-              <Icon size={18} />
-              {!sidebarCollapsed && <span>{t(labelKey)}</span>}
-            </Link>
-          ))}
+              <Link
+                key={path}
+                to={path}
+                className={`${styles.navItem} ${isActive(path) ? styles.navItemActive : ""}`}
+                title={sidebarCollapsed ? t(labelKey) : undefined}
+              >
+                <Icon size={18} />
+                {!sidebarCollapsed && <span>{t(labelKey)}</span>}
+              </Link>
+            ))}
         </div>
 
         <div className={styles.sidebarFooter}>
