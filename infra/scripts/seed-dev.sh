@@ -19,12 +19,10 @@ if command -v cypher-shell &>/dev/null; then
   cypher-shell \
     -a "${NEO4J_URI}" \
     -u "${NEO4J_USER}" \
-    --env NEO4J_PASSWORD \
     -f "${CYPHER_FILE}"
 elif command -v docker &>/dev/null; then
   docker exec -i -e NEO4J_PASSWORD="${NEO4J_PASSWORD}" bracc-neo4j cypher-shell \
     -u "${NEO4J_USER}" \
-    --env NEO4J_PASSWORD \
     < "${CYPHER_FILE}"
 else
   echo "Error: cypher-shell not found and docker not available."
