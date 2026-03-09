@@ -55,7 +55,7 @@ jobs:
             const repo = context.repo.repo;
             const issue_number = context.issue.number;
 
-            // Sync: remove other release:* labels from the allowed set, then add the chosenLabels one.
+            // Sync: remove other release:* labels from the allowed set, then add the chosenLabels.
             const { data: existing } = await github.rest.issues.listLabelsOnIssue({
               owner,
               repo,
