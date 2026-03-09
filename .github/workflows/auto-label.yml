@@ -50,12 +50,12 @@ jobs:
               return;
             }
 
-            const chosen = uniqueSelected;
+            const chosenLabels = uniqueSelected;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const issue_number = context.issue.number;
 
-            // Sync: remove other release:* labels from the allowed set, then add the chosen one.
+            // Sync: remove other release:* labels from the allowed set, then add the chosenLabels one.
             const { data: existing } = await github.rest.issues.listLabelsOnIssue({
               owner,
               repo,
@@ -67,7 +67,7 @@ jobs:
               .filter(name => allowedReleaseLabels.has(name));
 
             // Sync: remove any existing release:* labels that are no longer selected.
-            const toRemove = existingReleaseLabels.filter(name => !chosen.includes(name));
+            const toRemove = existingReleaseLabels.filter(name => !chosenLabels.includes(name));
             for (const name of toRemove) {
               await github.rest.issues.removeLabel({
                 owner,
@@ -79,7 +79,7 @@ jobs:
             }
 
             // Add any selected release:* labels that are not yet present.
-            const toAdd = chosen.filter(name => !existingReleaseLabels.includes(name));
+            const toAdd = chosenLabels.filter(name => !existingReleaseLabels.includes(name));
             if (toAdd.length > 0) {
               await github.rest.issues.addLabels({
                 owner,
