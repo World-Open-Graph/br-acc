@@ -1,6 +1,5 @@
-from typing import Annotated
 
-from fastapi import Depends, HTTPException, Response, status
+from fastapi import HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from neo4j import AsyncSession
 from neo4j.exceptions import ConstraintError
