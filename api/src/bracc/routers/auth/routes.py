@@ -5,9 +5,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from neo4j import AsyncSession
 from starlette.requests import Request
 
+from bracc.config import settings
 from bracc.dependencies import CurrentUser, get_session
 from bracc.middleware.rate_limit import limiter
-from bracc.config import settings
 
 from . import controller
 from .model import TokenResponse, UserCreate, UserResponse
