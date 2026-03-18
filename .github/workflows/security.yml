@@ -118,7 +118,7 @@ jobs:
 
   public-boundary-gate:
     name: Public Boundary Gate
-    if: github.repository == 'brunoclz/world-transparency-graph'
+    if: github.repository == 'brunoclz/br-acc'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
