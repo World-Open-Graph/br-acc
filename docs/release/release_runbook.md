@@ -1,6 +1,6 @@
 # Release Runbook
 
-This runbook describes how maintainers publish releases in `World-Open-Graph/br-acc`.
+This runbook describes how maintainers publish releases in `brunoclz/br-acc`.
 
 ## Preconditions
 
