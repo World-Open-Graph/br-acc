@@ -1,6 +1,6 @@
 # Public Scope
 
-This page defines the public boundary of `World-Open-Graph/br-acc`.
+This page defines the public boundary of `brunoclz/br-acc`.
 
 ## Included In Public Repo
 

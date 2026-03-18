@@ -1,7 +1,7 @@
 # CI Baseline (March 2026)
 
 Snapshot date: 2026-03-01  
-Repository: `World-Open-Graph/br-acc`
+Repository: `brunoclz/br-acc`
 
 ## Workflow inventory
 
@@ -42,7 +42,7 @@ Branch protection on `main` is strict (`strict=true`) and currently requires:
 
 ## Last-40-runs summary
 
-Data source: `gh run list --repo World-Open-Graph/br-acc --limit 40`
+Data source: `gh run list --repo brunoclz/br-acc --limit 40`
 
 | Workflow | Count | Avg duration | Median duration | Min | Max |
 |---|---:|---:|---:|---:|---:|

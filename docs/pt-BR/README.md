@@ -6,12 +6,12 @@
 
 **Infraestrutura open-source em grafo que cruza bases publicas brasileiras para gerar inteligencia acionavel para melhoria civica.**
 
-[![CI](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml/badge.svg)](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml)
+[![CI](https://github.com/brunoclz/br-acc/actions/workflows/ci.yml/badge.svg)](https://github.com/brunoclz/br-acc/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Last Commit](https://img.shields.io/github/last-commit/World-Open-Graph/br-acc)](https://github.com/World-Open-Graph/br-acc/commits)
-[![Issues](https://img.shields.io/github/issues/World-Open-Graph/br-acc)](https://github.com/World-Open-Graph/br-acc/issues)
-[![Stars](https://img.shields.io/github/stars/World-Open-Graph/br-acc?style=social)](https://github.com/World-Open-Graph/br-acc/stargazers)
-[![Forks](https://img.shields.io/github/forks/World-Open-Graph/br-acc?style=social)](https://github.com/World-Open-Graph/br-acc/network/members)
+[![Last Commit](https://img.shields.io/github/last-commit/brunoclz/br-acc)](https://github.com/brunoclz/br-acc/commits)
+[![Issues](https://img.shields.io/github/issues/brunoclz/br-acc)](https://github.com/brunoclz/br-acc/issues)
+[![Stars](https://img.shields.io/github/stars/brunoclz/br-acc?style=social)](https://github.com/brunoclz/br-acc/stargazers)
+[![Forks](https://img.shields.io/github/forks/brunoclz/br-acc?style=social)](https://github.com/brunoclz/br-acc/network/members)
 [![Twitter Follow](https://img.shields.io/twitter/follow/brunoclz?style=social)](https://x.com/brunoclz)
 [![Discord](https://img.shields.io/badge/Discord-Entre%20no%20servidor-5865F2?logo=discord&logoColor=white)](https://discord.gg/YyvGGgNGVD)
 
@@ -291,7 +291,7 @@ VITE_PATTERNS_ENABLED=false
 
 ## Releases
 
-- [Historico de releases](https://github.com/World-Open-Graph/br-acc/releases)
+- [Historico de releases](https://github.com/brunoclz/br-acc/releases)
 - [Politica de releases](../release/release_policy.md)
 - [Runbook do mantenedor](../release/release_runbook.md)
 
