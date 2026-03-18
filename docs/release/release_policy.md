@@ -1,6 +1,6 @@
 # Release Policy (Milestone-Based, SemVer, PT+EN)
 
-This policy defines how releases are published in `World-Open-Graph/br-acc`.
+This policy defines how releases are published in `brunoclz/br-acc`.
 
 ## Goals
 
