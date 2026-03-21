@@ -17,6 +17,9 @@ dev = [
     "pytest-asyncio>=0.24",
 ]
 
+[project.scripts]
+bracc-telegram = "bracc_telegram.bot:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

@@ -74,6 +74,35 @@ jobs:
       - name: Run quality suite
         run: ../scripts/ci/python_quality.sh
 
+  bot-telegram:
+    name: Bot Telegram (Python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: bots/telegram
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-bot-telegram-${{ hashFiles('bots/telegram/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-bot-telegram-
+
+      - name: Run quality suite
+        run: ../../scripts/ci/python_quality.sh
+
   frontend:
     name: Frontend (TypeScript)
     runs-on: ubuntu-latest
