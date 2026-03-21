@@ -41,8 +41,8 @@ jobs:
 
       - name: Run bandit
         run: |
-          bandit -r api/src etl/src scripts \
-            -x api/tests,etl/tests \
+          bandit -r api/src etl/src bots/telegram/src scripts \
+            -x api/tests,etl/tests,bots/telegram/tests \
             -lll -iii
 
   pip-audit:
@@ -65,12 +65,17 @@ jobs:
           uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local > /tmp/api-requirements.txt
           cd ../etl
           uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local > /tmp/etl-requirements.txt
+          cd ../bots/telegram
+          uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local > /tmp/bot-telegram-requirements.txt
 
       - name: Audit API dependencies
         run: uvx pip-audit -r /tmp/api-requirements.txt --strict
 
       - name: Audit ETL dependencies
         run: uvx pip-audit -r /tmp/etl-requirements.txt --strict
+
+      - name: Audit Bot Telegram dependencies
+        run: uvx pip-audit -r /tmp/bot-telegram-requirements.txt --strict
 
   npm-audit:
     name: NPM Audit (frontend)

@@ -1,1 +1,3 @@
-"""BR-ACC Telegram Bot — public data graph queries via Telegram."""
+"""BR-ACC Telegram Bot package."""
+
+__all__ = ["bot", "config"]

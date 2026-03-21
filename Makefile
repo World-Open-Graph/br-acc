@@ -1,4 +1,4 @@
-.PHONY: dev stop api etl frontend lint type-check test test-api test-etl test-frontend test-integration-api test-integration-etl test-integration check seed clean download-cnpj download-tse download-transparencia download-sanctions download-all etl-cnpj etl-cnpj-stream etl-tse etl-transparencia etl-sanctions etl-all link-persons bootstrap-demo bootstrap-full bootstrap-all bootstrap-all-noninteractive bootstrap-all-report check-public-claims check-source-urls check-pipeline-contracts check-pipeline-inputs generate-pipeline-status generate-source-summary generate-reference-metrics
+.PHONY: dev stop api etl frontend bot lint type-check test test-api test-etl test-frontend test-bot lint-bot type-check-bot test-integration-api test-integration-etl test-integration check seed clean download-cnpj download-tse download-transparencia download-sanctions download-all etl-cnpj etl-cnpj-stream etl-tse etl-transparencia etl-sanctions etl-all link-persons bootstrap-demo bootstrap-full bootstrap-all bootstrap-all-noninteractive bootstrap-all-report check-public-claims check-source-urls check-pipeline-contracts check-pipeline-inputs generate-pipeline-status generate-source-summary generate-reference-metrics
 
 # ── Development ─────────────────────────────────────────
 setup-env:
@@ -87,17 +87,21 @@ test-bot:
 
 lint-bot:
 	cd bots/telegram && uv run ruff check src/ tests/
+
+type-check-bot:
 	cd bots/telegram && uv run mypy src/
 
 # ── Quality ─────────────────────────────────────────────
 lint:
 	cd api && uv run ruff check src/ tests/
 	cd etl && uv run ruff check src/ tests/
+	$(MAKE) lint-bot
 	cd frontend && npm run lint
 
 type-check:
 	cd api && uv run mypy src/
 	cd etl && uv run mypy src/
+	$(MAKE) type-check-bot
 	cd frontend && npm run type-check
 
 test-api:
@@ -109,7 +113,7 @@ test-etl:
 test-frontend:
 	cd frontend && npm test
 
-test: test-api test-etl test-frontend
+test: test-api test-etl test-bot test-frontend
 
 # ── Integration tests ─────────────────────────────────
 test-integration-api:
