@@ -25,7 +25,7 @@ async def unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     del context
     if update.effective_message is not None:
         await update.effective_message.reply_text(
-            "⚠️ Comando não reconhecido\. Use /ajuda para ver os comandos disponíveis\.",
+            r"⚠️ Comando não reconhecido\. Use /ajuda para ver os comandos disponíveis\.",
             parse_mode="MarkdownV2",
         )
 
