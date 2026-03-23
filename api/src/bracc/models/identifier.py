@@ -9,17 +9,20 @@ def clean_identifier(raw: str) -> str:
 
 class Document:
     def __init__(self, value: str):
-        self.value = clean_identifier(value)
-
+        self._value = clean_identifier(value)
+        
+    def get_value(self) -> str:
+        return self._value
+    
 
 @dataclass
 class Cpf(Document):
-    value: str
+    _value: str
 
     _PATTERN = re.compile(r"^\d{11}$")
 
     def __post_init__(self):
-        self.value = clean_identifier(self.value)
+        self._value = clean_identifier(self._value)
 
     @classmethod
     def is_valid(cls, value: str) -> bool:
@@ -54,23 +57,23 @@ class Cpf(Document):
         return digit == int(cpf[position])
 
     def pretty(self) -> str:
-        return f"{self.value[:3]}.{self.value[3:6]}.{self.value[6:9]}-{self.value[9:]}"
+        return f"{self._value[:3]}.{self._value[3:6]}.{self._value[6:9]}-{self._value[9:]}"
 
     def mask(self) -> str:
-        return f"***.***.{self.value[6:9]}-{self.value[9:]}"
+        return f"***.***.{self._value[6:9]}-{self._value[9:]}"
 
     def mask_raw(self) -> str:
-        return f"*******{self.value[7:]}"
+        return f"*******{self._value[7:]}"
 
 
 @dataclass
 class Cnpj(Document):
-    value: str
+    _value: str
 
     _PATTERN = re.compile(r"^\d{14}$")
 
     def __post_init__(self):
-        self.value = clean_identifier(self.value)
+        self._value = clean_identifier(self._value)
 
     @classmethod
     def is_valid(cls, value: str) -> bool:
@@ -90,6 +93,7 @@ class Cnpj(Document):
 
         return True
 
+
     @staticmethod
     def _validate_digit(cnpj: str, position: int) -> bool:
         if position == 12:
@@ -105,10 +109,10 @@ class Cnpj(Document):
         return digit == int(cnpj[position])
 
     def pretty(self) -> str:
-        return f"{self.value[:2]}.{self.value[2:5]}.{self.value[5:8]}/{self.value[8:12]}-{self.value[12:]}"
+        return f"{self._value[:2]}.{self._value[2:5]}.{self._value[5:8]}/{self._value[8:12]}-{self._value[12:]}"
 
     def mask(self) -> str:
-        return f"**.***.***/{self.value[8:12]}-{self.value[12:]}"
+        return f"**.***.***/{self._value[8:12]}-{self._value[12:]}"
 
 
 def get_identifier(value: str) -> Optional[Union[Cpf, Cnpj]]:

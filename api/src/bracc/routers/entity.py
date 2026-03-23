@@ -88,29 +88,36 @@ async def get_entity(
     cpf_or_cnpj: str,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> EntityResponse:
-    # enforce_entity_lookup_policy(cpf_or_cnpj)
-    # identifier = _clean_identifier(cpf_or_cnpj)
-    identifier = get_identifier(cpf_or_cnpj)
-    if not identifier:
-    # if not CPF_PATTERN.match(identifier) and not CNPJ_PATTERN.match(identifier):
-        raise HTTPException(status_code=400, detail="Invalid CPF or CNPJ format")
 
-    # if CPF_PATTERN.match(identifier):
-    #     identifier_formatted = _format_cpf(identifier)
-    # else:
-    #     identifier_formatted = _format_cnpj(identifier)
+    identifier = get_identifier(cpf_or_cnpj)
+
+    if identifier is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid CPF or CNPJ"
+        )
 
     record = await execute_query_single(
         session,
         "entity_lookup",
-        {"identifier": identifier.value, "identifier_formatted": identifier.pretty},
+        {
+            "identifier": identifier.get_value(),
+            "identifier_formatted": identifier.pretty(),
+        },
     )
+
     if record is None:
-        raise HTTPException(status_code=404, detail="Entity not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Entity not found"
+        )
+
     enforce_person_access_policy(record["entity_labels"])
 
     return _node_to_entity(
-        record["e"], record["entity_labels"], record["entity_id"]
+        record["e"],
+        record["entity_labels"],
+        record["entity_id"],
     )
 
 
