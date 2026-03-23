@@ -41,6 +41,7 @@ from bracc_etl.pipelines.senado_cpis import SenadoCpisPipeline
 from bracc_etl.pipelines.siconfi import SiconfiPipeline
 from bracc_etl.pipelines.siop import SiopPipeline
 from bracc_etl.pipelines.stf import StfPipeline
+from bracc_etl.pipelines.stj_dados_abertos import StjPipeline
 from bracc_etl.pipelines.tcu import TcuPipeline
 from bracc_etl.pipelines.tesouro_emendas import TesouroEmendasPipeline
 from bracc_etl.pipelines.transferegov import TransferegovPipeline
@@ -99,6 +100,7 @@ PIPELINES: dict[str, type] = {
     "querido_diario": QueridoDiarioPipeline,
     "datajud": DatajudPipeline,
     "tesouro_emendas": TesouroEmendasPipeline,
+    "stj_dados_abertos": StjPipeline,
 }
 
 

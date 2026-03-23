@@ -1,28 +1,28 @@
-# Public Repo Release Checklist — World Transparency Graph
+# Public Repo Release Checklist — br/acc Open Graph
 
 ## 1) Prepare sanitized snapshot
 ```bash
-bash scripts/prepare_public_snapshot.sh /Users/brunoclz/CORRUPTOS /tmp/world-transparency-graph-public
+bash scripts/prepare_public_snapshot.sh /Users/brunoclz/CORRUPTOS /tmp/br-acc-public
 ```
 
 ## 2) Initialize clean-history repo from snapshot
 ```bash
-cd /tmp/world-transparency-graph-public
+cd /tmp/br-acc-public
 git init
 git add .
-git commit -m "Initial public release (WTG)"
+git commit -m "Initial public release (br-acc)"
 ```
 
 ## 3) Create GitHub repository (manual)
 - Owner: `brunoclz`
-- Name: `world-transparency-graph`
+- Name: `br-acc`
 - Visibility: Public
 - Do not auto-add README/License (already present)
 
 ## 4) Push initial release
 ```bash
 git branch -M main
-git remote add origin https://github.com/brunoclz/world-transparency-graph.git
+git remote add origin https://github.com/brunoclz/br-acc.git
 git push -u origin main
 ```
 

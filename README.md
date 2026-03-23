@@ -6,12 +6,12 @@
 
 **Open-source graph infrastructure that cross-references Brazil's public databases to generate actionable intelligence for civic improvement.**
 
-[![CI](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml/badge.svg)](https://github.com/World-Open-Graph/br-acc/actions/workflows/ci.yml)
+[![CI](https://github.com/brunoclz/br-acc/actions/workflows/ci.yml/badge.svg)](https://github.com/brunoclz/br-acc/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Last Commit](https://img.shields.io/github/last-commit/World-Open-Graph/br-acc)](https://github.com/World-Open-Graph/br-acc/commits)
-[![Issues](https://img.shields.io/github/issues/World-Open-Graph/br-acc)](https://github.com/World-Open-Graph/br-acc/issues)
-[![Stars](https://img.shields.io/github/stars/World-Open-Graph/br-acc?style=social)](https://github.com/World-Open-Graph/br-acc/stargazers)
-[![Forks](https://img.shields.io/github/forks/World-Open-Graph/br-acc?style=social)](https://github.com/World-Open-Graph/br-acc/network/members)
+[![Last Commit](https://img.shields.io/github/last-commit/brunoclz/br-acc)](https://github.com/brunoclz/br-acc/commits)
+[![Issues](https://img.shields.io/github/issues/brunoclz/br-acc)](https://github.com/brunoclz/br-acc/issues)
+[![Stars](https://img.shields.io/github/stars/brunoclz/br-acc?style=social)](https://github.com/brunoclz/br-acc/stargazers)
+[![Forks](https://img.shields.io/github/forks/brunoclz/br-acc?style=social)](https://github.com/brunoclz/br-acc/network/members)
 [![Twitter Follow](https://img.shields.io/twitter/follow/brunoclz?style=social)](https://x.com/brunoclz)
 [![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/YyvGGgNGVD)
 
@@ -195,9 +195,9 @@ If you find this project useful, **star the repo** — it helps others discover 
 
 Thanks to everyone who has contributed to br/acc.
 
-[![Contributors](https://contrib.rocks/image?repo=World-Open-Graph/br-acc)](https://github.com/World-Open-Graph/br-acc/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=brunoclz/br-acc)](https://github.com/brunoclz/br-acc/graphs/contributors)
 
-See the [full list of contributors](https://github.com/World-Open-Graph/br-acc/graphs/contributors) on GitHub.
+See the [full list of contributors](https://github.com/brunoclz/br-acc/graphs/contributors) on GitHub.
 
 ---
 
@@ -321,7 +321,7 @@ VITE_PATTERNS_ENABLED=false
 
 ## Releases
 
-- [Release history](https://github.com/World-Open-Graph/br-acc/releases)
+- [Release history](https://github.com/brunoclz/br-acc/releases)
 - [Release policy](docs/release/release_policy.md)
 - [Maintainer runbook](docs/release/release_runbook.md)
 
