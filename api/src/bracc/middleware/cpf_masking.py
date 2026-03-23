@@ -22,24 +22,21 @@ if TYPE_CHECKING:
 # Matches 11-digit CPF in formatted (123.456.789-00) or raw (12345678900) form.
 # Uses negative lookbehind/lookahead to avoid matching inside longer digit sequences
 # (e.g. 14-digit CNPJ).
-_CPF_FORMATTED = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
-_CPF_RAW = re.compile(r"(?<!\d)\d{11}(?!\d)")
+
+# def mask_formatted_cpf(cpf: str) -> str:
+#     """Mask a formatted CPF, keeping only the last 4 visible digits.
+
+#     Example: 123.456.789-00 -> ***.***.789-00
+#     """
+#     return f"***.***.{cpf[8:]}"
 
 
-def mask_formatted_cpf(cpf: str) -> str:
-    """Mask a formatted CPF, keeping only the last 4 visible digits.
+# def mask_raw_cpf(cpf: str) -> str:
+#     """Mask a raw 11-digit CPF, keeping only the last 4 digits.
 
-    Example: 123.456.789-00 -> ***.***.789-00
-    """
-    return f"***.***.{cpf[8:]}"
-
-
-def mask_raw_cpf(cpf: str) -> str:
-    """Mask a raw 11-digit CPF, keeping only the last 4 digits.
-
-    Example: 12345678900 -> *******8900
-    """
-    return f"*******{cpf[7:]}"
+#     Example: 12345678900 -> *******8900
+#     """
+#     return f"*******{cpf[7:]}"
 
 
 def _is_pep_record(record: dict[str, Any]) -> bool:
@@ -78,8 +75,8 @@ def _collect_pep_cpfs(data: Any) -> set[str]:
     return pep_cpfs
 
 
-def _digits_only(cpf: str) -> str:
-    return re.sub(r"\D", "", cpf)
+# def _digits_only(cpf: str) -> str:
+#     return re.sub(r"\D", "", cpf)
 
 
 def mask_cpfs_in_json(text: str, pep_cpfs: set[str] | None = None) -> str:
