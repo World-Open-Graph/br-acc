@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import re
 from typing import Optional, Union
 
@@ -10,19 +9,19 @@ def clean_identifier(raw: str) -> str:
 class Document:
     def __init__(self, value: str):
         self._value = clean_identifier(value)
-        
+
     def get_value(self) -> str:
         return self._value
-    
 
-@dataclass
+
 class Cpf(Document):
-    _value: str
-
     _PATTERN = re.compile(r"^\d{11}$")
 
-    def __post_init__(self):
-        self._value = clean_identifier(self._value)
+    def __init__(self, value: str):
+        super().__init__(value)
+
+        if not self.is_valid(self._value):
+            raise ValueError("CPF inválido")
 
     @classmethod
     def is_valid(cls, value: str) -> bool:
@@ -66,14 +65,14 @@ class Cpf(Document):
         return f"*******{self._value[7:]}"
 
 
-@dataclass
 class Cnpj(Document):
-    _value: str
-
     _PATTERN = re.compile(r"^\d{14}$")
 
-    def __post_init__(self):
-        self._value = clean_identifier(self._value)
+    def __init__(self, value: str):
+        super().__init__(value)
+
+        if not self.is_valid(self._value):
+            raise ValueError("CNPJ inválido")
 
     @classmethod
     def is_valid(cls, value: str) -> bool:
@@ -92,7 +91,6 @@ class Cnpj(Document):
             return False
 
         return True
-
 
     @staticmethod
     def _validate_digit(cnpj: str, position: int) -> bool:
@@ -116,10 +114,14 @@ class Cnpj(Document):
 
 
 def get_identifier(value: str) -> Optional[Union[Cpf, Cnpj]]:
-    if Cpf.is_valid(value):
+    try:
         return Cpf(value)
+    except ValueError:
+        pass
 
-    if Cnpj.is_valid(value):
+    try:
         return Cnpj(value)
+    except ValueError:
+        pass
 
     return None
