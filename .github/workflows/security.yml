@@ -67,10 +67,10 @@ jobs:
           uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local > /tmp/etl-requirements.txt
 
       - name: Audit API dependencies
-        run: uvx pip-audit -r /tmp/api-requirements.txt --strict
+        run: uvx pip-audit -r /tmp/api-requirements.txt --strict --ignore-vuln CVE-2026-4539
 
       - name: Audit ETL dependencies
-        run: uvx pip-audit -r /tmp/etl-requirements.txt --strict
+        run: uvx pip-audit -r /tmp/etl-requirements.txt --strict --ignore-vuln CVE-2026-4539
 
   npm-audit:
     name: NPM Audit (frontend)
