@@ -20,6 +20,7 @@ from bracc.services.intelligence_provider import IntelligenceProvider
 from bracc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
 from bracc.services.public_guard import (
     enforce_entity_lookup_enabled,
+    enforce_entity_lookup_policy,
     enforce_person_access_policy,
     has_person_labels,
     infer_exposure_tier,
@@ -87,6 +88,7 @@ async def get_entity(
     cpf_or_cnpj: str,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> EntityResponse:
+    enforce_entity_lookup_policy(cpf_or_cnpj)
 
     identifier = get_identifier(cpf_or_cnpj)
 
