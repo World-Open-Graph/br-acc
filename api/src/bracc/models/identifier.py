@@ -35,10 +35,7 @@ class Cpf(Document):
         if not cls._validate_digit(value, 9):
             return False
 
-        if not cls._validate_digit(value, 10):
-            return False
-
-        return True
+        return cls._validate_digit(value, 10)
 
     @staticmethod
     def _validate_digit(cpf: str, position: int) -> bool:
@@ -86,10 +83,7 @@ class Cnpj(Document):
         if not cls._validate_digit(value, 12):
             return False
 
-        if not cls._validate_digit(value, 13):
-            return False
-
-        return True
+        return cls._validate_digit(value, 13)
 
     @staticmethod
     def _validate_digit(cnpj: str, position: int) -> bool:
