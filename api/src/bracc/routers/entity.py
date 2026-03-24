@@ -15,6 +15,7 @@ from bracc.models.entity import (
     TimelineEvent,
     TimelineResponse,
 )
+from bracc.models.identifier import get_identifier
 from bracc.services.intelligence_provider import IntelligenceProvider
 from bracc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
 from bracc.services.public_guard import (
@@ -29,12 +30,7 @@ from bracc.services.public_guard import (
 
 router = APIRouter(prefix="/api/v1/entity", tags=["entity"])
 
-CPF_PATTERN = re.compile(r"^\d{11}$")
-CNPJ_PATTERN = re.compile(r"^\d{14}$")
 
-
-def _clean_identifier(raw: str) -> str:
-    return re.sub(r"[.\-/]", "", raw)
 
 
 def _is_pep(properties: dict[str, Any]) -> bool:
@@ -86,15 +82,6 @@ def _node_to_entity(
     )
 
 
-def _format_cpf(digits: str) -> str:
-    """Format an 11-digit string as CPF: 123.456.789-00."""
-    return f"{digits[:3]}.{digits[3:6]}.{digits[6:9]}-{digits[9:]}"
-
-
-def _format_cnpj(digits: str) -> str:
-    """Format a 14-digit string as CNPJ: 12.345.678/0001-00."""
-    return f"{digits[:2]}.{digits[2:5]}.{digits[5:8]}/{digits[8:12]}-{digits[12:]}"
-
 
 @router.get("/{cpf_or_cnpj}", response_model=EntityResponse)
 async def get_entity(
@@ -102,27 +89,36 @@ async def get_entity(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> EntityResponse:
     enforce_entity_lookup_policy(cpf_or_cnpj)
-    identifier = _clean_identifier(cpf_or_cnpj)
 
-    if not CPF_PATTERN.match(identifier) and not CNPJ_PATTERN.match(identifier):
-        raise HTTPException(status_code=400, detail="Invalid CPF or CNPJ format")
+    identifier = get_identifier(cpf_or_cnpj)
 
-    if CPF_PATTERN.match(identifier):
-        identifier_formatted = _format_cpf(identifier)
-    else:
-        identifier_formatted = _format_cnpj(identifier)
+    if identifier is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid CPF or CNPJ"
+        )
 
     record = await execute_query_single(
         session,
         "entity_lookup",
-        {"identifier": identifier, "identifier_formatted": identifier_formatted},
+        {
+            "identifier": identifier.get_value(),
+            "identifier_formatted": identifier.pretty(),
+        },
     )
+
     if record is None:
-        raise HTTPException(status_code=404, detail="Entity not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Entity not found"
+        )
+
     enforce_person_access_policy(record["entity_labels"])
 
     return _node_to_entity(
-        record["e"], record["entity_labels"], record["entity_id"]
+        record["e"],
+        record["entity_labels"],
+        record["entity_id"],
     )
 
 
