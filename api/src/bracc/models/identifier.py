@@ -100,8 +100,11 @@ class Cnpj(Document):
         return digit == int(cnpj[position])
 
     def pretty(self) -> str:
-        return f"{self._value[:2]}.{self._value[2:5]}.{self._value[5:8]}/{self._value[8:12]}-{self._value[12:]}"
-
+        return (
+    f"{self._value[:2]}.{self._value[2:5]}."
+    f"{self._value[5:8]}/{self._value[8:12]}-"
+    f"{self._value[12:]}"
+)
     def mask(self) -> str:
         return f"**.***.***/{self._value[8:12]}-{self._value[12:]}"
 
