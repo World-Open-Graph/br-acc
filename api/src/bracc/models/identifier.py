@@ -1,5 +1,4 @@
 import re
-from typing import Optional, Union
 
 
 def clean_identifier(raw: str) -> str:
@@ -113,7 +112,7 @@ class Cnpj(Document):
         return f"**.***.***/{self._value[8:12]}-{self._value[12:]}"
 
 
-def get_identifier(value: str) -> Optional[Union[Cpf, Cnpj]]:
+def get_identifier(value: str) -> Cpf | Cnpj | None:
     try:
         return Cpf(value)
     except ValueError:

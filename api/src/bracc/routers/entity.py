@@ -1,7 +1,6 @@
 import re
 from typing import Annotated, Any
 
-from api.src.bracc.models.identifier import get_identifier
 from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession
 
@@ -16,11 +15,11 @@ from bracc.models.entity import (
     TimelineEvent,
     TimelineResponse,
 )
+from bracc.models.identifier import get_identifier
 from bracc.services.intelligence_provider import IntelligenceProvider
 from bracc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
 from bracc.services.public_guard import (
     enforce_entity_lookup_enabled,
-    enforce_entity_lookup_policy,
     enforce_person_access_policy,
     has_person_labels,
     infer_exposure_tier,

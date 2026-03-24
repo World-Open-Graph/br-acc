@@ -56,3 +56,10 @@ addopts = "-m 'not integration'"
 markers = [
     "integration: requires running Neo4j instance",
 ]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pytest>=9.0.2",
+    "ruff>=0.15.2",
+]
