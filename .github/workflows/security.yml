@@ -62,11 +62,11 @@ jobs:
       - name: Export lock-compatible requirement sets
         run: |
           cd api
-          uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local > /tmp/api-requirements.txt
+          uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local --no-dev > /tmp/api-requirements.txt
           cd ../etl
-          uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local > /tmp/etl-requirements.txt
+          uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local --no-dev > /tmp/etl-requirements.txt
           cd ../bots/telegram
-          uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local > /tmp/bot-telegram-requirements.txt
+          uv export --format requirements-txt --no-hashes --no-emit-project --no-emit-local --no-dev > /tmp/bot-telegram-requirements.txt
 
       - name: Audit API dependencies
         run: uvx pip-audit -r /tmp/api-requirements.txt --strict

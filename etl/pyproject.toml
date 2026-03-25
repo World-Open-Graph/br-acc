@@ -11,7 +11,7 @@ dependencies = [
     "click>=8.1.0",
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
-    "pypdf>=6.9.1",
+    "pypdf>=6.9.2",
     "defusedxml>=0.7.0",
     "pandera>=0.21.0",
 ]
