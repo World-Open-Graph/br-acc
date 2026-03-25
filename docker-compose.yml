@@ -70,5 +70,19 @@ services:
       neo4j:
         condition: service_healthy
 
+  telegram-bot:
+    build: ./bots/telegram
+    profiles: ["bot"]
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      BRACC_API_URL: http://api:8000
+      RATE_LIMIT_PER_MONTH: ${RATE_LIMIT_PER_MONTH:-10}
+    volumes:
+      - telegram-bot-data:/app/data
+    depends_on:
+      api:
+        condition: service_healthy
+
 volumes:
   neo4j-data:
+  telegram-bot-data:
