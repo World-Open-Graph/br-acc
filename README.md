@@ -44,7 +44,7 @@ It makes public data that is already open but scattered across dozens of portals
 
 ```bash
 cp .env.example .env
-docker compose up -d --build
+docker compose -f infra/docker-compose.yml up -d --build
 bash infra/scripts/seed-dev.sh
 ```
 
